@@ -1,0 +1,22 @@
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.9.0/axios.min.js"></script> 
+    
+    <script>
+        function sendRequest(){ // it is supposed to hit our backend server
+        // so either use fetch or axios (here axios is being used)
+        const a = document.getElementById("a").value
+        const b = document.getElementById("b").value
+           axios.post("http://localhost:3000/sum", {
+                a : a,
+                b : b
+           })
+        }
+    </script>
+
+</head>
+<body>
+    <input id = "a" type="text" placeholder="First Value"></input>
+    <input id = "b" type="text" placeholder="Second Value"></input>
+
+    <button onclick="sendRequest()">Find Sum</button>
+</body>
