@@ -310,9 +310,91 @@ model Todo{
     title  String 
     description  String 
     done  Boolean 
-    userId  Int  
+    userId  Int
+    // METHOD 1 -->
+    time   DateTime? // MAKE THIS OPTIONAL by adding "?" in this line of code, "?" -> likhne se OPTIONAL ho jata h field means KI JO PHLE KI FIELD THI USKO IGNORE KRO (they dont need DateTime, purane me khali v ho skta h) 
+    // OR -> GIVE IT DEFAULT VALUE 
+    // METHOD 2 -->
+    time   DateTime   @default(now()) // with this they all will get this default  value unless you explicitly change it
+    // now() means av ka jo time and date h wo chli jae
 }
 ```
+
+**To run a particular migration, we were running the below command till now**
+
+```javascript
+npx prisma migrate dev
+```
+<span style="color:orange">**BUT, this takes some time and then it asks you to give the name of migration, Now instead of doing it step by step you can directly merge the two steps and run the below command**</span>
+
+```javascript
+npx prisma migrate dev --name <name_of_your_migration>
+```
+<span style="color:orange">**USE THIS COMMAND ALWAYS (its better)**</span>
+
+**If you have `psql`, try to explore the tables that `prisma` created for you**
+
+```javascript
+psql -h localhost -d postgres -U postgres
+```
+You will see something like the below 
+
+<img src = "image-11.png" width=500 height=200>
+
+## **Generating the Prisma client**(Important as well as Confusing)
+
+:bulb:**What is a client ??**
+
+A client is a class inside which there are different methods or logic which give it the power to interact with the database (Performing CRUD operations on the database)
+
+<img src = "image-12.png" width=400 height=200>
+
+now **to use `client`, you have to GENERATE it first**
+
+This is where the sample code which came written inside the `schema.prisma` file refers to 
+
+```javascript
+generator client{ // you have told to generate the prisma client 
+    provider = "prisma-client-js"
+} 
+
+"prisma-client-js" has the ability to generate the client which will perform CRUD operations on the schema made below (in our case `Users` and `Todo` see the code of them above)
+```
+**you can have different `client` for different purpose such as one is available for `zod` also**
+
+**To GENERATE THE CLIENT, run the below command**
+
+```javascript
+npx prisma generate
+```
+Two of the most frequently used prisma command are ->
+
+```javascript
+npx prisma migrate dev
+&& 
+npx prisma generate
+```
+
+In simple words, 
+
+Client represents all the function that convert 
+
+```javascript
+User.create({email : "satyamraj1905@gmail.com"})
+```
+Into 
+```javascript
+INSERT INTO Users VALUES ......
+```
+Once you've created the `prisma/schema.prisma`, you can generate these clients that you can use in your `Node.js` app
+
+
+
+
+
+
+
+
 
 
 
