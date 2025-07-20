@@ -1,5 +1,24 @@
 # **Prisma**
 
+- [**Prisma**](#prisma)
+  - [**What are ORMs ??**](#what-are-orms)
+  - [**Why ORMs ??**](#why-orms)
+  - [**What is Prisma ??**](#what-is-prisma)
+  - [**Installing Prisma**](#installing-prisma)
+  - [**Generating the Prisma client**(Important as well as Confusing)](#generating-the-prisma-clientimportant-as-well-as-confusing)
+  - [**Creating your first app**](#creating-your-first-app)
+    - [**Insert or Create**](#insert-or-create)
+    - [**Read or Get**](#read-or-get)
+    - [**Update**](#update)
+    - [**Delete**](#delete)
+  - [**Relationships in Prisma**](#relationships-in-prisma)
+    - [**Types of Relationships**](#types-of-relationships)
+    - [**Updating the Prisma schema / defining relationships in prisma**](#updating-the-prisma-schema--defining-relationships-in-prisma)
+  - [**Expressifying in Prisma**](#expressifying-in-prisma)
+  - [**Seeding dummy data**](#seeding-dummy-data)
+  - [**Assignment**](#assignment)
+
+
 ## **What are ORMs ??**
 
 **Boring official definition**
@@ -380,13 +399,356 @@ In simple words,
 Client represents all the function that convert 
 
 ```javascript
-User.create({email : "satyamraj1905@gmail.com"})
+User.create({email : "satyamraj1905@gmail.com"}) // RAW SQL QUERIES
 ```
 Into 
 ```javascript
-INSERT INTO Users VALUES ......
+INSERT INTO Users VALUES ...... // TO QUERIES
 ```
 Once you've created the `prisma/schema.prisma`, you can generate these clients that you can use in your `Node.js` app
+
+## **Creating your first app**
+----------
+### **Insert or Create**
+
+:bulb:**Write a function that lets you INSERT the data in the `Users` table.**
+
+inside the `index.ts` file lets solve the above problem 
+
+```javascript
+import { PrismaClient } from "@prisma/client"; // you have imported the made client came by running npx prisma generate
+
+const client = new PrismaClient();
+
+async function createUser() { // as Database ka kaam h and Database ki dusre country me h to TIME to lgega na so used async  
+    await client.user.create({
+        data: {
+            username : "harkirat",
+            password : "123123",
+            age : 21,
+            city : "Delhi",
+        }
+    })
+}
+
+createUser( ) ;
+```
+
+Now if you will run this `ts` file using `npm run dev`, you will see the table being inserted in the database 
+
+__Output ->__
+
+<img src = "image-13.png" width=600 height=100>
+
+To show the difference `prisma` has made in previous way doing CRUD operation in the database see this -> 
+
+
+```javascript
+// This is what you have to write previously 
+client.query("INSERT INTO users (username, password, email, age) VALUES (harkirat, 123123, 21, Delhi)")
+
+// And if you use Prisma (as used above) then you have to write this 
+client.user.create({
+    data: {
+        username : "harkirat",
+        password : "123123",
+        age : 21,
+        city : "Delhi",
+    }
+})
+
+// Can you see the difference -> clearly prisma one is more readable, understandable, hassle-free way of doing CRUD operation on the database 
+
+// Prisma even gives you the method to write the RAW SQL QUERY by using .$queryRaw you can do this (BUT AVOID IT as phir prisma use krne ka fayda kya hua phir)
+
+client.$queryRaw("INSERT INTO users (username, password, email, age) VALUES (Satyam, 123123, 21, Delhi)")
+```
+
+### **Read or Get**
+
+```javascript
+mport { PrismaClient } from "@prisma/client"; 
+const client = new PrismaClient();
+
+async function findUser() {  
+    const user1 = await client.user.findIFirst({  // use .findFirst() if SIRF EK ENTRY chahiye and use .find() if SARI ENTRY CHAHIYE
+        where: {
+            id : 1
+        }
+    }) 
+    // This will give you ALL the keys value which is linked with user with id 1 and store inside the user1 variable 
+}
+
+async function findUser() {  
+    const user1 = await client.user.findIFirst({  
+        where: {
+            id : 1
+        },
+        select: {
+            username : true 
+        }
+        // This will SELECTIVELY return ONLY the username of the person whose id = 1 
+    })
+}
+
+findUser();
+```
+
+### **Update**
+
+```javascript
+import { PrismaClient } from "@prisma/client"; 
+const client = new PrismaClient();
+
+async function updateUser() {  
+    await client.user.update({
+        where: {
+            id : 1
+        },
+        data: {
+            username : "harkirat2"
+        }
+    })
+}
+
+updateUser();
+```
+
+### **Delete**
+
+```javascript
+import { PrismaClient } from "@prisma/client"; 
+
+const client = new PrismaClient();
+
+async function deleteUser() { 
+    await client.user.delete({
+        where: {
+            id : 1
+        }
+    })
+}
+
+deleteUser();
+```
+## **Relationships in Prisma**
+----------
+
+
+Prisma lets you define `relationships` to relate tables with each other
+
+### **Types of Relationships**
+
+1. **One to One**
+2. **One to Many**
+3. **Many to One**
+4. **Many to Many**
+
+for ex -> for a `todo` app, there is **`One to Many` relationships**
+
+<img src = "image-14.png" width=600 height=200>
+
+You should always try to define the `relationships` upfront (**means FOREIGN KEY should be defined upfront only**)
+
+### **Updating the Prisma schema / defining relationships in prisma**
+
+<img src = "image-15.png" width=500 height=300>
+
+Notice the **red color block** in the above picture (that shows how to define the relationships in Prisma)
+
+Basically dono table ya jitne v table h jinse relate krna h un sb me **define krna pdta h relationship**
+
+```javascript
+model User {
+    id  Int  @id @default(autoincrement())
+    username  String 
+    password  String 
+    firstName  String 
+    lastName  String 
+    todos  Todo[]  // Notice here we have said that this "User" table has relationship with "Todo" and it is linked to the array to the entries made inside the "Todo" table 
+    // REMEMBER -> ye kbhi v SQL me nhi jayega for Query (means iska alg se column nhi ban jayega inside the "User" table as it is Relationships)
+    // Prisma ko kaise pta chlta h ki ye column nhi h relationship h ??
+    // Notice the type given to the key (be it "todos" or "user"(present in the "Todo" table)) can you clearly see that the type of them refers to the TABLE name and thats how Prisma comes to know that they are referring to the table not column. Now, we have also used "@relation" keyword with the table we want to establish relationship with 
+}
+
+model Todo{
+    id  Int  @id @default(autoincrement())
+    title  String 
+    description  String 
+    done  Boolean  @default(false) 
+    userId  Int
+    user   User  @relation(fields : [userId], references : [id]) // 2 Here we have described the relation with User table 
+}
+```
+**Explanation of `// 2` line of code** [IMPORTANT]
+
+> :pushpin:**`fields` in `// 2` code is FOREIGN KEY only which is being refernced via `references` keyword**
+
+The line simply means that **Every `Todo` table has `user` entry which is of type `User` which goes through the relation that `userId` field jo iss(`Todo`) table me h that is related to `id` field present inside the `User` table**
+
+You can also see **`One to Many` realtionship** (we have defined `Todo[]` ARRAY (**MANY**) inside the `User` table for **SINGLE** user) 
+
+**Benefit of this ->**
+
+Now if you write the below code and then run it
+```javascript
+import { PrismaClient } from "@prisma/client"; 
+
+const client = new PrismaClient();
+
+async function getUser() { 
+    await client.user.findMany({
+        where: {
+            id : 1
+        },
+        include: {
+            todo : true
+        }
+
+    })
+    console.log(user)
+}
+
+getUser();
+```
+
+You will see that now along with all the information present inside the `User` table for `user` with `id = 1`, you can see their corresponding data present inside the `todo` table 
+
+**Output ->**
+
+<img src = "image-16.png" width=500 height=300>
+
+**You get back the users details and at the same time, you get back all the Todos corresponding to it**
+
+## **Expressifying in Prisma**
+
+Lets try to write some endpoint for some functionalities :-
+
+```javascript
+import { PrismaClient } from "@prisma/client"; 
+import express from "express"
+
+const client = new PrismaClient();
+const app = new express()
+
+// WRITING AN END POINT ("/users")TO GET ALL THE USERS PRESENT IN THE DATABASE 
+app.get("/users", async(req, res) => {
+    const users = await client.user.findMany() // .findMany returns all the users present in the database 
+    res.json({
+        users
+    })
+
+})
+
+// WRITING AN END POINT ("/todos/:id") FOR GETTING ALL THE TODOs OF A PARITCULAR USER WITH GIVEN ID in the URL 
+app.get("/todos/:id", async(req, res) => {
+    const id = req.params.id // as req.params me jo v input tm dete ho (basically jo v input tm dete ho inside the url, it will be TREATED AS STRING, for example -> if you give 1 then it will be treated as "1")
+    const users = await client.user.findOne({
+        where: {
+            id : parseInt(id) // convert the string into number as url me string me by default aata h input 
+        },
+        select: {
+            todos : true, // will give all the "todos" linked to the particular user with id = id came from url along with this show the below field value from the User table 
+            username : true,
+            password :true
+        }
+    })
+    res.json({
+        users
+    })
+})
+async function getUser() { 
+    await client.user.findMany({
+        where: {
+            id : 1
+        },
+        include: {
+            todo : true
+        }
+
+    })
+    console.log(user)
+}
+
+getUser();
+app.listen(3000)
+```
+**Output ->**
+
+<img src = "image-17.png" width=320 height=250> <img src = "image-18.png" width=320 height=250>
+
+Notice both the endpoint are working correctly
+
+## **Seeding dummy data**
+
+If you see many github repo take this for example -> https://github.com/code100x/cms/blob/main/prisma , you will see `seed.ts` file (the purpose of this file making is that **KUCH INITIAL DATA DAAL DO so that if new developer comes in the team and they will migrate the database (that is fine) but there will be NO INTIAL DATA there, if you setup some management system, you will see some initial or dummy data there to visualise the developer in Better manner through UI**)
+
+The above is what we call **seeding of data (as you have just initialised the database, now it will grow bigger just like that tiny seed grows to a big tree)**
+
+to make it or include this file inside your project 
+
+**Step 1 ->** go to the created `prisma` folder 
+
+**Step 2 ->** and inside that create a new file named as `seed.ts`
+
+**Step 3 ->** inside the `package.json` add below code after `"description"` key 
+
+```javascript
+"prisma": {
+    "seed": "ts-node prisma/seed.ts"
+},
+```
+
+**Step 4 ->** now inside the `seed.ts` file, write the logic for it  
+
+```javascript
+import {PrismaClient} from "@prisma/client"
+const client = new PrismaClient()
+
+function createDummyUsers(){ // just put some dummy data 
+    await client.user.create({
+        data:{
+            username : "harkiratasdadsat",
+            age : 21,
+            password : "123123",
+            city : "Delhi",
+            todos : { // You can create "todos" for this user inside the block of code only no need to go to "Todo" table or have refernece to it 
+                create : {
+                    description : "Go to gym",
+                    title : "Gym",
+                    done : false
+                }
+            }
+        }
+    })
+
+} 
+```
+**Step 5 ->** to run the above logic written first run the below command 
+
+```javascript
+npm i -D ts-node typescript @types/nodes
+```
+**Step 6 ->** and then running the below command finally to run the code 
+
+```javascript
+npx prisma db seed
+```
+> :warning:**Remember ->** dont put any data which is already present in the database inside the `seed.ts` dummy data logic  as **phir wo dummy data kaise hua**, otherwise it will give you ERROR at the time of running 
+
+
+## **Assignment**
+
+Try creating a `todo` application that __let's a user signup, put todos and fetch
+todos.__
+
+Use ->
+l. Typescript as the language
+2. Prisma as the ORM
+3. Postgres as the database
+4. Zod as validation library
+
+
 
 
 
