@@ -280,11 +280,7 @@ and then again give the new name for this change / migration -> "added users_cit
 
 > :pushpin:Now you can **relate why `prisma` offers you single file schema design system as well as comfort to be used that in any of the two database `SQL` or `NoSQL`**
 
-**Lets say before migrating means getting reflected on the real database, i want to see HOW MY DATABASE WILL LOOK LIKE, to achieve this run the command ->**
 
-```javascript
-
-```
 
 Lets try to create the `Todo` app, and try to create the `Todo` model and its schema (going inside the `schema.prisma` file). 
 
