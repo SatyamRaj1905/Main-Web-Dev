@@ -31,7 +31,7 @@ The above is the reason most of the website have their __Landing page__ in `HTML
 
 Lets discuss some of the problems now 
 
-## **SEO Optimisation**(common interview question)
+### **SEO Optimisation**(common interview question)
 ----------
 
 Google/Bing has a bunch of `crawlers` that hit websites and figure out what
@@ -54,7 +54,7 @@ Googlebot(or simply saying `crawlers`) has no idea on what the project is. It on
 
 Ofcourse when the JS file loads eventually, things get rendered but `googlebot` doesn't discover this content very well.
 
-## **Waterfalling problem**
+### **Waterfalling problem**
 ----------
 
 Lets say you built a **blogging website** in `react`, what steps do you think the `req-res` cycle takes ??
@@ -91,6 +91,59 @@ The above is what we call **WATERFALLING PROBLEM**
 BUT, if you have did the same thing as above in `Next.js`, then **In First `request` i would get back the blogs**, something like this ->
 
 <img src = "image-2.png" width=600 height=200>
+
+## **`Next.js` offerings**
+----------
+
+
+`Next.js` provides you the following `upsides` over React
+
+l. __Server side rendering__ Get's rid of SEO problems
+2 API routes - __Single codebase with frontend and backend__
+    + By using routes which has the capability of hitting both frontend and backend, you can achieve this
+3. __File based routing__ (no need for react-router-dom) [later will come to this part]
+4. __Bundle size optimisations, Static site generation__
+    + optimises your final bundle (makes it really small), basically the `response` is **VERY OPTIMISED** in `next.js`, **"If you dont need it, you will NOT get it from the server"** ["JITNA CHAHIYE UTNA HE MILEGA"]
+5. Maintained by the __Vercel team__
+
+**Downsides ->**
+
+l. __Can't be distributed via a CDN.__(there are some parts of `next.js` which can be delivered via CDN but lets not go there)
+2. __always needs a server running that does `server side rendering`__ and hence is _expensive_
+3. Very opinionated, very hard to move out of it(`react` to `next.js` -> EASY but `next.js` to `react` -> SLIGHTLY HARD).
+
+### **Server side rendering**
+----------
+
+
+:bulb:**What is server side rendering ??**
+
+currently, `react` is following the below steps to **render on the screen**, Notice the **render is occuring on the `Client` side (i.e. `browsers` side)**
+
+<img src = "image-3.png" width=400 height=200>
+
+This is what `react` does => **It does CLIENT SIDE RENDERING (CSR)** BUT `Next.js` is different, it does **SERVER SIDE RENDERING (SSR)**
+
+for `Next.js` the same above picture or steps looks like the below ->
+
+<img src = "image-4.png" width=400 height=200>
+
+explaining the above pic -> the first time `request` comes, it will hit `next.js` server, and `next.js` server will hit the `backend` server (although `next.js` has its own `backend` server capibilites, but lets say there is seperate `backend` server for now), and the server will return you with the blogs and on the `next.js` server only **Rendering will occur and this rendering is DIRECTLY SENT to the browser**. Benefit of it is you achieved **SERVER SIDE RENDERING (as rendering has happened inside the `next.js` server not on the browser)** and due to this you will get an `HTML` file which have most of the important information about what your website does and as `crawlers` see for these `HTML` files only so whenver someone searches for something which matches from your website actions, it(`crawlers`) will show them your website as **the first `response` `crawler` has found has an `HTML` file which consists of most of the things that the user wants**
+
+That why for `Next.js`, rendering happens in the **Server side**
+
++ **As in the first `response` only, you are getting an `HTML` file which has most of your website functionalities mentioned in it, then definitely this will be `SEO` optimised**
+
+>:pushpin:<span style="color:orange">**Remember**</span> **One VERY BIG DIFFERENCE in `react` and `next.js` is that inside the `react`, finally a BUNDLE(`dist` folder created) is made (which has only three files (HTML, CSS and JS)). Now the BUNDLE which has been created has all the things related to frontend for your project [iske alawa if you delete all the files or folders present, IT WILL HAVE NO EFFECT on the project frontend], Now you just have to push this BUNDLE to any server and you are good to go your website will get loaded**
+> >**BUT in `next.js`, this is not what happens**
+> > > **there is a server running there and inside that there is some logic (`js` file) which actually runs, HITS the backend server, GETS the data, RENDERS the data and finally RETURNS it to the browser**
+
+**Basically saying -> in `React` you just serve the `HTML, CSS and JS` file in the production and that's why `react` projects are IN-EXPENSIVE(as they can also be scaled via CDN) BUT in `Next.js`, you actually need a server running somewhere (as if any `req` comes, there should be someone listening on the port), it is a DYNAMIC file (as server is constantly listening and making changes in the server side for sending the updated renders on the browsers), NOT like `react` which has STATIC file (`HTML, CSS and JS`)**
+
+## **Setting up `Next.js` Project**
+----------
+
+
 
 
 
