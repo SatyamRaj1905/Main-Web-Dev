@@ -143,6 +143,127 @@ That why for `Next.js`, rendering happens in the **Server side**
 ## **Setting up `Next.js` Project**
 ----------
 
+just run the command 
+```javascript
+npx create-next-app@latest 
+```
+and then select these options according to your choice (**its upto you**) but below is the **preferred options to choose ->**
+
+<img src = "image-5.png" width=400 height=400>
+
+Notice `next.js` has itself `router` inside it that is what is referred to as `App router` in the above picture. 
+
+Would you like your code inside a `src/` directory ? -> 
+
++ if **Yes ->** then there **will be a `src` folder jiske andar source code hoga**
++ if **No ->** then there **won't be any `src` folder, top level folder me sb kuch hoga**
+
+after selecting all the things hit `enter` and it will start to **Bootstrap the PROJECT**
+
+after completion of the process, you can see EMPTY `next.js` project. opening it in `vs code` you will see something like this ->
+
+<img src = "image-6.png" width=200 height=250>
+
+
+The red blocks are the main folders you should know about 
+
++ **`app` ->** contains all your code/ components/ layouts/ routes/ apis[**95% work is done in this folder**]
++ **`tailwind.config.js` ->** Tailwind configuration file
++ **`next.config.mjs` ->** Next js configuration file
+
+Now coming to inside the `app` folder -> 
+
+<img src = "image-7.png" width=200 height=200>
+
++ **`page.tsx` ->** most important file (**Entry point of your website [this is what renders over the first page on the website]**)
+
+## **Understanding routing in `Next.js`**
+----------
+
+Before understanding how routing is being done in the `Next.js`, lets recall how routing was being done in the `React`
+
+in `React`, you used to do routing like this
+
+```javascript
+function App(){
+    return (
+        <>
+            <BrowseRouter>
+                <Routes>
+                    <Route path = "/signup" element = {<Signup/>} />
+                    <Route path = "/signin" element = {<Signin/>} />
+                    <Route path = "/blog/:id" element = {<Blog/>} />
+                </Routes>
+            </BrowseRouter>
+        </>
+    )
+
+}
+```
+
+Now lets understand how **Routing is done in `next.js`** and **why `next.js` offer file based routing**
+
+-> go to the `app > page.tsx` and then remove all the thing and write the below code 
+
+```javascript
+export default function Home(){
+    return (
+        <div>
+            hi there 
+        </div>
+    )
+}
+```
+Now if you go to the `http://localhost:3000` , you can see 
+
+<img src = "image-8.png" width=500 height=200>
+ 
+"hi there" on the screen (see right side of the above pic)
+
+Now if you go to `http://localhost:3000/users`, (route not defined till now), then it will say `404:This page could not be found`
+
+But if you go inside the `app` folder, make a seperate folder named as `users` and inside that a file named as `page.tsx` and inside that if you write the below code 
+
+```javascript
+export default function Home(){
+    return (
+        <div>
+            Users page
+        </div>
+    )
+}
+```
+
+and now if you go to `http://localhost:3000/users`, then you will see this :-
+
+<img src = "image-9.png" width=500 height=200>
+
+Notice on the right side of the above pic, you can clearly see "Users page" being rendered on the screen and that too on the route -> `http://localhost:3000/users`
+
+**So now can you relate WHY `Next.js` HAS FILE BASED ROUTING**, [Just by making the folders, you can do ROUTING]. go to [Next.js offerings](#nextjs-offerings) where we have said we have said that we will learn about **file based routing**. 
+
+>:pushpin:**Jo v routes chahiye unki folder bana do and you are good to go in `next.js`, you have achieved Routing in `next.js`**
+
+:bulb:**Is this good ??**
+
+-> Can be easy for begineer, but from production perspective it is a problem as `next.js` will create so many folders and files to look up that if you want to **debug, manage and find something inside your codebase, it will become EXTREMELY DIFFICULT to do that**
+
+you can also create **subroutes**, means lets say **user** can have many roles such as **admin, user, coadmin etc..**, so inside the `users` routes, i will add another routes called as `admin`, so for this just create another folder inside the `app > users` known as `admin` and then make a new file known as `page.tsx`
+
+something like the below :-
+
+<img src = "image-10.png" width=600 height=300>
+
+then you can see in the `url` that you have creatd a sub route inside the `users` route and hence **You can DO AS MUCH NESTING OF ROUTES just by making folders**
+
+
+
+
+
+
+
+
+
 
 
 
