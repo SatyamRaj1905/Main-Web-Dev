@@ -1,4 +1,17 @@
-# **NextJS Intro**
+# **NextJS Intro (Frontend)**
+
+- [**NextJS Intro (Frontend)**](#nextjs-intro-frontend)
+  - [**About `Next.js` and why it was developed**](#about-nextjs-and-why-it-was-developed)
+    - [**SEO Optimisation**(common interview question)](#seo-optimisationcommon-interview-question)
+    - [**Waterfalling problem**](#waterfalling-problem)
+  - [**`Next.js` offerings**](#nextjs-offerings)
+    - [**Server side rendering**](#server-side-rendering)
+  - [**Setting up `Next.js` Project**](#setting-up-nextjs-project)
+  - [**Understanding routing in `Next.js`**](#understanding-routing-in-nextjs)
+    - [**Preetifying signin page**\[Ready made template for sign in page\]](#preetifying-signin-pageready-made-template-for-sign-in-page)
+    - [**Server side rendering in action**](#server-side-rendering-in-action)
+  - [**Layouts**](#layouts)
+
 
 **Pre - requisites**
 
@@ -88,7 +101,7 @@ The above is what we call **WATERFALLING PROBLEM**
 >
 >> the term got its name from the fact that if you take one section of `waterfall`, then it is dependent on other while falling
 
->:pushpin:<span style="color:orange">**Just remember this line and you will knwo what waterfalling problem is ->**</span>
+>:pushpin:<span style="color:orange">**Just remember this line and you will never forget what waterfalling problem is ->**</span>
 >
 >>**basically phle `HTML` return hua, then the browser came to know that isme `JS` v h to uska response return hua and then the browser came to know that it also consits of `backend` or code related to `server` fetching also so now this will go to do that part and then finally the website loads up fully(No. of steps = 4)**
 
