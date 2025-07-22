@@ -88,6 +88,10 @@ The above is what we call **WATERFALLING PROBLEM**
 >
 >> the term got its name from the fact that if you take one section of `waterfall`, then it is dependent on other while falling
 
+>:pushpin:<span style="color:orange">**Just remember this line and you will knwo what waterfalling problem is ->**</span>
+>
+>>**basically phle `HTML` return hua, then the browser came to know that isme `JS` v h to uska response return hua and then the browser came to know that it also consits of `backend` or code related to `server` fetching also so now this will go to do that part and then finally the website loads up fully(No. of steps = 4)**
+
 BUT, if you have did the same thing as above in `Next.js`, then **In First `request` i would get back the blogs**, something like this ->
 
 <img src = "image-2.png" width=600 height=200>
@@ -256,9 +260,279 @@ something like the below :-
 
 then you can see in the `url` that you have creatd a sub route inside the `users` route and hence **You can DO AS MUCH NESTING OF ROUTES just by making folders**
 
+Summary :-
 
+<img src = "image-11.png" width=320 height=200> <img src = "image-12.png" width=320 height=200>
 
+### **Preetifying signin page**[Ready made template for sign in page]
 
+for this first make a folder named as `signin` insdie the `app` folder and then inside that create `page.tsx` inside it which consists of these lines of code
+
+```javascript
+export default function Signin() {
+  return <div className="h-screen flex justify-center flex-col">
+    <div className="flex justify-center">
+      <a href="#" className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 ">
+        <div>
+          <div className="px-10">
+            <div className="text-3xl font-extrabold">
+              Sign in
+            </div>
+          </div>
+          <div className="pt-2">
+            <LabelledInput label="Username" placeholder="harkirat@gmail.com" />
+            <LabelledInput label="Password" type="password" placeholder="123456" />
+            <button type="button" className="mt-8 w-full text-white bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2">Sign in</button>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+}
+
+interface LabelledInputType {
+  label: string;
+  placeholder: string;
+  type?: string;
+}
+
+// we have made LabelledInput as GENERIC COMPONENT as it is going to be used many times (see the picture below)
+function LabelledInput({ label, placeholder, type }: LabelledInputType) {
+  return <div>
+    <label className="block mb-2 text-sm text-black font-semibold pt-4">{label}</label>
+    <input type={type || "text"} id="first_name" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder={placeholder} required />
+  </div>
+}
+```
+now if you go to "http://localhost:3000/app/signin", you will see something like this 
+
+<img src = "image-13.png" width=200 height=200>
+
+`Username` with `Input box` is one LabelledInput `Password` with `Input box` is another LabelledInput. [as ye type ka structure boht jagah use hota h to  ek GENERIC COMPONENT he bna diya] (you can see the code consits of 2 LabelledInput component)
+
+To make the `sign up` page, (if basic one) just copy paste this and change wherever written `Sign in` to `Sign up`
+
+### **Server side rendering in action**
+
+Lets try exploring the response from the server on the `/signup` route by first running the code `npm run dev` and then going to "http://localhost:3000/signup"
+
+Noitce the response you get back in the `HTML` file 
+
+<img src = "image-14.png" width=600 height=250>
+
+Now if `googlebot` tries to scrape your page, it'll understand that this is a
+`Sign up` page without running any Javascript.
+
+The first `index.html` file it get's back will have context about the page since it
+was `server side rendered`
+
+>:pushpin:**Isse WATERFALLING PROBLEM v chli gyi**
+
+<img src = "image-15.png" width=600 height=300>
+
+**You can make the component `async` as you have made in the above code `Blogs` as that is also a function only**
+
+In the above code or similar code, aapka page **ban banya aayega server se**
+
+Now if you go to "http://localhost:3000/blogs" and see the result :-
+
+<img src = "image-16.png" width=600 height=300>
+
+You can see all the todo (coming from API fetch (basically some backend)) with their status that whether they have been done or not and at the same time see in the developer tab, you can clearly see that the **first endpoint `blogs`, you will see all the divs coming and rendering in the VERY FIRST RESPONSE** [NO WATERFALLING problem ki phle frontend response kro, phir backend hit krke data lo, and then finally render kro]
+
+**Backend request are still happening but now through `next.js` server (whether it be database or backend server)**
+
+The same thing if you have used `React`, then the code would have looked like ->
+
+```javascript
+import {useState, useEffect} from "react"
+
+async function getBlogs() {
+  const [blogs, setBlogs] = useState([])
+
+  useEffect(() => {
+    const blogs = axios.get("/blogs")
+    setBlogs(blogs)
+  }, [])
+
+  return <div>
+
+  </div>
+
+// The above code might seems to be similar to what written in Next.js code above but this will not have SERVER SIDE RENDERING 
+// as "useEffect" does not run on SERVER side so this react code will be affected with WATERFALLING PROBLEM as this will run on client 
+  
+}
+```
+
+## **Layouts**
+
+You have noticed there is a file named as `layout.tsx` inside the `app` folder.
+
+<img src = "image-17.png" width=250 height=200>
+
+Talking about what it does -> [Layouts official documentation](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts)
+
+**Layouts let you `wrap` all child `pages` inside some logic**
+
+>:pushpin:<span style="color:orange">**Remember ->**</span> **The thing which apperas on multiple pages or you want to make them appear on multiple pages (such as navbar(present on every page of the website), footer (mostly present on every page) etc.. ) is written inside the `layout.tsx` file**
+
+>:pushpin:**`layout.tsx` file can be made inside any folder not only in the parent directory as you may want for ex -> footer to be shown on particular page rather than in all**
+
+if you see the `layout.tsx`, you will first see some font related code (ignore them), now comes the `Metadata` part, (this is same as that in `HTML` code, jo v tm likhoge wo jake uska content show kr dega (at the top))
+
+Now comes the complicated part 
+
+```javascript
+export default function RootLayout({ // looks like normal component
+  children, // gets children as input -> the concept is same as that in REACT 
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en"> // Wrapping all the children inside this HTML tag 
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+**Explanation of the above code**
+
+`RootLayout` is simply **Wrapping ALL THE CHILDREN which is going to come after this page** 
+
+We know that `navbar` is present on almost all the pages of a website, now lets try to make it in a manner that it is present inside all the pages 
+
+so inside the `layout.tsx`,
+
+```javascript
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <div className = "border-b p-4">Quizzio</div> 
+        {children} // Ye children (i.e. upcoming pages as well as home page) to render honge he sath sath upar ka navbar component v render kr do sbpe 
+      </body>
+    </html>
+  );
+}// Basically you have wrapped all the children inside the body tag and then also added a navbar to show it on every page
+```
+
+so  if you consider this file explorer, then :- 
+
+<img src = "image-18.png" width=200 height=300>
+
+jo v `page.tsx` (main one present inside the `app` folder) to render hoga he sath sath as wo `children` h sath sath `navbar` component v render hoga, similarly, sare route (as they are also `children` unke individual page to render hoge he sath sath `navbar` v render hoga)
+
+Lets see it in action :-
+
+<img src = "image-19.png" width=320 height=200> <img src = "image-20.png" width=320 height=200>
+
+<img src = "image-21.png" width=320 height=200>  
+
+Notice the **url** in all of the above pic, they are all the routes which you have created, but all of them are having `navbar` made in the `layout.tsx` as you have only said that in the `RootLayout` (as the name suggests, Layout of the main part(root)) along with all the `children` add another component known as `navbar` so that why this is being shown in all the pages of the website.
+
+lets try to understand in another way :- 
+
+lets say you have created another folder inside `app` folder named as `auth` and move the `sign in` and `sign up` folder inside there, now let say i want to make navbar appear on ONLY in `sign in` and `sign up` page (nothing other than this), then how to deal with this problem
+
+**1st way ->** make a `navbar` component seperately by first making a seperate folder for all the component named as `components` and then making another file named as `navbar.tsx` and then write the logic for `navbar` you want to make for example :-
+
+```javascript
+export default function Navbar(){
+  return (
+    <div className = "border-b p-4"> Quizzio </div>
+  )
+}
+```
+
+Now as you want this component to be displayed only on `sign in` and `sign up` page so go to `app > auth > sign in` file path and inside the `sign in`, `page.tsx` import this component :-
+
+```javascript
+import {navbar} from "@/components/navbar"
+
+export default function signIn(){
+
+  // some logic
+  return (
+    // at the top of return statement add the component
+    <Navbar />
+  )
+
+}
+```
+
+similar you will do this same thing for `sign up` -> `page.tsx` file copy this code 
+
+```javascript
+import {Navbar} from "@/components/navbar"
+
+export default function signUp(){
+  // some logic
+  return (
+    // At the top render this navbar component
+    <Navbar />
+  )
+
+}
+```
+
+This will work and `navbar` will render only on `signin` and `sign up` page only but __this is `React` way of doing things__
+
+**2nd way ->** using `next.js` and more particularly `layout` concepts 
+
+so the problem with the above thing is that you are adding or importing the component __at all the place wherver it is required__, Now if the website is very big then you might not put it in some place also there are many other components present inside the complex website. so now we will use `layout` concept here to deal with this problem :-
+
+so **Instead of writing or importing the component at multiple places, cant we import at one point (will avoid code repeatition)** and hence just go to the parent folder (or route(called in `next.js`)), here the parent folder is `auth` as it consists of both `sign in` and `sign up` page, and we want to show the `navbar` only in these pages. so make a file `layout.tsx` inside the parent folder (`auth`), **not the child folder**
+
+>:pushpin:<span style="color:orange">**The only thing to know about the concept of `layout` :--->**</span>**The above part simply means that `auth` ke aage jitna v pages h un sb me (ex -> `/auth/signin` or `/auth/signup` etc..) In sbme `layout.tsx` ka code aayege he aayega if any component is made, then wo v sare page pe aayega which exist after `auth`**, if you understand this statement then you have understood the usecase of `layout`
+
+```javascript
+import {Navbar} from "@components/navbar"
+
+export default function AuthLayout({children}){
+  return (
+    <div>
+      <Navbar />
+      {children} // simply means that along with all the children auth(parent folder or folder inside which layout.tsx consists of this code) have (here -> signin  and signup), render inside all of them Navbar component also 
+    </div>
+  )
+}
+```
+
+**Benefit ->** you dont have to seperately import and then render the `Navbar` component inside `signin` and `signup` page, you have just written the logic inside one file and you are good to go. [**It will render on every page that exist in that folder**]
+
+so **if you go inside `signin` folder inside the `page.tsx` code, before all the code which is present inside the `page.tsx` of `signin` page RENDERs first `Navbar` present inside the `layout.tsx` present inside the `auth` folder gets RENDERED and then as {children} is now needs to be rendered so now the `signin` `page.tsx` components will RENDER**
+
+so you have basically given **Layout to all the pages which exist after `auth` that they will have `Navbar` first then their content**
+
+Now if you add a third page(means made a new folder named as `profile`) inside the `auth` folder and then inside the `profile` folder, made a file named as `page.tsx` and then write some logic relatd to profile showing so that will also consits of `Navbar` component as **Every page that exist inside the `auth` folder will be WRAPPED inside the `layout.tsx` me jo component likha h (i.e. `AuthLayout`)**
+
+jo global pe tha `RootLayout` (present inside the `layout.tsx` of `app` folder) wo harek page pe aayega as `app` folder **is the PARENT FOLDER of all the folders** and the above `AuthLayout` is **sublayout**
+
+:large_blue_diamond: **You can also do CONDITIONAL RENDERING inside the `layout.tsx`**
+
+Now if you have understood the above concept, then can you see that to make available a common component to more than 2 pages (or routes),  you have to **put them inside the parent folder and then inside that parent folder create `layout.tsx` to make them available on all the sub routes(or folders) present inside the parent folder**. Now why we are making an **extra folder (route) for this thing**
+
+**To avoid the above problem, we do a small change inside the parent folder name <span style="color:orange">**JUST WRAP THE PARENT FOLDER NAME INSIDE THE SMALL BRACKET**</span>**
+
+somthing like this ->
+
+<img src = "image-23.png" width=200 height=200>
+
+and now `next.js` will ignore the folder (or route) which has name wrapped inside the small bracket and now you can directly go to the route present inside the `auth` folder here without using `/auth/child_route`.
+
+so now instead of going to "http://localhost:3000/auth/signin" go to "http://localhost:3000/signin" (Basically this will Small bracket me jo v folder or route h wo IGNORE ho jayega)
+
+>**layout concept will still remain the same whi parent folder ke sare page or sub folder pe wo apne andar ka component render krwa dega, bas parent route dene ka ab jarurat nhi h**
+
+> :pushpin:<span style="color:orange">**Remember ->**</span> **Whenever you dont want to disturb your folder structure, means force route to exist inside some parent folder, just wrap that route inside the CURLY BRACES and it will be IGNORED by `next.js`**
 
 
 
