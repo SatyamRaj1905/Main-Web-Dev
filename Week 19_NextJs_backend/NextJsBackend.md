@@ -369,7 +369,10 @@ export function POST(){
 ```
 Output -> `get` request (in left side) and `post` request (in the right side)
 
+
 <img src = "image-15.png" width=320 height=200> <img src = "image-19.png" width=320 height=200>
+
+> :pushpin: <span style="color:orange">**REMEMBER this line ->**</span>**`NextResponse` in `next.js` is same as `res` used in `express`**
 
 Now you can use this in your intial code where you were hitting other backend 
 
@@ -470,13 +473,191 @@ The code will still work but you should avoid using this way of doing routing.
 Now next step is -> Creating the `signin` and `signup` page so inside the `app`, make a folder named as `signin` and inside that `page.tsx` to write the logic for this page, the code for it ->
 
 ```javascript
-export default function Signin(){
-  return (
-    <div className = " >
-  )
+"use client"
+import axios from "axios"
 
+export default function Signin() {
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <div className="border p-2">
+        <input type="text" placeholder="username"></input>
+        <input type="password" placeholder="password"></input>
+        <button onClick={() => {
+          axios.post("http://localhost:3000/api/v1/signin") // we have to create this endpoint and make it hit the database so that data can be fetched and for that we will take username and password given by the user above in the field made
+        }}>
+          Sign in
+        </button>
+      </div>
+    </div>
+  );
 }
 ```
+
+>:pushpin:**Whenver you add `<button>` component in `next.js`, as it is CLIENT SIDE COMPONENT so you have to add `"use client"` at the top of your code**
+
+Output ->
+
+<img src = "image-21.png" width=400 height=200>
+
+similarly make a folder named as `signup` inside the `app` folder and inside that `page.tsx` to write the logic for this page, the code for it ->
+
+```javascript
+"use client"
+import axios from "axios"
+
+export default function Signup() {
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <div className="border p-2">
+        <input type="text" placeholder="username"></input>
+        <input type="password" placeholder="password"></input>
+        <button onClick={() => {
+          axios.post("http://localhost:3000/api/v1/signup", { // same we require to make this endpoint and hit the database but for that first we need to take the username and password given in the input field // How to do that ?? // 2
+
+          })
+        }}>
+          Sign up
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+**Answer to `// 2` question**
+
+There are two ways to do the above thing ->
+
+**1st way -> using STATE Variables**
+
+```javascript
+"use client"
+
+import axios from "axios"
+import {useState} from "react"
+
+export default function Signup() {
+  const [username, setUsername] = useState("") // made two variable that if any change in their value occurs then it should re-render the component 
+  const [password, setPassword] = useState("")
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <div className="border p-2">
+        <input type="text" placeholder="username" onChange = {e => // added the onChange handler that if any change happens in the username then an event should occur, e.target -> as the event ispe hua h to e.target se isko refer kiya jaa rha h and e.target.value -> means finally input box ke andar jo value h usko refer kiya jaa rha h
+          setUsername(e.target.value)
+        }></input>
+        <input type="password" placeholder="password" onChange = {e =>
+          setPassword(e.target.value) // same explanation as above
+        }></input>
+        <button onClick={() => {
+          axios.post("http://localhost:3000/api/v1/signup", {  // sending the username and password
+            username,
+            password
+          })
+        }}> 
+          Sign up
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+Output ->
+
+<img src = "image-22.png" width=500 height=250>
+
+You can see that data is getting in the correct way to the backend (although we still have to implment the backend)
+
+**2nd Way -> using `useRef` hook (as you have expected), we have already learnt that this can be used to REFER and THIS WAY IS BETTER WAY as RE-RENDER will NOT happen in this way every time the username or password changes**
+
+:bulb:**How to implement backend part**
+
+-> already done above so using the same concept to achieve this 
+
+create a folder `api` inside the `app` folder, then inside that `v1`, then inside it `signup` and then inside it create a file named as `route.ts` (where the code looks like this)
+
+```javascript
+import {NextRequest, NextResponse} from "next/server"
+
+export async function POST(req : NextRequest){ // How to get request (req) here for this here you GET ACCESS TO "req" OBJECT whose type is NextRequest and using this object you can EXTRACT whatever possible while dealing with POST request (ex -> query parameters, headers, body etc..)
+
+  // BELOW IS THE WAY TO EXTRACT THE BODY 
+  const data = await req.json() // this will extract the BODY coming from the frontend (which in our case is username and password)
+  // Now you have got the data in the backend next step will be storing in the database HOW TO DO THAT (see below)
+  
+
+  return NextResponse.json({ // we know that NextResponse act same as res in express and used to send the response as res does in express but what about getting the data means "req" in express for this NextRequest also exists 
+    message : "you have been signed up"
+  })
+}
+```
+>:pushpin:<span style="color:orange">**just REMEMBER ->**</span> **`NextRequest` in `next.js` is same as `req` in `express` and `NextResponse` in `next.js` is same as `res` in `express`**
+>
+>>**As you are using them inside the `Next.js` so added "Next" in front of it**
+
+:bulb:**How to redirect to `signin` page after the user has done `signup` ??**
+
+-> inside the `signup`'s `page.tsx` add these ->
+
+```javascript
+"use client"
+import {useRouter} from "next/navigation"
+import {useState} from "react"
+import axios from "axios"
+
+export default function Signup() {
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  const router = useRouter() // used router as we want to redirect 
+  return (
+    <div className="w-screen h-screen flex justify-center items-center">
+      <div className="border p-2">
+        <input type="text" placeholder="username" onChange = {e => 
+          setUsername(e.target.value)
+        }></input>
+        <input type="password" placeholder="password" onChange = {e =>
+          setPassword(e.target.value) 
+        }></input>
+        <button onClick={async () => { // make this function "async" as it will take some time to go to backend and from there storing the username and password to the database
+          axios.post("http://localhost:3000/api/v1/signup", {  
+            username,
+            password
+          })
+          router.push("/signin") // once data is stored in the database, redirect this to "signin" page. You could have also used Link tag for routing as discussed above but as you have see its implementation above so using this way now 
+        }}> 
+          Sign up
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+Now if you go to the `signup` page and then put some data and then click on `sign up` button then it will now REDIRECT to the `signin` page as given in the question above.
+
+### **Storing the data in the database**
+
+Now that you have got the data in the backend, your next step wiļl be **STORING IT IN THE DATABASE**
+
+so to do that again coming to the code we have written till now in our backend created inside the `next.js`
+
+```javascript
+import {NextRequest, NextResponse} from "next/server"
+
+
+export async function POST(req : NextRequest){ 
+
+  const data = await req.json() 
+
+  return NextResponse.json({ 
+    message : "you have been signed up"
+  })
+}
+```
+
+
+
+
+
 
 
 
