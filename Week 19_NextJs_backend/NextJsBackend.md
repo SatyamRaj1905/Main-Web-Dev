@@ -277,10 +277,206 @@ Now the `next.js` is clever enough ki **jb tk left pic me highlighted part (`asy
 
 **Initial `HTML` me isse v `loading.tsx` ka `HTML` code he aayega but now you have done it in `next.js` way instead of doing it like `react` way**
 
+## **Introducing API routes in `Next.js`**
+
+NextJS lets you write backend routes, just like express does.
+
+This is why Next is considered to be a `full stack` framework.
+
+The benefits of using NextJS for backend includes
+1. Code in a single repo
+2. All standard things you get in a backend framework like exprbss
+3. Server components can directly talk to the backend
+
+Till now we were writing the `page handler`, now we will write `route handler`
+
+<img src = "image-12.png" width=500 height=200>
+
+See the url, as this url was externally present means it was not inside the `next.js` server means `next.js` server has fetched the data from external backend. Now to make it available inside my `next.js` server, i will create same route ->
+
+so going inside the `app` folder, adding now `route handler` and then inside that make first `api` folder, then inside that `v1` folder, and then inside that `user` folder, and finally inside that `details` folder inside which if you make `page.tsx` file inside which if you write :-
+
+```javascript
+export default function Page(){
+  return (
+    <div>
+      hi there
+    </div>
+  )
+}
+```
+
+Now if you now go to  "http://localhost:3000/api/v1/user/details"
+
+then you will see "hi there" on the screen but what do i want to see at this -> see the above pic present in `json` format
 
 
+<img src = "image-14.png" width=320 height=200> <img src = "image-13.png" width=320 height=200> 
 
+so can i write like this :-
 
+```javascript
+export default function Page(){
+  return {
+    name : "harkirat"  
+  }
+}
+```
+**No this will give ERROR if you see it on the `url`** as **it is component and it EXPECTS `JSX` to return**
+
+Now as **I am not returning a page(not returning a `HTML` from here), IT IS A BACKEND route(it might return `text`, `json`, and maybe `HTML`)** so for that 
+
+**Convert the name of the file to `route.tsx` (doesnt even have to `.tsx` as we are currently not returning `HTML` (see the data it is in `JSON` format)) so `.ts` is enough**
+
+as you have already see the frontend part in `next.js`, recaping the steps :-
+
+**For pages , return a component that return some `HTML`, above which data fetching is code is being handled**
+
+Now coming to the `backend` part,
+
+now inside the `route.ts`, write this -> [Here we will learn the syntax for backend]
+
+```javascript
+import {NextResponse} from "next/server" // first importing the NextResponse from the next/server 
+
+// THIS IS HOW YOU MAKE "GET" REQUEST
+// you have made a "get" request on the 
+// as we have MULTIPLE type of handler on the route -> api/v1/user/details so that why not used DEFAULT on the function (see the Default vs Normal export difference)
+export function GET(){
+  return NextResponse.json({
+    user : "harkirat",
+    email : "harkirat@gmail.com"
+  })
+}
+
+// THIS IS HOW YOU WILL HANDLE POST REQUEST 
+export function POST(){
+  return NextResponse.json({
+    user : "harkirat",
+    email : "harkirat@gmail.com"
+  })
+}
+
+// SIMILARLY HANDLING THE PUT REQUEST 
+export function POST(){
+  return NextResponse.json({
+    user : "harkirat",
+    email : "harkirat@gmail.com"
+  })
+}
+
+// IN THE SAME WAY YOU CAN HANDLE ANY TYPE OF REQUEST
+```
+Output -> `get` request (in left side) and `post` request (in the right side)
+
+<img src = "image-15.png" width=320 height=200> <img src = "image-19.png" width=320 height=200>
+
+Now you can use this in your intial code where you were hitting other backend 
+
+```javascript
+import axios from "axios"
+
+export default async function User(){ 
+    // const response = await axios.get("https://week-13-offline.kirattechnologies.worker.dev/api/v1/user/details") // INSTEAD OF THIS 
+
+    // WRITE THIS 
+    const response = await axios.get("http://localhost:3000/api/v1/user/details")
+
+    const data = response.data 
+
+    return ( 
+        <div>
+            User Page 
+            {data.email}
+        </div>
+    )
+}
+```
+Output ->
+
+<img src = "image-18.png" width=400 height=200>
+
+what we were doing initially -> (in the left pic) and what we are doing now (in the right pic, basically Nextjs pe he bhej rhe ho request)
+
+<img src = "image-16.png" width=340 height=200> <img src = "image-17.png" width=300 height=200>
+
+**so we have MIGRATED the backend to our `next.js`**
+
+## **Project -> End to End To-do application in `next.js`**
+
+Initialising an empty `next.js` project by the same step done previously ->
+
+and then proceeding by `page.tsx` present inside the `app` folder ->
+
+inside the `page.tsx`
+
+```javascript
+import Link from "next/Link"
+
+export default function Home(){
+  return (
+    <div className = "text-lg w-screen h-screen flex items-center justify-center">
+      <div>
+        TO-DO application
+        </br >
+        <Link className = "text-md border m-2" href = "/signin">Sign in to TODO app</Link>
+        </br >
+        <Link className = "text-md border m-2" href = "/singup">Sign up to TODO app</Link>
+      </div>
+    </div>
+  )
+}
+```
+>:pushpin:**`<Link>` tag is present in `next.js` and works the same way as `a` tag in `HTML`**
+>
+>> **Used to RE-DIRECT to other page (also it is a button, you click on it)**
+
+>:pushpin:<span style="color:orange">**REMEMBER ->**</span> **Using `<Link>` tag is the BEST way to do ROUTING in `next.js` although there exists another way but that will lead to complication only**
+
+Going to the http://localhost:3000 , you see the output as ->
+
+<img src = "image-20.png" width=400 height=200>
+
+If you click on the sign in then it will redirect to the http://localhost:3000/signin ,(i.e -> `signin` page) and similar with the `signup` page
+
+**Other way of doing routing inside `next.js`**[Complicated way]
+
+```javascript
+"use client"
+import {useRouter} from "next/navigation"
+
+export default function Home(){
+  const Router = useRouter()
+  return (
+    <div className = "text-lg w-screen h-screen flex items-center justify-center">
+      <div>
+        TO-DO application
+
+        <button onCLick = {() => {
+          Router.push("/sigin")
+        }}>Sign in</button>
+      </div>
+    </div>
+  )
+}
+```
+
+>:pushpin:**using `useRouter` is another way to achieve ROUTING in `next.js` but this BAD way to do as you have to make the code CLIENT SIDE as it is available in CLIENT SIDE which will enforce the code to run on the CLIENT SIDE and `next.js` is known for SERVER side** also **PRE-FETCHING is not available for this way of doing routing as CLIENT SIDE me possible nhi hota, go above, we have discussed it**
+>
+>> **in the code at the top i have added line `"use client"` as it is CLIENT SIDE component**
+
+The code will still work but you should avoid using this way of doing routing.
+
+Now next step is -> Creating the `signin` and `signup` page so inside the `app`, make a folder named as `signin` and inside that `page.tsx` to write the logic for this page, the code for it ->
+
+```javascript
+export default function Signin(){
+  return (
+    <div className = " >
+  )
+
+}
+```
 
 
 
