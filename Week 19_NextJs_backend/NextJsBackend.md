@@ -635,6 +635,8 @@ export default function Signup() {
 Now if you go to the `signup` page and then put some data and then click on `sign up` button then it will now REDIRECT to the `signin` page as given in the question above.
 
 ### **Storing the data in the database**
+----------
+
 
 Now that you have got the data in the backend, your next step wiļl be **STORING IT IN THE DATABASE**
 
@@ -647,12 +649,226 @@ import {NextRequest, NextResponse} from "next/server"
 export async function POST(req : NextRequest){ 
 
   const data = await req.json() 
+  // you have to do somthing like the below 
+  mongoose.User.insert() // if using monogoose 
+  pg.query("INSERT INTO USERS sql query ahead") // if using postgres
+  prisma.user.update({data to be sent}) // if using prisma 
 
   return NextResponse.json({ 
     message : "you have been signed up"
   })
 }
 ```
+Here we will storing in the database through `prisma`, so using it to store inside the database :-
+
+### **Adding `prisma` to `next.js` project**
+----------
+
+
+for using `prisma` using `postgres`, you already know how to setup that 
+
+**Step 1 ->**get the `postgres` sql connection url from the website -> neon.tech
+
+**Step 2 ->** **Install prisma**
+
+```javascript
+npm install prisma
+```
+**Step 3 ->** **Initialise `prisma` schema**
+
+```javascript
+npx prisma init 
+```
+-> The above command created `schema.prisma` file and inside which we have to write the logic 
+
+```javascript
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db{
+  provider = "postgresql"
+  url = env("Database_URL")
+}
+
+Model User {
+  id   Int   @default(autoincrement())   @id 
+  username    String     @unique 
+  password    String
+}
+```
+after this, make sure to ADD the Dastbase url got from the `neon.tech` inside the global `.env` file.
+
+**Step 4 -> Migrate the database**(`schema.prisma` file ka jo table h, usko database me REFLECT to krwana pdega)
+
+```javascript
+npx prisma migrate dev --name init_schema
+```
+
+**Step 5 -> Generate the client** 
+
+```javascript
+npx prisma generate
+```
+
+-> this will create folder to ./node_modules/@prisma/client  [**These folders have the file that can be used to connent to the database**] for ex -> Object oriented programming ki takat de dega ye 
+
+```javascript
+import {NextRequest, NextResponse} from "next/server"
+import {PrismaClient} from "@prisma/client/extension" // Import the client generated
+
+const prismaClient = new PrismaClient() // making a variable which has the capability of it 
+export async function POST(req : NextRequest){ 
+
+  const data = await req.json() 
+
+  // TO FURTHER ENHNACE, ADD ZOD HERE FOR VALIDATION OF THE INPUT 
+
+  await prismaClient.user.create({ // then using the prismaClient to gain the capability for interacting with the database 
+    data : {
+      username : data.username,
+      password : data.password
+    }
+  })
+
+  return NextResponse.json({ 
+    message : "you have been signed up"
+  })
+}
+```
+Now if you go the `signup` page, put some entry for `username` and `password` and then click on `signup` button, you will be redirected to `signin` page and at the same time, **Data you put while on the `signup` page will be stored inside the `postgres` database**, just REFRESH the made database made on the `neon.tech` site and you will see that inside the `User` table, you will see the **new entry of the `username` and `password` you have given while on the `signup` page**
+
+### **Better fetches**
+----------
+
+
+Now lets create an Endpoint which **will return you the details making it**
+
+For the root page, we are fetching the details of the user by hitting an HTTP endpoint in 
+
+```javascript
+import axios from "axios";
+
+async function getUserDetails() {
+  try {
+    const response = await axios.get("http://localhost:3000/api/v1/user"); // 2
+    return response.data;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export default async function Home() {
+  const userData = await getUserDetails();
+
+  return (
+    <div className="flex flex-col justify-center h-screen">
+      <div className="flex justify-center">
+        <div className="border p-8 rounded">
+          <div>
+            Name: {userData?.name}
+          </div>
+          {userData?.email}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+```
+
+and then handling `GET` request present on the Home page (**Basically we are trying to give all the data associated with the user on the Home screen**)
+
+```javascript
+import {NextRequest, NextResponse} from "next/server"  
+import {PrismaClient} from "@prisma/client/extension" 
+
+const prismaClient = new PrismaClient() 
+export async function POST(req : NextRequest){ 
+  // SAME AS ABOVE CODE 
+}
+
+// ADDING THE GET REQUEST here 
+export async function GET(req : NextRequest){ // 3
+  const user = await prismaClient.user.findFirst();
+
+  return NextResponse.json({
+    user
+  })
+}
+```
+You are basically **fetching the data from the backend server (which in turn is fetching from the database) and then finally you are showing the corresponding data of the user on the Home page**
+
+The above code is working like this -> you are hitting your own backend (see `// 2`) line of code and when this line of code executes, you **hit your own made backend** and then **the control reaches at `// 3` line of code and hence you get the user details**
+
+<span style="color:orange">**But there can be BETTER way to FETCH ->**</span>
+
+Basically **why you have to hit a seperate api(basically hit your own backend)**
+
+**Why not write the `get` logic inside the component only ??**
+
+something like this :-
+
+```javascript
+import axios from "axios";
+
+async function getUserDetails() {
+  try {
+    // const response = await axios.get("http://localhost:3000/api/v1/user"); // INSTEAD OF HITTING YOUR OWN BACKEND and then run the logic from that 
+    // return response.data; // DIRECTLY WRITE THIS LOGIC HERE ONLY 
+    const user = await client.user.findFirst({}) // 2
+    return ({
+      name : user?.username,
+      email : user?.email
+    })
+
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+export default async function Home() {
+  const userData = await getUserDetails();
+
+  return (
+    <div className="flex flex-col justify-center h-screen">
+      <div className="flex justify-center">
+        <div className="border p-8 rounded">
+          <div>
+            Name: {userData?.name}
+          </div>
+          {userData?.email}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+Basically, **You dont really need to hit your own made `HTTP` server, you can directly do this in the component only**
+
+**SCARY PART of the above apporach ->** <span style="color:orange">**Mere component me database he aayega**</span> and then the question arises 
+
+:bulb:**can this `client` be hit from the frontend (as it has came in the frontend to tm database (i.e. `client`) ko power de diye hit krna ka iska mtlb ), WILL THE USER CAN HIT THE DATABASE ??**
+
+-> **Answer to the above question is NO (a big NO) because on the client side or basically user side, final `HTML` code is only returned NOT THE LOGIC so whatever the `async` function you are doing here will REMAIN ONLY ON THE SERVER and run on the server not the client and hence the user cant hit the database from frontend.**
+
+> :pushpin:<span style="color:orange">**Remember only the `HTML` part is returned to the `user` not the logic for backend if any in `next.js`**</span>
+
+So rather that creating than hitting yourself on the different API endpoint, dont create the API endpoint instead DIRECTLY DO THE DATABASE SEARCH OVER THERE.
+
+in short, **if you just want to do SEARCH, then DO THE SEARCH DIRECTLY**
+
+### **Singleton Prisma client**
+
+Click to see the documentation -> [Prisma client Troubleshoot](https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices)
+
+
+**The above is the `next.js` specific**
+
+
+
+
+
 
 
 
