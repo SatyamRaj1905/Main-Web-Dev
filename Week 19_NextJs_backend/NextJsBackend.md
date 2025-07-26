@@ -1,5 +1,18 @@
 # **Next Js for Backend (Server side code)**
 
+- [**Next Js for Backend (Server side code)**](#next-js-for-backend-server-side-code)
+  - [**Recap of Data fetching in `React`**](#recap-of-data-fetching-in-react)
+  - [**Data fetching in `Next.js`**](#data-fetching-in-nextjs)
+  - [**Loaders in `Next.js`**](#loaders-in-nextjs)
+  - [**Introducing API routes in `Next.js`**](#introducing-api-routes-in-nextjs)
+  - [**Project -\> End to End To-do application in `next.js`**](#project---end-to-end-to-do-application-in-nextjs)
+    - [**Storing the data in the database**](#storing-the-data-in-the-database)
+    - [**Adding `prisma` to `next.js` project**](#adding-prisma-to-nextjs-project)
+    - [**Better fetches**](#better-fetches)
+    - [**Singleton Prisma client**](#singleton-prisma-client)
+  - [**Some important Questions realted to `next.js`**](#some-important-questions-realted-to-nextjs)
+
+
 `Next.js` is a full stack framework
 
 <img src = "image.png" width=400 height=200>
@@ -218,6 +231,8 @@ Now the question comes,
 :bulb:**Lets say in the above code, the data took 2 or more second to load then how to render the LOADER till the data is loaded as we have not written or done anything about that ??**
 
 ## **Loaders in `Next.js`**
+----------
+
 
 so here comes the **requirement of your website ->** if you want your website to be SEO optimised, then **loading page to dikha mt dena as if you will add that then the first `response` coming from the server will be LOADING page only as isse jldi to data load hoga he and due to this `googlebot` will see the LOADING page which will eventually drastically reduce the SEO optimisation**
 
@@ -278,6 +293,8 @@ Now the `next.js` is clever enough ki **jb tk left pic me highlighted part (`asy
 **Initial `HTML` me isse v `loading.tsx` ka `HTML` code he aayega but now you have done it in `next.js` way instead of doing it like `react` way**
 
 ## **Introducing API routes in `Next.js`**
+----------
+
 
 NextJS lets you write backend routes, just like express does.
 
@@ -406,6 +423,8 @@ what we were doing initially -> (in the left pic) and what we are doing now (in 
 **so we have MIGRATED the backend to our `next.js`**
 
 ## **Project -> End to End To-do application in `next.js`**
+----------
+
 
 Initialising an empty `next.js` project by the same step done previously ->
 
@@ -859,6 +878,8 @@ So rather that creating than hitting yourself on the different API endpoint, don
 in short, **if you just want to do SEARCH, then DO THE SEARCH DIRECTLY**
 
 ### **Singleton Prisma client**
+----------
+
 
 Click to see the documentation -> [Prisma client Troubleshoot](https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices)
 
