@@ -863,7 +863,150 @@ in short, **if you just want to do SEARCH, then DO THE SEARCH DIRECTLY**
 Click to see the documentation -> [Prisma client Troubleshoot](https://www.prisma.io/docs/orm/more/help-and-troubleshooting/help-articles/nextjs-prisma-client-dev-practices)
 
 
-**The above is the `next.js` specific**
+**The above and below thing is the `next.js` specific topic**
+
+You will not face this issue when you are in PRODUCTION, (if you deploy your website, it will totally be fine), also you will not face this issue when you are running this locally but using the local database BUT if you are running the code locally but your database is not local (This is our case or the way we have coded above or made the website) like our database is on `neon.tech` so in this case, if are doing **HOT RELOADING (means you are making changes in your codebase too frequently and then running the code, this will create TOO MUCH CONNECTION(as `const prismaClient = new PrismaClient()` line will RUN every time) `request` to the database which will GIVE YOU AN ISSUE that you have too many connection to the database** [This HOT RELOADING thing does not comes when you deploy it as there, code is once submitted you do not make frequent change in the database].
+
+To fix that -> we **create a singleton**
+
+:bulb:**What is Singleton ??**
+
+-> Singleton basically means that **"Something which is defined only once"** (doesn't have multiple references)
+
+the above is what we exactly want
+
+Whenever the code is compiling, the line `const prismaClient = new PrismaClient()` **should be restricted to one time running only**
+
+for that **Put this line of the code to the seperate folder and name it as `lib` (not matter) which is present inside the `app` folder and inside that make `db.ts` file whose content are as follows**
+
+```javascript
+import {PrismaClient} from '@prisma/client'
+
+const prismaClientSingleton = () => { // 2
+  return new PrismaClient()
+}
+ 
+// @ts-ignore  (just wrote to ignore any ts error if being given by the ts)
+const prisma = globalThis.prisma ?? prismaClientSingleton() // 3
+
+export default prisma 
+
+if(process.env.NODE_ENV !== 'production') globalThis.prisma = prisma // 4
+```
+
+**Explanation of `// 2` code**
+
+What this line `const prismaClient = new PrismaClient()` is doing the same thing is done by the `// 2` codeblock. 
+
+**Explanation of `// 3` code**
+
+This line means that either `prisma` is `globalThis.prisma` (**`globalThis` means simply `WINDOW` object which is present inside the browser (acts as GLOBAL OBJECT))**)
+
+**Explanation of `// 4` code**
+
+This line means that if the **codebase is not running into the production, then do make that GLOBAL variable = `prisma`**
+
+Basically now you will do something like this ->
+
+<img src = "image-23.png" width=600 height=200>
+
+Notice you are importing the `prismaClient` from the `db.ts` present inside the `lib` folder, **Now as the line (`const prismaClient = new PrismaClient()` ) is not present here so if reloading  will happen this will not trigger to again connect to the database**
+
+Now First time the code will run `globalThis`, as it is NULL its value will become equal to  `new prismaClient`, and then next time it will run, as `prismaClient` is already being made so this code will not re-run hence avoid **RE-CONNECTING to the database frequently**[TOO MANY CREATION OF `prismaClient` WILL BE AVOIDED]
+
+**How to do it via the `mongoose` ??**
+
+-> same process make a folder named as `lib` inside the `app` and inside which create the file named as `db.ts` and inside that 
+
+**Step 1 ->** First install the `mongoose` as dependncy by running the command 
+
+```javascript
+npm install @types/mongoose
+```
+**Step 2 ->** Define the schema as you define while you were working with `mongoose`.
+
+```javascript
+import mongoose, {Schema, Model} from "mongoose"
+
+mongoose.connect("Database_URL") // put the url inside the .env file 
+
+const userSchema = new Schema ({
+  username : String,
+  password : String 
+})
+
+export const UserModel = Model("user", userSchema)
+```
+Now making changes according to the above in the `api/v1/signup` and then inside that present `route.ts`
+
+```javascript
+import {NextRequest, NextResponse} from "next/server"  
+import {PrismaClient} from "@prisma/client/extension" 
+import {UserModel} from "@lib/db"
+
+const prismaClient = new PrismaClient() 
+export async function POST(req : NextRequest){ 
+   const data = await req.json() 
+
+  // TO FURTHER ENHNACE, ADD ZOD HERE FOR VALIDATION OF THE INPUT 
+
+  // await prismaClient.user.create({ // then using the prismaClient to gain the capability for interacting with the database 
+  //   data : {
+  //     username : data.username,
+  //     password : data.password
+  //   }
+  // })
+  // INSTEAD OF WRITING THE ABOVE CODE as we are now using "mongoose" so add "mongoose" related code to insert into the mongoDB as this is the database we are using
+  UserModel.insert()
+
+  return NextResponse.json({ 
+    message : "you have been signed up"
+  })
+}
+
+
+export async function GET(req : NextRequest){ 
+  // SAME AS CODE WRITTEN ABOVE 
+}
+```
+
+## **Some important Questions realted to `next.js`**
+----------
+
+:bulb:**What is HOT MODULE RELOADING in `next.js` ??**
+
+**Without the page reloading, the changes which you will make or occur in the page gets reflected on the page, this is what is called as HOT MODULE RELOADING means in `next.js`**
+
+>:pushpin:**It simply meaans MODULE TO RELOAD HO RHA H BUT PAGE RELOAD NHI HOTA H**
+
+
+:bulb:**What is caching ??**
+
+-> You __store the important thing inside the browser__ so that you dont have to hit the database frequently to get or verify the data
+
+:bulb:**What does SERVERLESS means ??**
+
+-> SERVERLESS does not means that without server your codebase is running, it simply means that you have given your code to someone who will deploy your code on the server (which you are not aware of) and that has all the responsiblity to handle your site, and in turns charge you per request for handling that
+
+**This is different from `cloud` here you know where your codebase has been deployed and through the `cloud service provider` you are paying them and in turn they are responsible for maintaining your codebase**[simply means you have rented a machine via the `cloud service provider` through which your codebase is running]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
