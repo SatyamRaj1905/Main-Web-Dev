@@ -334,6 +334,23 @@ The `Catch-All Routes []` is very useful ->
   + For ex -> if you go to any content management sites -> first go to the topic, then inside the subtopic, then you have the option to get video or study material and finally you get to see the video (so much nesting)
 
 
+## **Static Site Generation**
+----------
+
+Before understanding this, lets understand why this concept exists ??
+
+we have studied that there are two ways of data fetching from the backend,
+
+1. **making `async` component**
+2. **using `useEffect`**
+
+Now you have the boundation of **not using the `async` component making then what will you do ??** -> you will in that case use the **`useEffect()` hook method (as data fetching from api me yhi use hota h), then store the value inside the STATE VARIABLE using `useState()` and then render it using the state variable made, BUT THIS WILL LEAD TO CLIENT SIDE RENDERING (as `useEffect` and `useState` CLIENT components hote h) OR SIMPLY SAYING `react` ki TARAF ZYADA CHLA GYA instead of `Next.js` (lost the POWER of `Next.js`)**
+
+so even without defining the `async` component, we can still **achieve server side rendering HOW ?? lets see**
+
+```javascript
+
+```
 
 
 
