@@ -169,7 +169,7 @@ But if you add something after it (i.e. after the dynamic route), then it will _
 
 ```javascript
 export default function BlogPage({params} : any){ // Give the type to "any" for now but figure out the better type that exists for this 
-  const postId = params.postId // this is the DYNAMIC PARAMETER made to ensure the DYANMIC nature is maintained (basically jo v url me [postId] field me h uska value extract kiya as url h to "params" lgana pda and as "postId" naam ka variable me store ho rha h so "params.postId" use kiya)
+  const postId = (await params).postId // this is the DYNAMIC PARAMETER made to ensure the DYANMIC nature is maintained (basically jo v url me [postId] field me h uska value extract kiya as url h to "params" lgana pda and as "postId" naam ka variable me store ho rha h so "params.postId" use kiya)
   return (
     <div>
       Blog Page {postId}
@@ -178,11 +178,17 @@ export default function BlogPage({params} : any){ // Give the type to "any" for 
 }
 ```
 
+> :pushpin:<span style="color:orange">**Remember ->**</span> **`params` is PROMISE SO ALWAYS `await` it**
+>
+> > **Basically wait kr till `parameters` comes**
+
 If **[blogId] is the name then see the below case ->**
 
 <img src = "image-8.png" width=500 height=200>
 
-then you would have used `const postId = params.blogId`. 
+in the above pic, you have __not used `await` with the `params` so the above code will give **ERROR**. 
+
+then you would have used `const postId = (await params).blogId`. 
 
 Now **Lets connect to the backend also that according to the dynamic route, the data should be appearing corresponding to this**
 
@@ -191,7 +197,7 @@ import axios from "axios"
 import {useEffect} from "react"
 
 export default async function BlogPage({params} : any){
-  const postId = params.blogId
+  const postId = (await params).blogId
   const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}`)
   const data = response.data // once got the data you can do anything you want with this 
 
@@ -200,12 +206,28 @@ export default async function BlogPage({params} : any){
       Blog Page {postId}
       <br />
       title - {data.title}
+      body - {data.body}
     </div>
   )
 }
 ```
 
-+ You could have also used the other way of hitting the backend which was using `useEffect()`
++ You could have also used the other way of hitting the backend or data fetching from the backend which was using `useEffect()`
+
+Seeing the output ->
+
+<img src = "image-9.png" width=320 height=200> <img src = "image-10.png" width=320 height=200>
+
+Now you can see the website is changing its content according to the DYNAMIC PARAMETER you are giving in the url and hence this is what the **DYNAMIC ROUTES [] means**
+
+**The above thing is what the content loads on instagram, linkedin and other social media platform**
+
+## **[...] Catch-All Segment**
+
+
+
+
+
 
 
 
