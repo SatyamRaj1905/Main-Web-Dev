@@ -586,9 +586,90 @@ Your final website will look like this ->
 
 <img src = "image-23.png" width=500 height=250>
 
+Betund the scenes, the components are split into two module graphs. The __`server module graph (or tree)` contains all the Server Components that are rendered on the server. and `client module graph (or tree)` contains all Client components__
+
+After Server are rendered. a special data format called the __React Server Component Payload (RSC)__ is sent to the client. 
+
+The RSC payload contains:-
+
+1. The rendered result of server components.
+2. Placeholders (or holes) for where Client Components should be rendered and references to their JavaScript files.
+
+React uses this information to Server and Client Components and update the DOM on the client.
+
 Try to relate the above tree with the below page which is actually a good example of how you decide which to make server component and which to make client component
 
-<img src = "image-24.png" width=400 height=200>
+<img src = "image-24.png" width=500 height=250>
+
+Notice in the above pic of website, the whole page is `Layout` in tree structure showed above(made **SERVER component** as `layout` thode na change hoga), inside that website also has **Navbar** which resemble to `Nav` of the tree(also a **Server component**) and inside that **Navbar** we have logo of 100xdevs in the left which resembles `Logo` of the tree (and as this is NOT GOING TO CHANGE so made **Server component**) and the button (search, light/dark mode, profile [clickable things]) resembles `Links` of the tree (and as on **clicking these buttons, you are noticing the changes so you made it CLIENT component**) as that is only shown inside the tree (`Links` is referred to as **Client modules**)
+
+The above thing also explains **Why you should try to avoid using Client component as much as possible (Notice in the above example, we have not made the components Client components DESPITE KNOWING THE FACT THAT YOU CAN MAKE ANY COMPONENT AS CLIENT COMPONENTs unless and untill we really needed it), till then everything was SERVER COMPONENTs**
+
+
+## **Hydration**
+
+:bulb:**What is Hydration in `Next.js` ??**
+
+The below is also the answer to **How `Next.js` works and why it is so optimised ??**
+
+Hydration is the process by which a client-side JavaScript framework (such as `React`) takes over an already rendered `HTML` page and makes it interactive. In a `Next.js` application, __pages are often server-rendered (SSR) or statically generated (SSG).__ The server sends a fully formed `HTML` document to the browser, allowing users to see meaningful content quickly (which is great for SEO and performance). __Once the page arrives in the browser, React's JavaScript bundle "hydrates' that static HTML by attaching event listeners and other interactive behaviors so that the page becomes a fully functional React application.__
+
+```javascript
+"use client"; // You can see this is made client component due to the fact that it is using "useEffect" as well has Button handler 
+
+import axios from "axios";
+import { useEffect } from "react";
+
+export function Refresh() {
+
+    useEffect(() => {
+        axios.get("https://jsonplaceholder.typicode.com/posts/1");
+    }, [])
+
+    return <div>
+        <button onClick={() => {
+            console.log("onclick pressed")
+        }}>click me</button>
+        hello refresh component
+    </div>
+}
+```
+
+But if you go to the statically generated code of the above code which is present inside the `.next/server/app/doc.html`(again folder name(here `doc`) can be different as this is just for example), you will see that it has **NO INTERACTIVITY** 
+
+looks something like the below 
+
+<img src = "image-25.png" width=600 height=100>
+
+Can you notice the handler(onClick) missing from the button so **the page we rendered on the server but the interactive feature were not put in that is done by HYDRATION**
+
+Hence the main difference between **Client component and server component are** ->
+
+<span style="color:orange">**Client component are rendered on the server BUT HYDRATED ON THE CLIENT whereas in Server component both the HYDRATION and RENDERING occurs on the SERVER**</span>
+
+<img src = "image-26.png" width=400 height=200>
+
+The **Hydration ERROR which you see time to time also happen because of the above concept only**
+
+**Main Reason ->** **When the HYDRATION is happening on the client side and at time if the CHANGE IN VALUE has occured between what is there when the server `HTML` code was sent and what has came after client hydrated it -> is what leads to HYDRATION ERROR**
+
+**Very common scenario to hit into HYDRATION ERROR**
+
+A classic example of entering into the HYDRATION ERROR is **suppose you are using `Date` related function which has ability to give you time even (microseconds) there if you make it client component, then as it is client component so jb server pe render ho rha hoga iska code tb kuch aur time hoga and jb tk ye client pe aake hydrate hoga, tb kuch aur time hoga (microseconds ka diff. to hota he h generally)WHICH WILL EVENTUALLY LEADS TO CONFLICTING VALUEs on client and server and hence HYDRATION ERROR will occur**[server and client dono pe alg-alg cheez render hui h]
+
+in short -> **if (Server's `HTML` code rendered != Client's `HTML` code rendered), HYDRATION ERROR will occur**
+
+That is the reason that you **whenever you are using `Date.now()`, you should keep it inside the `useEffect` hook**
+
+> :pushpin:as **Server IGNORES all the things which are part of CLIENT COMPONENTs (such as code inside `useEffect` or `useState` or any other code which lies inside the CLIENT component)**
+
+
+
+
+
+
+
+
 
 
 
