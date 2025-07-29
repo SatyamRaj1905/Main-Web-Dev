@@ -503,7 +503,7 @@ export default function(){
 Now notice the **difference between `good` and `bad` `page.tsx`, can you see `page.tsx` of `good` page WILL NOT CHANGE ("hi there" se "hi satyam" nhi ho jayega), but the code inside the `page.tsx` of `bad` page CAN CHANGE IN THE FUTURE (as there is state variable which will change if the button will be clicked) which WILL RE-RENDER and hence you will some change in the page**
 
 
-If you even go to the `bad`, `page.tsx`"http://localhost:3000/bad" **you will clearly see an error saying as BUILD ERROR and hence if you want to make this code work, youhvae to use `"use client"` at the top of your code as IT NOW HAS BECOME CLIENT COMPONENT**
+If you even go to the `bad`, `page.tsx`"http://localhost:3000/bad" **you will clearly see an error saying as BUILD ERROR and hence if you want to make this code work, you have to use `"use client"` at the top of your code as IT NOW HAS BECOME CLIENT COMPONENT**
 
 ```javascript
 "use client" // adding "use client" at the top of the code 
@@ -529,6 +529,71 @@ export default function(){
 >> **simply saying, if a component is dependent on the `client` to make change on the page, make it CLIENT component and which does not then automatically `Next.js` will make it SERVER component**
 >>
 >>> <span style="color:orange">**To make a component or code CLIENT COMPONENT,**</span> **just add `"use client"` line of code at the TOP of your code and that's it now it will be CLIENT COMPONENT and will render on the CLIENT side instead of SERVER side**
+
+**This was made because of the fact that some component do not change over the time so make them SERVER components and which do change over time, make them CLIENT component**
+
+<span style="color:orange">**Important Question**</span>
+
+:bulb:**Does the statement Client components are rendered on the `CLIENT` side and Server component are rendered on the `SERVER` side is TRUE or NOT ??**
+
+-> The answer to the above question is **NO**, as **Even a Client component also renders on the SERVER side only and so is Server component**(the question statement is not the difference between them)
+
+### **When to use which ??**
+
+**Server components**
+
++ if you are using an __`async` component__
++ **Want to render other server or client components**
++ **Hooks that will specifically run on the server**
+
+**Client components**
+
++ if you are using **`useState` hook**
++ if you are using **`useEffect` hook**
++ using **any Browser-side apis (ex -> `Window.pc`, `RTCPeerConnection` etc..)[which basically runs in your browser only]**
++ using **Custom hooks that involve use of `useState` or `useEffect` or browser-only apis**
++ using **Button handlers or basically EVENT HANDLERS**
+
+Brief documentation of it is present in the below pic 
+
+<img src = "image-19.png" width=320 height=120> <img src = "image-20.png" width=320 height=120>
+
+:bulb:**Its okay that we cant make everything `Server` component but then why we cant make everything `Clien` component then ??**
+
+-> Reason for **making most of the thing as SERVER Component instead of client component is that ->**
+
+**Server component are very OPTIMAL due to the fact that they return `HTML` file[They are almost like the static page(although they are not)] which is NOT the case with Client component as they return `HTML` as well as `JS` which also needs to render the `JS` code(some code which will make variation like button pe onClick handler lga h to wo chlna chahiye) and hence becomes slightly UNOPTIMAL (means DYNAMIC h isliye UNOPTIMAL hoga thoda)**
+
+A pictorial representation of what they return is also shown below :-
+
+<img src = "image-22.png" width=320 height=170> <img src = "image-21.png" width=320 height=170>
+
+Notice that in the left part (server component), it is returning `HTML` code only but in right part (client component), along with `HTML`, some `JS` file is also being returned.
+
+>:pushpin:The above is the reason that **You should try to make as many things possible as SERVER Components, something you cant avoid client component, there you can use but mostly you should use Server component and try to make them server component only**
+
+### **Some official documentation**
+
+----------
+
+The __Network Boundary is a conceptual line that separates the Dfferent environments.__
+
+In React, choose where to place the network boundary in your component tree. For exarnple. you can fetch data and render a user's posts on the server (using Server Components). then render the interactive `Likebutton` for each post on the client (using Client Components).
+
+Similarly, create a `Nav` component that is rendered on the server and shared across pages, but if want to show an Active state for links, you render the list Of `Links` on the client.
+
+Your final website will look like this ->
+
+<img src = "image-23.png" width=500 height=250>
+
+Try to relate the above tree with the below page which is actually a good example of how you decide which to make server component and which to make client component
+
+<img src = "image-24.png" width=400 height=200>
+
+
+
+
+
 
 
 
