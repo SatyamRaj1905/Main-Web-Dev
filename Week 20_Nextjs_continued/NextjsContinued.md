@@ -206,7 +206,6 @@ Now **Lets connect to the backend also that according to the dynamic route, the 
 
 ```javascript
 import axios from "axios"
-import {useEffect} from "react"
 
 export default async function BlogPage({params} : any){
   const postId = (await params).blogId
@@ -349,8 +348,215 @@ Now you have the boundation of **not using the `async` component making then wha
 so even without defining the `async` component, we can still **achieve server side rendering HOW ?? lets see**
 
 ```javascript
+import {useEffect} from "react"
 
+// By defining the function something like this (Before Next.js 13, these two was being used to fetch the data as before Next.js 13, there was no such concept of making the component async)
+// These two function only helps to achieve the Data fetching before Next.js 13 
+export function getServerSideProps(){ // used for Server side rendering 
+
+}
+export function getStaticProps(){ // used for Static site generation 
+
+}
+
+export default function ({params}){
+  
+  useEffect(() => {
+    const response = await axios.get("api.100xdevs.com/user")
+  }, [])
+
+  return (
+    <div>
+      hi there 
+    </div>
+  )
+}
 ```
+
+Before understanding how the static site generation is done, first lets know what are -
+
+## **Server side rendering V/S Client side rendering V/S Static site generation**
+
+----------
+
+### **Client side rendering**
+
+simply means **Jo code aapke browser(CLIENT SIDE) me render ho rha h that is called as Client side rendering**
+
++ `react` me **client side rendering hota h**
+
+**Same thing occurs in `Next.js`, but only on CLIENT COMPONENTs not like `react`(ki everything has client side rendering)**
++ Example of client side rendering in `Next.js` -> If you have `button` in the `Next.js` also, then it will have **client side rendering as `button` is CLIENT SIDE component for `Next.js`**
+
+### **Server side rendering**
+
+The __logic(loading of `HTML` code or any change which needs to happen)__ is **not running on the browser, it is running in the SERVER**
+
+> :pushpin: **In the first `response` only, you got all the website rendering component required and that rendering as has happened on the server so in first `response` this got possible**
+
+### **Static site generation**
+
+**Something which has been generated only once and NEVER CHANGE (that's what STATIC means)**
+
+OR simply saying that 
+
+**If you are seeing that a particular component that looks same for everyone and present inside your codebase that can be server to everyone so WHY TO SERVER SIDE RENDER it ??**
+
+**Formal definition**
+
+Whenever you build a nextjs app , some pages can be statically generated.
+
+__Static generation = HTML is built at build time and is served directly.__
+
+Take an example of a component 
+
+```javascript
+export default function Home(){
+  return(
+    <div>
+      hi there 
+      <button>Click Me</button>
+    </div>
+  )
+}
+```
+Now the above component if you will run in the browser, **you will notice that everytime you come to the the page where this needs to be rendered, you will see a `request` goes out to the `Next.js` server(backend part of it) where all the page content will be RENDERED and then send it to the client(browser) in `response`**
+
+**The problem above is that server is RENDERING the whole page content if everyone comes to that page and RENDERING is not a FAST or EFFICIENT thing to do, it takes time as well as memory(compute intensive)**
+
+So instead of the above thing, as you know that the above code is going to be **same for everyone, so dont do server side rendering when someones comes to it**
+
+instead -> make a file `index.html` inside the `app` folder and inside that load the above code so that whenever someone comes to the site instead of server side rendering and then returning the loaded page, `index.html` code ko render kr do as **they are fast and almost have nill compute intensive and also**
+
+>**Basically agar koi page me USER SPECIFIC logic nhi likha hua h to usko STATICALLY GENERATE krna is an efficient way**
+
+inside the `index.html`
+
+```javascript
+<div>
+  hi there 
+  <button>Click Me</button>
+</div>
+```
+in short, **return them this STATICALLY GENERATED FILE**
+
+and this is what known as **STATIC SITE GENERATION means**
+
+> :pushpin:**To make static site -> put the component which is going to be same for everyone inside the `index.html` file and you are good to go**
+
+>:pushpin:**STATICALLY GENERATED ARE VERY FAST WHEN IT COMES TO LOADING THE PAGE as you are loading an `HTML` with some `CSS` and `JS` only**
+
+But you dont have to do this now, `Next.js` now is **Intelligent enough(ensure latest version of `Next.js`) that kaun si cheezein STATIC generate ho skti h and then it even generate them STATICALLY**
+
+You can also see it by running the command 
+
+```java
+npm run dev
+```
+
+and then if you see the output ->
+
+<img src = "image-18.png" width=500 height=300>
+
+You can clearly see that `Next.js` compiler has showed us which routes are statically generated (notice the **Gola made over that route**) and `f` over that route which are **Dynamically generated**[even in the terminal it is written], as the `[blog]` is dynamically generated and changes according to the value it will get hence it has not been statically generated
+
+>:pushpin:You can also find the code for `HTML` file made for static site generation inside the **`.next > server > app` and inside this which ever folder is statically generated by `next.js` or you that folder will have an `.html` file with the corresponding name for the folder**
+
+## **Client compoenents V/S Server components**
+----------
+
+There are some of the components **which will only be rendered on the `server`, and not RE-RENDER on the `client`** [VERY VERY IMPORTANT LINE]
+
+Lets try to understand this by example ->
+
+Lets make two routes(or folders) -> `good` and `bad`(inside `app` folder) and inside their corresponding `page.tsx`
+
+Now inside the `good`, `page.tsx` 
+
+```javascript
+export default function(){
+  return (
+    <div>
+      hi there
+    </div>
+  )
+}
+```
+and inside the `bad`, `page.tsx`
+
+```javascript
+import {useState} from "react" 
+
+export default function(){
+  const [count, setCount] = useState(0)
+
+  return (
+    <div>
+      hello 
+      <button onClick = {() => {
+        setCount(count => count + 1)
+      }}>Click me! (`count is ${count}`)</button>
+    </div>
+  )
+}
+```
+Now notice the **difference between `good` and `bad` `page.tsx`, can you see `page.tsx` of `good` page WILL NOT CHANGE ("hi there" se "hi satyam" nhi ho jayega), but the code inside the `page.tsx` of `bad` page CAN CHANGE IN THE FUTURE (as there is state variable which will change if the button will be clicked) which WILL RE-RENDER and hence you will some change in the page**
+
+
+If you even go to the `bad`, `page.tsx`"http://localhost:3000/bad" **you will clearly see an error saying as BUILD ERROR and hence if you want to make this code work, youhvae to use `"use client"` at the top of your code as IT NOW HAS BECOME CLIENT COMPONENT**
+
+```javascript
+"use client" // adding "use client" at the top of the code 
+
+import {useState} from "react" 
+
+export default function(){
+  const [count, setCount] = useState(0)
+
+  return (
+    <div>
+      hello 
+      <button onClick = {() => {
+        setCount(count => count + 1)
+      }}>Click me! (`count is ${count}`)</button>
+    </div>
+  )
+}
+```
+
+>:pushpin:<span style="color:orange">**Remember ->**</span> **The thing which will be RE-RENDERED(or CHANGES over the time) on the screen will be made CLIENT component and The things which DONT CHANGE over the time KEEP them as SERVER components**
+>
+>> **simply saying, if a component is dependent on the `client` to make change on the page, make it CLIENT component and which does not then automatically `Next.js` will make it SERVER component**
+>>
+>>> <span style="color:orange">**To make a component or code CLIENT COMPONENT,**</span> **just add `"use client"` line of code at the TOP of your code and that's it now it will be CLIENT COMPONENT and will render on the CLIENT side instead of SERVER side**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
