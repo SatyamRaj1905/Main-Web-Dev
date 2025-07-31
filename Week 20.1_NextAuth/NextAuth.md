@@ -157,8 +157,6 @@ Till now we have used the same approach as that being used in `react` + `express
 
 Now lets try to create a `profile` page which a person wants to see 
 
-**Now if you have remembered how we used to make profile page, lets first try to make it DUMB way which was `react` way (i.e. Client side rendering)**
-
 first making the backend endpoint -> `app > api > profile` and inside the `profile` folder, make a `route.tsx` file which consists of the following code -
 
 ```javascript
@@ -182,7 +180,10 @@ export function GET(req : NextRequest){
 
 creating the frontend part now -> inside the `app` folder, made a folder named as  `profile` inside which `page.tsx` file which contains the code as follows -
 
+**Now if you have remembered how we used to make profile page, lets first try to make it DUMB way which was `react` way (i.e. Client side rendering)**
+
 ```javascript
+"use client"
 import axios from "axios"
 import {useEffect} from "react"
 
@@ -191,21 +192,88 @@ export default function Profile(){
 
     useEffect(() => {
         axios.get("http://localhost:3000/api/profile", { 
-            header : {
+            headers : {
                 authorization : localStorage.getItem("token")
             }
         }).then(res => {
             setProfilePicture(res.data.avatarUrl) // as "avatarUrl" he return ho rha h backend se
         }) // just used .then instead of async, await 
     }, [])
+    // The above code logic is important which means that -> whenever this "useEffect" will run (the whole code inside it) on the client(as it is client component), we send the request to the "profile" endpoint(backend) with the token in the header
     return (
         <div>
+            {profilePicture}
         </div>
     )
-
-
 }
 ```
+If you now go to the http://localhost:3000/profile , then how we are getting back the image url, lets see ->
+
+<img src = "image-6.png" width=320 height=200> <img src = "image-7.png" width=320 height=200>
+
+You are initially getting an **EMPTY `HTML` see the `profile` request which goes out, inside `preview` section(left pic above) and after some time, you are sending the `request` to `/profile` which in turn is returning `response` as `avatarurl`**
+
+Ofcourse, you are sending the header (authorization header) which **reads the token from my local storage and that is being sent to the backend which in turn verifies the token and sends back the profile picture which is being propagated to the frontend**
+
+<img src = "image-8.png" width=450 height=250>
+
+Now this is the classic example of **Client side rendering as you can clearly see the intial `HTML` was totally empty and to intialise the change on the frontend, i have to use `useEffect` and `useState` to propagate that change on the frontend and then after some time, the `js` code which you see gets run after then you sent the `request` to the `/profile` and you got the data which is reflected on the screen**
+
+Basically, although you have achieved authentication using the same approach as that used in `react` + `express.js` but the problem is **when you are hitting the `profile` page, you are not getting the user's profile picture RENDERED from the server, you are not getting the benefit of SERVER SIDE RENDERING and hence this make no sense in using `Next.js` then**
+
+If you want to do client side rendering then use `react` why to go for `Next.js`
+
+Now comes the challenge that
+
+:bulb:**How can i in the first `request` which goes be able to show the user's profile picture ??(this is what will be the real meaning of doing authentication in `Next.js`)**
+
+You have seen above the first way (`react` way) of data fetching which is also the DUMB way. we do not use the above code instead we use this -> (`next.js` way)
+
+```javascript
+"use client"
+import axios from "axios"
+import {useEffect} from "react"
+
+export async default function Profile(){ // making the component "async"
+
+    const res = await axios.get("http://localhost:3000/api/profile", {  // 2
+        headers : {
+            authorization : localStorage.getItem("token")
+        }
+    })
+    const profilePicture = res.data.avatarUrl
+
+    return (
+        <div>
+            {profilePicture}
+        </div>
+    )
+}
+```
+
+The above is the correct way for the data fetching as **isse in the first request only(first `HTML`) you would expect ki user's profile picture aa jayega BUT if you see the url -> "http://localhost:3000/profile", you will see the below ERROR coming on the screen**
+
+<img src = "image-9.png" width=500 height=250>
+
+Now the above code is **running on the server (i.e. Server side rendering is taking place) or precisely saying on the `Next.js` server**, Now browser se `request` gya `Next.js` server pe (and **`Next.js` SERVER PE THODE `localstorage` EXIST KRTA H (ye to server h some virtual machine type thing) and hence you are seeing the ERROR as `Next.js` SERVER ko pta he nhi `localstorage` kya hota h**)
+
+**Also as the first `request` is going from the `Next.js` server not from the browser and hence the FIRST `request` CAN NEVER CARRY YOUR AUTHENTICATION TOKENs as `localstorage` naam ka cheez `Next.js` server ko pta he nhi h**
+
+**so `// 2` code block will not be applicable as you dont know who the person is here as they are not authenticating themselves as they are not able to send the token even they want then also not possible**
+
+**Simply saying ->** [VERY VERY IMPORTANT POINT]
+
+<span style="color:orange">**Tm first `request` me bhej to diye token but as that is stored in the `localstorage` and in `Next.js` the `request` comes to `Next.js` server (acts as backend) and `Next.js` ne jb code dekha usme `localstorage` dikha but `Next.js` server ko to ye pta nhi kya hota h hence it will throw error and also as the server dont know who you are so it will not give you SERVER SIDE rendered page**</span>
+
+So to solve the above problem comes **NEXT AUTH**
+
+## **Next Auth**
+----------
+
+
+
+
+
 
 
 
