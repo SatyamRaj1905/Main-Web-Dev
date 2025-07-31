@@ -75,6 +75,53 @@ __Key Difference__
 
 __In `React`, you control when and how to send the JWT because all logic runs in the browser. In `Next.js` SSR, the server renders the page first, so it can't access browser-only storage like localStorage.__
 
+:bulb: **What if i forcibly send the `jwt` in the first request in `Next.js` ??**
+
+-> you can do this but then **You will lose all the benefits of using `Next.js`** as if you send the `jwt` in the first request as the page has not loaded up so **you will get an EMPTY BUNDLE of info. from the backend and then you have to use some other way like `useEffect`(as it runs when the page mounts) and then fetch the info or make a `request` again via `useEffect` and hence this will also lead to CLIENT SIDE RENDERING, this is where you will lose all your benefit of using `Next.js`**
+
+Now lets try to understand by code 
+
+after initialising the **EMPTY `Next.js` project**, and now to use `JWT` run the command 
+
+```javascript
+npm install @types/jsonwebtoken
+```
+Lets try to create `signin` endpoint so do this -> `app > api > signin` and then inside the `signin` folder, making `route.ts` file and writing :-
+
+```javascript
+import jwt from "jsonwebtoken"
+
+export async function POST(req : NextRequest){
+    // Ideally we should check the username and password in the DB and only if it is right we should return the jwt 
+    const body = await req.json()
+
+    const username = body.username
+    const password = body.password
+    //After this you should check in the db so here will be a db call which we will have logic of finding the username with the corresponding password and verify it
+
+    const userId = 1
+    const token = jwt.sign({
+        userId
+    }, "SECRET")
+
+    return NextResponse.json({
+        token
+    })
+}
+```
+
+while testing the above code from `Postman` and then seeing the result :-
+
+<img src = "image-3.png" width=400 height=200>
+
+You can see the token has been returned so the code is working fine 
+
+
+
+
+
+
+
 
 
 
