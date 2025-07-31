@@ -17,7 +17,7 @@ Popoular choices while doing auth include -
 ## **Why not use JWT + localstorage in case of `Next.js` ??**
 ----------
 
-:bulb:**How did we do `authentication` in `Node.js` or `react` ??**
+:bulb:**How did we do `authentication` in `Express.js` or `react` ??**
 
 The below is the control flow of how we used to `authentication`
 
@@ -79,7 +79,7 @@ __In `React`, you control when and how to send the JWT because all logic runs in
 
 -> you can do this but then **You will lose all the benefits of using `Next.js`** as if you send the `jwt` in the first request as the page has not loaded up so **you will get an EMPTY BUNDLE of info. from the backend and then you have to use some other way like `useEffect`(as it runs when the page mounts) and then fetch the info or make a `request` again via `useEffect` and hence this will also lead to CLIENT SIDE RENDERING, this is where you will lose all your benefit of using `Next.js`**
 
-Now lets try to understand by code 
+Now lets try to understand by code **that if we try to do what we used to do traditionally (i.e. using `express.js` and `react` then what will happen**
 
 after initialising the **EMPTY `Next.js` project**, and now to use `JWT` run the command 
 
@@ -87,6 +87,8 @@ after initialising the **EMPTY `Next.js` project**, and now to use `JWT` run the
 npm install @types/jsonwebtoken
 ```
 Lets try to create `signin` endpoint so do this -> `app > api > signin` and then inside the `signin` folder, making `route.ts` file and writing :-
+
+:warning:**Remember whatever the code which is being written now does not ensure the correctness (it is wrong mainly) but to make you understand we are trying to do this and see the result practically that why the approach being used for `react` + `node.js` will not work here inside the `next.js`**
 
 ```javascript
 import jwt from "jsonwebtoken"
@@ -116,6 +118,94 @@ while testing the above code from `Postman` and then seeing the result :-
 
 You can see the token has been returned so the code is working fine 
 
+Now we store this token inside the frontend (i.e. localstorage) as we used to do while working with `Express.js`
+
+so for this lets make the frontend page for it inside the `app` folder, make another folder `signin` and inside that `page.tsx` which has lets say the following code 
+
+```javascript
+"use client" // as you are using button handler ("onClick")
+export default function (){
+    return (
+        <div>
+            SIGN IN PAGE </br>
+            <input> Username </input>
+            <input> password </input>
+            <button onClick = {async () => { // when clicking on the button it should send the request to the backend so first installing it by using npm install axios in the terminal and then 
+                const res = await axios.post("http://localhost:3000/api/signin", {
+                    username : "asd",
+                    password : "asdasd"
+                })// as you are going to get the response from the backend so it will take time so made async   
+                // Now after getting the response from the backend which in our case will be token, you will store inside the browser localstorage
+                localStorage.setItem("token", res.data.token)
+            }}> Sign in </button>
+        </div>
+    )
+}
+```
+
+Now if you go to the http://localhost:3000/signin the you will see something like this :-
+
+<img src = "image-4.png" width=500 height=250>
+
+Notice the `request` is going to the same url (when you click on the `signin` button) on which we were sending the `request` from `Postman`, so our frontend is also able to communicate with backend effectively.
+
+you can also see the token which has been returned by the backend and eventually stored inside the localstorage 
+
+<img src = "image-5.png" width=500 height=250>
+
+Till now we have used the same approach as that being used in `react` + `express.js`
+
+Now lets try to create a `profile` page which a person wants to see 
+
+**Now if you have remembered how we used to make profile page, lets first try to make it DUMB way which was `react` way (i.e. Client side rendering)**
+
+first making the backend endpoint -> `app > api > profile` and inside the `profile` folder, make a `route.tsx` file which consists of the following code -
+
+```javascript
+import {NextRequest, NextResponse} from "next/server"
+
+export function GET(req : NextRequest){
+    // below if the logic to identify who is the user
+    const headers = req.headers // Step 1 -> headers extract as it contains the metadata 
+    const authorizatonHeader = headers("authorization") // Step 2 -> metadata me se "authorization" naam ka jo key h uske corresponding value nikala (which is basically token)
+    const decoded = jwt.decode(authorizatonHeader, "SECRET") // Step 3 -> token along with JWT Secret is what you use to fine which user is it belong to 
+    const userId = decoded.userId // Step 4 -> you will extract the userId and then using this userId 
+    // You will hit the database to the get the users profile picture or something else 
+    // Remember the similar thing we used to do in express.js the logic written above goes into the "userMiddleware" something like this you used to write -> app.get("/profile", userMiddleware, (req, res) => {// some logic to get profile related info.})
+    // Just remove the above lines for simplicity, just hardcode it SKIP THE ABOVE PART OF CHECK WHO IS THE USER 
+
+    return NextResponse.json({
+        avatarUrl : "http://images.google.com/cat.png"
+    })
+}
+```
+
+creating the frontend part now -> inside the `app` folder, made a folder named as  `profile` inside which `page.tsx` file which contains the code as follows -
+
+```javascript
+import axios from "axios"
+import {useEffect} from "react"
+
+export default function Profile(){
+    const [profilePicture, setProfilePicture] = useState("") // made state variable as we have to show it on the screen 
+
+    useEffect(() => {
+        axios.get("http://localhost:3000/api/profile", { 
+            header : {
+                authorization : localStorage.getItem("token")
+            }
+        }).then(res => {
+            setProfilePicture(res.data.avatarUrl) // as "avatarUrl" he return ho rha h backend se
+        }) // just used .then instead of async, await 
+    }, [])
+    return (
+        <div>
+        </div>
+    )
+
+
+}
+```
 
 
 
