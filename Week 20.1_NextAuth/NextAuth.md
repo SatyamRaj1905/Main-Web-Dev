@@ -99,7 +99,7 @@ export async function POST(req : NextRequest){
 
     const username = body.username
     const password = body.password
-    //After this you should check in the db so here will be a db call which we will have logic of finding the username with the corresponding password and verify it
+    //After this you should check in the db so here will be a backend call (and inside it we will have logic of finding the username with the corresponding password and verify it)
 
     const userId = 1
     const token = jwt.sign({
@@ -385,7 +385,7 @@ const handler = NextAuth({
                 // ex -> can be username, password, 2FA token, etc...
                 // You can pass any HTML attribute to the <input> tag through the object
             },
-            // and lastly it has of course a FUNCTION to do authentication 
+            // and lastly it has of course a FUNCTION named here as "authorize" to do authentication 
             async authorize(credentials, req){
                 // Add logic here to look up the user from the credentials supplied 
                 // so Extracting the credentials provided by the user 
@@ -503,13 +503,17 @@ Of course the button will not work now as we have not written the code for it (w
 
 -> answering them one by one 
 
-### **Logic to display on the main page sign in and log out button**
+### **Logic to display on the main page fully functional authorization buttons (ex -> signin, logout)**
 
 -> as we want to display it on the **Main page** hence we will do this inside the  route `/` or indirectly inside `app` folder, `page.tsx` we will write the following code -> (Remove all the things which comes pre-attached while initialising the EMPTY `Next.js` project)
 
 :bulb:**How to know whether the user has signed in or not ??**
 
 -> There are 2 ways to do this -> (depends on which type of component you want to choose ??(CLIENT or SERVER))
+
+#### **using `useSession` hook**
+----------
+
 
 **1st Way -> using `useSession` hook [EASIER way]**
 
@@ -588,8 +592,20 @@ export default function Home(){
         
     )
 } 
-function RealHome(){
+function RealHome(){ // REMEMBER as "useSession" is CLIENT COMPONENT and hence you cant make this component "async" and hence you cant do any thing which requires the use of "await" keyword (ex-> something related to DATABASE or API CALLs)
     const session = useSession()
+    // Taking the above point in mind you cant do something like this 
+    const profileInformation = await axios.get("https://localhost:3000.profile"),{
+        headers : { // headers you want to pass on from session 
+            session
+        }
+    }
+    // OR SOMETHING LIKE THIS // 2
+    const profileInformation = await db.user.findOne({
+        where : {
+            email : session.email    
+        }
+    })
 
     return(
         <div>
@@ -635,7 +651,129 @@ if the page has **Sign in** button then (see left pic) and if **Logout** button 
 
 The value you are seeing in the right pic is the HARDCODED value you have given in the `route.tsx` present inside the `app > api > auth > [...nextAuth]` to make the website work for the time being (you can also see above, you have only given these values) 
 
-Now you can notice not all the values we have hardcoded and given inside the `route.tsx` is coming inside the right pic attached above (**we will come to this why this is happening and how you can add more fields here**)
+Now you can notice not all the values(some values it has ignored) we have hardcoded and given inside the `route.tsx` is coming inside the right pic attached above (**we will come to this why this is happening and how you can add more fields here**)
+
+Now comes here the **problem here which is INDICATED in `// 2`**
+
+>:pushpin:<span style="color:orange">**REMEMBER ->**</span>**Client component kbhi bhi `async` nhi ho skte h**
+
+taking note of the above point and `// 2` code block, **How to show the profile information (like avatar of the user or other information like this) ??**
+
+To make them show the user profile picture, we will have to **add `useEffect` here and hence you will come back to the same original problem(client side rendering)**
+
+<span style="color:orange">**and this is where another hook comes into the action known as `getServerSession` hook**</span>
+
+#### **using `getServerSession` hook**
+----------
+
+**2nd way -> using `getServerSession` hook**
+
+**The above hook is similar to `useSession` hook except for the difference that this hook is compatible with SERVER COMPONENTS as it is itself SERVER COMPONENT and hence is able to perform SERVER SIDE RENDERING of what we were doing above**
+
+:bulb:**Why despite being a hook its name does not starts with `use` instead it starts with `get   ` ??**
+
+-> as **SERVER COMPONENT dont RE-RENDER so there is no point of calling it hook even and hence we have not named it as we name it for other used hooks**
+
+:bulb:**What we were doing in the 1st way ??**
+
+-> basically the client was hitting the backend, getting the session and populating the frontend 
+
+BUT if we now use the `getServerSession` and try to transform the above code using this ->
+
+```javascript
+import {getServerSession} from "next-auth" // Notice "useSession" was imported from "next-auth/react", here "react" also hints that "useSession" will run on the client side but here "getServerSession" is imported from "next-auth" and hence it CLEARLY shows that it is SERVER component  
+
+export async default function Home(){
+    const session = await getServerSession()
+
+    return (
+        <div>
+            {JSON.stringify(session)}
+        </div>
+    )
+}
+```
+In just writing the above logic we were able to **achieve SERVER SIDE RENDERING as if you will now see**, the first `request` which goes out in this case has already some content(**PRE-POPULATED**) inside it instead of what was happening in the 1st way (where the 1st `request`which came has nothing and then after some time wee sent other request (`session` one) and then the frontend got populated)
+
+Now running the above code but before running it first make -> a file `.env` inside the global folder where **add the `NEXTAUTH_SECRET` variable here as**
+
+```java
+NEXTAUTH_SECRET = 123er45 // (any random for now)
+```
+and then adding `secret` alos inside the codeblock of `route.tsx`
+
+```javascript
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials" 
+
+const handler = NextAuth({
+    providers : [
+        CredentialsProvider({
+            name : "email", 
+            credentials : { 
+                username : {label : "Username", type : "text", placeholder : "Satyam12@"},
+                password : {label : "Password", type : "password"}
+            }, 
+            async authorize(credentials, req){
+                const username = credentials?.username
+                const password = credentials?.password
+                const user = {
+                    name : "harkirat",
+                    id : "1",
+                    email : "harkirat@gmail.com" 
+                }
+
+                if(user){
+                    return user
+                }else{
+                    return null
+                }                
+            }
+        })
+    ],
+    secret : process.env.NEXTAUTH_SECRET // adding the "secret" key here
+
+})
+
+export {handler as GET, handler as POST}
+```
+
+>:pushpin:<span style="color:orange">**REMEMBER ->**</span> **`.env` file me jo v variables defined h wo apne app IMPORT ho jate h wherever you will use them BUT IN `Next.js` this happens for others, you know you have to import it and then use it**
+
+Now if you run the project and sign in and then if you see the `request` which goes out and its corresponding `response`
+
+<img src = "image-25.png" width=500 height=250>
+
+Notice in the first request you were able to populate the frontend 
+
+Now if i go to the `page.tsx` or **profile** page 
+
+```javascript
+import {getServerSession} from "next-auth" 
+
+export async default function Home(){
+    const session = await getServerSession() // Basically FIRST you are getting the data of the user that KAUN H YE BANDA
+    const userProfile = await db.avatars.findOne({ // then rendered all the info. on the server  available in the db for this corresponding BANDA by logic for finding that BANDA
+        where : {
+            email : session.email  // backend se tm email extract krke frontend pe show kr do 
+        }
+    })
+
+    return ( // and finally from server readymade page client side render ho gya and in this way we have achieved SERVER SIDE AUTHENTICATION 
+        <div>
+            {JSON.stringify(session)}
+        </div>
+    )
+}
+```
+This helps to **achieve the PRE-RENDERED AUTHENTICATION (or simply saying SERVER SIDE AUTHENTICATION)**
+
+
+
+
+
+
+
 
 
 
