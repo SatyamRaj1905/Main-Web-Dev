@@ -356,7 +356,7 @@ link to it -> [Credentials as provider in NextAuth](https://next-auth.js.org/pro
 
 ### **Credentials as provider in NextAuth**
 ----------
-#### **Overview**
+**Overview**
 
 The Credentials provider __allows you to handle signing in with arbitrary credentials,__ such as a `username` and `password`, __domain__, or __two factor authentication or hardware device (e.g. YubiKey U2F / FIDO).__
 
@@ -370,7 +370,7 @@ so adding the credentials `providers` to the code written above
 
 ```javascript
 import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials" // first importing it
+import CredentialsProvider from "next-auth/providers/credentials" // FIRST importing the CREDENTIALS provider
 
 const handler = NextAuth({
     providers : [
@@ -398,7 +398,7 @@ const handler = NextAuth({
                 const user = {
                     name : "harkirat",
                     id : "1",
-                    username : "harkirat@gmail.com" // as database me to boht kuch store hota h ek user ke corresponding to sb kuch wo return kr dega
+                    email : "harkirat@gmail.com" // as database me to boht kuch store hota h ek user ke corresponding to sb kuch wo return kr dega
                 }
 
                 if(user){
@@ -446,6 +446,199 @@ Lets understand the code flow of the above code,
 5. and if the user is correct then you will return their details and they will get logged in and if not then they **will not be logged in**
 
 **The best thing about this is once you log in, it will AUTOMATICALLY REDIRECT you to the MAIN PAGE as you see with the normal website you see in practical**
+
+The image of the output if you will `return null`(means user has not provided the correct details) in the above code written (see the `else` part of the code)
+
+<img src = "image-17.png" width=500 height=250>
+
+Now lets say **i want to add "Sign in with google" then its quite easy**
+
+### **Google and Github as provider in NextAuth**
+----------
+
+
+documentation to do this -> [NextAuth providers(google)](https://next-auth.js.org/providers/google)
+
+Just add the below line of code to add `Sign in with google` in the above code written above 
+
+```javascript
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials" 
+import GoogleProvider from "next-auth/providers/google" // FIRST importing the GOOGLE provider
+import GithubProvider from "next-auth/providers/github" // Importing the GITHUB provider also for another option to sign in with Github
+
+const handler = NextAuth({
+    providers : [
+        CredentialsProvider({
+            // same logic as above so no need to add here
+        }), // as we are adding another provider -> "google" in the ARRAY of "providers"
+        GoogleProvider({ // we will see below from WHERE you will get these "clientId" and "clientSecret" for google
+            clientId : process.env.GOOGLE_ID,
+            clientSecret : process.env.GOOGLE_SECRET
+        }),   // similar to this you can also add GITHUB sign in also just by first importing and then adding the similar code like the above for google 
+        GithubProvider({
+            clientId : process.env.GITHUB_ID,
+            clientSecret : process.env.GITHUB_SECRET
+        })
+    ]
+
+})
+
+export {handler as GET, handler as POST}
+```
+
+**The more you want to add options, the more corresponding providers you will have to import and  add in the "providers" ARRAY**
+
+**0utput ->**
+
+<img src = "image-18.png" width=500 height=280>
+
+Notice without writing the logic for button for `sign in with Google` and `sign in with Github` it has appeared on the screen 
+
+Of course the button will not work now as we have not written the code for it (which we will at later point of time)
+
+## **Some important authentication part**
+
+:bulb:**How to show that the user is Logged in or simply saying how to show them Logout button, if they are not logged in, then how to show them the login button and things like these ??**
+
+-> answering them one by one 
+
+### **Logic to display on the main page sign in and log out button**
+
+-> as we want to display it on the **Main page** hence we will do this inside the  route `/` or indirectly inside `app` folder, `page.tsx` we will write the following code -> (Remove all the things which comes pre-attached while initialising the EMPTY `Next.js` project)
+
+:bulb:**How to know whether the user has signed in or not ??**
+
+-> There are 2 ways to do this -> (depends on which type of component you want to choose ??(CLIENT or SERVER))
+
+**1st Way -> using `useSession` hook [EASIER way]**
+
+inside the `app` folder, `page.tsx`
+
+```javascript
+"use client"
+import {useSession} from "next-auth/react" // Importing from the next-auth library
+
+export default function Home(){
+    const session = useSession() // using the "useSession" hook provided by the Next.js
+
+    return(
+        <div>
+            {session.status === "authenticated" ? {Logout} : {Sign in}} // simply means that if the user is authenticated then show Logout component otherwise Sign in component(of course you will import these component from some folder where you have made them, which i have not done here to simplify then understanding)
+        </div>
+    )
+}
+```
+
+>:pushpin:**`useSession` is a hook provided by the `Next.js` to know whether a user has been logged in or logged out and show the corresponding opposite button/page of that [Basically easiest way to check if someone is signed in or not]**
+>
+>> **You should use it on the client side i.e. (this is client component) so you have to add `"use client"` at the top of your code**
+
+But the **BIGGEST PROBLEM with using the `useSession` hook is that YOU HAVE TO WRAP IT INSIDE THE SESSION PROVIDER or simply saying YOU HAVE TO PROVIDE THE SESSION PROVIDER for it to work**
+
+:bulb:**What is Session Provider ??**
+
+-> Recall the providers, we have learnt inside the `Recoil` or more precisely `Context API`(there also we have used providers)
+
+:bulb: **How to warp it inside the SESSION PROVIDER ??**
+
+-> **DUMB WAY -> Make another component and wrap the logic inside it and then shift the newly made component to the `Home` component by wrapping inside the `<SessionProvider></SessionProvider>`.**
+
+You will do something like this ->
+
+```javascript
+"use client"
+import {useSession, SessionProvider} from "next-auth/react" 
+
+export default function Home(){
+    return (
+        <SessionProvider>
+            <RealHome /> // Wrapped inside the <SessionProvider> and shifted the made component to main component 
+        <SessionProvider>
+        // You can remove the Top level <div> also as rule to follow ho he rha h(ek he top div to return ho rha h component se)
+    )
+}
+// Make another component 
+function RealHome(){ // and inside it moved all the logic written in the main component
+    const session = useSession()
+
+    return(
+        <div>
+            {session.status === "authenticated" ? {Logout} : {Sign in}}
+        </div>
+    )
+}
+```
+
+<span style="color:orange">**This is similar to `<RecoilProvider>` which you used to do inside the `Recoil`**</span>
+
+>:pushpin:<span style="color:orange">**Remember ->**</span>**MAKE SURE `useSession` hook jahan v use ho rha h tm usko WRAP KRO inside the `<SessionProvider></SessionProvider>`**
+
+Lets make out a working `log out` and `sign in` button which works as expected(jis kisi ko v click kroge wo kaam ho jayega)
+
+```javascript
+"use client"
+import {useSession, SessionProvider, signOut, signIn} from "next-auth/react" 
+
+export default function Home(){
+    return (
+        <SessionProvider>
+            <RealHome />
+        <SessionProvider>
+        
+    )
+} 
+function RealHome(){
+    const session = useSession()
+
+    return(
+        <div>
+            {session.status === "authenticated" && <button onClick = {() => signOut()}>Logout</button>} // means if the user is authenticated means he / she should see the Sign out button AND clicking on it should make them sign out from their account
+            // "signOut" is a PREDEFINED function present inside the "next-auth/react" that has the functionality to sign out the user which is currently logged in
+            {session.status === "unauthenticated" && <button onClick = {() => signIn()}>Sign In</button>}
+            // Similar to "signOut", the library provides the "signIn" function logic also 
+        </div>
+    )
+}
+```
+
+Seeing it in practical ->
+
+by default -> 
+
+<img src = "image-19.png" width=500 height=250>
+
+clicking on `Sign in` button will **redirect you to `sign in` page we made**
+
+<img src = "image-20.png" width=500 height=250>
+
+After filling the details, and then clicking on the `Sign in with Login with email` it will redirect you back to the main page where you will now see `Logout` button now instead of `Sign in` button
+
+<img src = "image-21.png" width=500 height=250>
+
+Now if you click on `Logout` button, then you will again be able to see the `Sign in` button on the main page (as you have now logged out) [**Even if you keep refreshing the page then also the user will remain signed in, unless and until you click on the logout button**]
+
+<img src = "image-22.png" width=500 height=250>
+
+and **hence the AUTHENTICATION works**
+
+<span style="color:orange">**But what we have did above is CLIENT SIDE AUTHENTICATION(basics of it).**</span>
+
+Lets try to see what the `useSession()` or the variable storing its **returned value has inside it by adding**
+
+```javascript
+{JSON.stringify(session)} // just below the return codeblock sigin logic
+```
+if the page has **Sign in** button then (see left pic) and if **Logout** button present on the main page then (right pic, which consists of `Sign in`)
+
+<img src = "image-24.png" width=320 height=100> <img src = "image-23.png" width=320 height=100>
+
+The value you are seeing in the right pic is the HARDCODED value you have given in the `route.tsx` present inside the `app > api > auth > [...nextAuth]` to make the website work for the time being (you can also see above, you have only given these values) 
+
+Now you can notice not all the values we have hardcoded and given inside the `route.tsx` is coming inside the right pic attached above (**we will come to this why this is happening and how you can add more fields here**)
+
+
+
 
 
 
