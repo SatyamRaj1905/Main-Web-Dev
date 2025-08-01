@@ -269,6 +269,204 @@ So to solve the above problem comes **NEXT AUTH**
 
 ## **Next Auth**
 ----------
+`Next.js` lets you add `Authentication` to your `Next.js` app ->
+
+1. **It supports various `providers` such as ->**
+    + Login with email
+    + Login with google 
+    + Login with facebook
+    + Login with Apple etc...
+
+But before proceeding to code it lets first try to recall what we have learnt till now about the 
+
+## **Catch All route**
+----------
+As discussed earlier, 
+
+If you want to add a single route handler for
+1. `/api/auth/user`
+2. `/api/auth/random`
+3. `/api/auth/123`
+4. `/api/auth/...`
+
+You can create a `Catch All` route like the one created below to direct all the routes which come up after a particular route to a **common page made to handle them**
+
+<img src = "image-13.png" width=500 height=400>
+
+Another example can be the below part
+
+<img src = "image-10.png" width=500 height=200>
+
+Now you can see the going to different url but you will get the same output ->
+
+<img src = "image-11.png" width=320 height=100> <img src = "image-12.png" width=320 height=100>
+
+as long as a route is starting with `/api/auth/`, it will be caught by the above made `route`(i.e. catches any routes that starts with `/api/auth`)
+
+**The reason for understanding the above concepts and recalling it is that NextAuth (the library which we are going to use here today) uses this concept only to AUTHENTICATE**
+
+## **Coding NextAuth**
+----------
+
+For details about this library -> [Next auth](https://next-auth.js.org/configuration/initialization#route-handlers-app)
+
+### **Setup**
+
+**Step 1 ->** Initialise a fresh `Next.js` project by using the command 
+
+```javascript
+npx create-next-app@latest
+```
+
+**Step 2 ->** **Install the NextAuth library in your project**
+
+```javascript
+npm install next-auth
+```
+
+**Step 3 ->** lets use the Catch all concept to make the route so for this make a folder structure like the below 
+
+`app > api > auth > [...nextauth]` and inside the `[...nextauth]`, make a file named as `route.ts` which will have the **DEFAULT CODE present on the website (see the documentation)**
+
+```javascript
+import NextAuth from "next-auth"
+
+const handler = NextAuth()// some thing will be passed inside this function, will be discussed below // 2
+
+export {handler as GET, handler as POST}
+```
+
+<span style="color:orange">**Any project which is using the NextAuth will have the same folder structure and similar code**</span>
+
+Giving some of the examples ->
+
+<img src = "image-14.png" width=500 height=250>
+
+Notice the **fileroute as well the code**
+ 
+**Explanation `// 2` code**
+
+basically tm **NextAuth() function me who cheez pass krte ho jisse tm chahte ki user will login (ex -> login with google, email, facebook, tweeter, etc..) generally we call it PROVIDERS**
+
+you can see the list of providers NextAuth supports -> [NextAuth Providers](https://next-auth.js.org/providers) but here we are going to use the **`Credentials` as a provider** 
+
+link to it -> [Credentials as provider in NextAuth](https://next-auth.js.org/providers/credentials)
+
+**Reason for taking this as providers is simply that THEY ARE HIGHLY CONFIGURABLE (you can login with 10 different fields or just one is enough(just the password), depends on how your app is structured) also it is HARDER among all of the providers such as login with google, facebook, etc..**
+
+### **Credentials as provider in NextAuth**
+----------
+#### **Overview**
+
+The Credentials provider __allows you to handle signing in with arbitrary credentials,__ such as a `username` and `password`, __domain__, or __two factor authentication or hardware device (e.g. YubiKey U2F / FIDO).__
+
+It is intended to support use cases where you have an existing system you need to authenticate users against.
+
+It comes with the __constraint that users authenticated in this manner are not persisted in the database, and consequently that the Credentials provider can only be used if JSON Web Tokens are enabled for sessions.__
+
+so adding the credentials `providers` to the code written above 
+
+> :pushpin: <span style="color:orange">**Remember ->**</span>**"providers" key is the ARRAY of all the way of authentication you want to provide to the user for login / authenticating.**
+
+```javascript
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials" // first importing it
+
+const handler = NextAuth({
+    providers : [
+        CredentialsProvider({
+            name : "email", // frontend pe kya dikhna chahiye (this simply means that "Sign in with )
+            // The name to display on the sign in form is given inside the "name" key (e.x -> if you give name : "email" then on frontend it will be shown "Sign in with email" if name : "xyz" then on frontend you will see "Sign in with xyz" and so on means "Sign in with" common rhega)
+            credentials : { // basically what all INPUT FIELD we want from the user ??
+                username : {label : "Username", type : "text", placeholder : "Satyam12@"},
+                password : {label : "Password", type : "password"}
+                // "credentials" OBEJECT is used to GENERATE a form on the Sign in page 
+                // You can specify which fields should be submitted, by adding corresponding keys to the "credentials" object
+                // ex -> can be username, password, 2FA token, etc...
+                // You can pass any HTML attribute to the <input> tag through the object
+            },
+            // and lastly it has of course a FUNCTION to do authentication 
+            async authorize(credentials, req){
+                // Add logic here to look up the user from the credentials supplied 
+                // so Extracting the credentials provided by the user 
+                const username = credentials?.username
+                const password = credentials?.password
+
+                // and then doing the db request to check if the username and password are correct 
+                // writing the logic for it (we are coding the credentials provider page for user)
+                // For now lets say the database returned you something like the one written below and you stored it inside the "user" named variable ->
+                const user = {
+                    name : "harkirat",
+                    id : "1",
+                    username : "harkirat@gmail.com" // as database me to boht kuch store hota h ek user ke corresponding to sb kuch wo return kr dega
+                }
+
+                if(user){
+                    return user // you returned the details to the user
+                }else{
+                    return null
+                    // If you return null, then an ERROR will be displayed advising the user to check their details provided
+
+                    // You can also REJECT the callback with an ERROR thus the user will be sent to the ERROR page (default ERROR page provided by the Next.js)
+                }                
+            }
+        })
+    ]
+
+})
+
+export {handler as GET, handler as POST}
+```
+
+You have just written this much code and now if you go to the http://localhost:3000/api/auth/signin  and see the result there -
+
+**Output ->**
+
+<img src = "image-15.png" width=500 height=250>
+
+Notice you dont have to make any component or `HTML, CSS` code for this. (**Of course you can make it preetier by overiding it**)
+
+Now you just have to add fields inside the `credentials` key and you will be able to see another field for ex ->
+
+```javascript
+adminPassword : {label : "Admin Password", type : "password"}
+```
+and now if you go the same url as above then you will see something like this ->
+
+<img src = "image-16.png" width=500 height=250>
+
+`Admin Password` field has also been loaded or added.
+
+Lets understand the code flow of the above code,
+
+1. user will come to the website, put its `username` and `password`
+2. as soon as it clicks on the `Sign in with Login with email`, a **request will go to the backend**
+3. the `request` will eventually reach to the line of code where `async authorize` part of code is written and then that codeblock will run 
+4. you will do the check by doing the **db call to check in the database**
+5. and if the user is correct then you will return their details and they will get logged in and if not then they **will not be logged in**
+
+**The best thing about this is once you log in, it will AUTOMATICALLY REDIRECT you to the MAIN PAGE as you see with the normal website you see in practical**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
