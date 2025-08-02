@@ -1,5 +1,21 @@
 # **Important Topics to understand in `Next.js`**
 
+- [**Important Topics to understand in `Next.js`**](#important-topics-to-understand-in-nextjs)
+  - [**Client side rendering (CSR)**](#client-side-rendering-csr)
+    - [**Code flow for client side rendering**](#code-flow-for-client-side-rendering)
+    - [**Downsides**](#downsides)
+  - [**Server side rendering (SSR)**](#server-side-rendering-ssr)
+    - [**Code flow for server side rendering**](#code-flow-for-server-side-rendering)
+    - [**Why SSR ??**](#why-ssr-)
+    - [**Downsides of SSR**](#downsides-of-ssr)
+  - [**Static site generation (SSG)**](#static-site-generation-ssg)
+    - [**Why SSG ??**](#why-ssg-)
+    - [**How to do SSG ??**](#how-to-do-ssg-)
+    - [**Clearing the cache after some time**](#clearing-the-cache-after-some-time)
+      - [**Another way to clear the cache**](#another-way-to-clear-the-cache)
+  - [**Assignment**](#assignment)
+
+
 
 ## **Client side rendering (CSR)**
 ----------
@@ -121,12 +137,16 @@ Notice how you have recieved **in the FIRST `request` only** the `HTML` page wit
 <span style="color:orange">**The backend itself populated the page, rendering happened over here and finally sent to the frontend**</span>
 
 ### **Why SSR ??**
+----------
+
 
 1. __SEO Optimisations__
 2. __Gets rid of the waterfalling problem__(single `request` going on to get the desired output)
 3. __No white flash before you see content__
 
 ### **Downsides of SSR**
+----------
+
 
 1. __Expensive__ since every request needs to render on the server
 2. __Harder to scale, you can't cache to CDNs__
@@ -236,7 +256,6 @@ Now the backend point url you have used will be changing everytime you will relo
 Now you dont have to use the conventional technique which we have read in the `Next.js` for how to add the static site generation, **`Next.js` is capable enough to understand which page can be made STATIC and hence makes them and also renders them according to the STATIC page concepts**
 
 ### **Clearing the cache after some time**
-
 ----------
 
 :bulb:**What if the `Next.js` server has some sensitive data that you needs to be cleared after some time ??**
@@ -309,6 +328,8 @@ A good example of where static page are mostly of heavely used is ->
 **BLOG websites(as you rarely change or update your blog which you once made) and thus you can make them static page**
 
 ## **Assignment**
+----------
+
 
 :bulb:**How can you statically generate the contents of dynamic routes ??**
 
