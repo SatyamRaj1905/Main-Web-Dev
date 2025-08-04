@@ -104,7 +104,10 @@ We will be using **Cloudflare workers in this module**[<span style="color:orange
 
 simply saying <span style="color:orange">**Project kaise maintain hoga you dont even want to care about it**</span>
 
-## **Setting up Cloudflare workers**
+## **Cloudflare workers**
+----------
+
+### **Setting up Cloudflare workers**
 ----------
 Link to sign up -> [Sign up Cloudflare](https://cloudflare.com) 
 
@@ -121,6 +124,257 @@ What we are interested is, the option present in the left navigation bar is unde
 **`Workers` are the serverless offerings of the cloudflare. They lets you deploy or serve some backend and even frontend code SERVERLESSLY.(means these are behind where it should be deployed, what countries it is deployed and so on..)**
 
 To start with **lets try to create a worker**. coming inside the `Compute(workers) > Workers & Pages` and then selecting `Start with Hello World` by clicking on the `Get Started` button
+
+### **How cloudflare workers work ??**
+----------
+
+Detailed blog post - [Cloudflare workers working](https://developers.cloudflare.com/workers/reference/how-workers-works/)
+
+But the main part of it has been discussed below 
+
+> :pushpin:<span style="color:orange">**Important point to note here ->**</span> __Cloudflare workers DONT use the Node.js runtime. They have created their own runtime. There are a lot of things that Node.js has__
+
+Whenever you are writing the code in `JS`, you will be running that in `Node.js` runtime or **BUN.js**
+
+Now we have already learnt that how **Node.js** came into existence which was already `V8 Engine` was present on the **Chrome or precisely saying browser** and then it was pulled out which eventually lead to the development of `Node.js`
+
+Now coming to How the cloudflare work or how this is able to run your code, there are two possiblities only to this ->
+
+**1. Either they are using the `Node.js` runtime** means that everytime to run the code cloudflare workers has to run the command -> `node index.js` 
+
+Now the above way is not optimal due to :-
+
+1. **You are every time starting a new `Node` process**
+2. **Node modules is a big library when it comes to running it on the server**
+3. **Latency increases**
+
+due to the above reasons, cloudflare came up with 2nd approach ->
+
+**2. Take out the `V8` Engine** and then **enhance the previous architecture**. <span style="color:orange">**Basically they start a single `Node.js` process inside which they run Small group workers which will handle multiple `node index.js` command of different projects assigned to the number of workers**</span>
+
+Something like the below pic ->
+
+<img src = "image-2.png" width=400 height=200>
+
+### **Working of Workers**
+----------
+
+Though Cloudflare Workers behave similarly to `JavaScript` in the browser or in `Node.js`,(**The code which you will use to run your code on the cloudflare the same code can be used to run it in your local browser**) there are a few differences in how you have to think about your code. Under the hood, the Workers runtime uses the V8 engine — the same engine used by Chromium and `Node.js`. The Workers runtime also implements many of the standard `APIs` available in most modern browsers.
+
+The __differences between `JavaScript` written for the browser or `Node.js` happen at runtime.__ Rather than running on an individual's machine (for example, a browser application or on a centralized server), Workers functions run on `Cloudflare's Edge Network` - __a growing global network of thousands of machines distributed across hundreds of locations.__
+
+<img src = "image-3.png" width=400 height=200>
+
+Basically they have **Bunch of server running on many parts of the world as shown above and whenever you start your project, it runs on one of these servers depending on the place from where the `request` has came from**
+
+__Each of these machines hosts an instance of the Workers runtime, and each of those runtimes is capable of running thousands of user-defined applications. This guide will review some of those difference.__
+
+### **Isolates V/S containers**(if not understand, then also good)
+----------
+
+Basically this was the **approach they took to be the fastest or in short faster than `aws` (they claim at least).**
+
+`V8` uses something called as `isolates` which is lightweight contexts that provide your code with variables it can access and a safe environrnent to be executed within. You could even consider an `isolate` __a sandbox for your function to run in.__
+
+<img src = "image-4.png" width=500 height=200>
+
+The refersh type symbol is the `node index.js` command and the `{}` (__curly braces__),  in the left pic, you can clearly see that for every `codebase`, you have to __start a new `node` process by running the command `node index.js`__ whereas when it comes to the second pic you are just running one **single `node index.js` process and all of the `codebase` are running using that and even ISOLATING from each other** 
+
+This is why it is called `Isolate` as although all project are running with the help of **single node process** still they are **ISOLATED from each other, which is the functionality provided by the `isolate` present inside the `V8`**
+
+### **Intializing a worker**
+
+----------
+
+To create and deploy your application, you can take the following steps inside the `Terminal` ->
+
+**Step 1 ->** Initialize a worker 
+
+```javascript
+npm create cloudflare -- my-app 
+```
++ select `No` if asked for if you want to deploy your application
++ `my-app` is the name of folder you have given to your project(you can give anything)
+
+**Step 2 ->** Explore `package.json` dependencies
+
+```javascript
+"wrangler" : "^3.0.0"
+```
+**Notice `express` is not present here** as we have not written any `app.get` type of thing inside our codebase. (see the code below for reference)
+
+:bulb:**What is Wrangler ??**
+
+-> In simple words, `Wrangler` is the **CLI (command line interface) of the cloudflare cloud provider means it is what lets you deploy your application to cloudflare, runs your code locally**
+
+**Step 3 ->** go inside the `index.ts` file and try to exolore the code written inside it which looks something like this ->
+
+```javascript
+export interface Env {
+
+}
+
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+      return new Response('Hello World!');
+   },
+};
+```
+
+:bulb:**What is the role of the `Promise<Response>` part and explain it ??**
+
+-> This is basically the **Data type which the function `fetch` is returning** Now you may ask that as the function `fetch` is returning a `Response` object (see the codeline `return new Response`), so you should be writing `Response` in place of `Promise<Response>` and now the reason for this is 
+
+as **function `fetch` is `async` so it will return `Promise` also**[Reason for making them `async` function is that eventually you will do some logic to hit the database which will take time and hence `async` & `await` will be used]
+
+So combining the above two statement, you can say that the function `fetch` will return **`Promise` which is of type `Response` and hence the GENERICS has been used to interwine two thing and make a custom data types** combining both the above statement will give me `Promise<Response>`
+
+**If you do not give this, then also the code will work fine as `Typescript` has the ability to INFER according to the data the function is returning**
+
+**Step 4 ->** Run / Start your worker locally
+
+```javascript
+npm run dev
+```
+
+Now if you write `npm run dev` to run the code and will go to the given url, then you will see "Hello World!" on the screen.
+
+if you slightly change the code something like this ->
+
+```javascript
+export interface Env {
+
+}
+
+// Below codeblock is also the answer  of How to return json ??
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+      return Response.json({
+         message : "hi there" 
+      });
+   },
+};
+```
+you will see something like the below as output -> 
+
+<img src = "image-5.png" width=200 height=50>
+
+**It automatically RELOADS for you**
+
+:bulb: __Where is the express code? HTTP Server?__
+
+Cloudflare expects you to just write the logic to handle a request. __Creating an HTTP server on top is handled by cloudflare__
+
+### **Routing in cloudflare**
+----------
+
+In express, routing is done as follows 
+
+```javascript
+import express from "express"
+const app = express()
+
+app.get("/route", (req, res) => {
+   // handles a request to get route
+})
+```
+
+Now although you have studied above that the normal `js` code also works and even the above code of using the `Express` will also works but you will soon come to knwo that **why you should not write in the above manner ??**
+
+Doing the same in the cloudflare environment will look something like the below ->
+
+```javascript
+export interface Env {
+
+}
+
+export default {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    console.log(request.body);
+    console.log(request.headers);
+    console.log(request.method);
+
+    if (request.method === "GET") { // similar for other Request method 
+      return Response.json({
+        message: "you sent a get request"
+      });
+    } else {
+      return Response.json({
+        message: "you did not send a get request"
+      });
+    }
+  },
+};
+```
+
+**Basically you have access to all the things which you can do using `Express` (like getting the `body`, `query parameters`, `headers`, `method` etc..) inside the `request` object or more precisely `Request` object**
+
+Now can you see **How difficult it will be for the developers to write like the above way, it will clearly be very hard to maintain and hence will be very long as for each Request method, you are trying to write the `if-else` condition**
+
+So eventually we will be using a library to make the job easier for us. 
+
+>:round_pushpin:**How to get query params** -> "https://community.cloudflare.com/t/parse-url-query-strings-with-cloudflare-workers/90286" [see it as it is important]
+
+### **Deploying your codebase to the Internet through the cloudflare**
+----------
+
+**Step 1 ->** You have to first `login` to your cloudflare account and for this again `wrangler` will be used(as that is the main element to do all the task of cloudflare), inside the terminal, run the command :-
+
+```javascript
+npx wrangler login
+```
+running this will give you an url (OAuth) through which you can directly give the access to the cloudflare to do necessary actions to your project[**You have given authorisation to deploy your project using cloudflare**]
+
+> :pushpin:running the command **`npx wrangler whoami` will give you all the information about your account, you can see them**
+
+**Step 2 ->** Now that you have given access to your account, **to deploy your code to the internet just do**
+
+```javascript
+npm run deploy
+```
+
+Now the `wrangler` will have the responsiblity to **deploy your code as under the hood the above command is running `wrangler deploy` command whose work is to do the above task**
+
+Soon, you will get a **url to your project / code which is hosted on the internet and that too for FREE! FREE! FREEEEE!**
+
+> :pushpin:**The syntax looks very similar to that which you used to write the NATIVE http in `node.js`(i.e. without using any library like `Express.js`)**
+
+Now if see the url it gave to where my code was deployed you will see that 
+
+https://my-app.Rajsatyam1906.workers.dev
+
+Notice the nomenclature of the above url :-
+
++ `my-app` -> the **Name of the project (so try to name it wisely (basically name this the same name which you have given to your website))**
++ `Rajsatyam1906` -> the cloudflare account unique id which was used to deploy the app
+
+You can also later **change the name of the project by going to the `wrangler.toml` file made** and inside that you will see the `name` key whose value will be the current name of the project, just write here the new `name` as its values and then just do `npm run deploy` again to change the name of the project and deploy the project with **updated name** and THAT's IT.
+
+Cloudflare __does not expect a routing library/http server out of the box.__ You can write a full application with just the constructs available above.
+
+We will eventually see how you can use other HTTP frameworks (like express) in cloudflare workers.
+
+### **Adding `Express` to it**
+----------
+:bulb:**Why cant we use Express ?? why does it (cloudflare) doesn't start off with a simple express boiler plate ??**
+
+-> **Reason 1 -> Heavily relies on the `Node.js`**
+
+see the documentation -> [Rely on Node.js](https://community.cloudflare.com/t/express-support-for-workers/390844)
+
+**Crux of the above documentation is ->**
+
+<img src = "image-6.png" width=400 height=300>
+
+
+
+
+
+
+
+
+
+
 
 
 
