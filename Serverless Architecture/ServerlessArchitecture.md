@@ -411,6 +411,8 @@ Crux of the above documentation is **what leads to develop `hono.js`** and that 
 | Netlify  | AWS Lambda | Lambda@Edge      |
 | Supabase Functions  | Node.js | Others      |
 
+>:pushpin:<span style="color:orange">**Remember ->**</span>**Cloudflare Pages is used to deploy the FRONTEND and Cloudflare Workers is used to deploy the BACKEND (This is the main differenc between the cloudflare pages and workers)**
+
 ### **Setting up Hono**
 ----------
 **Step 1 ->** Initialize a new app with hono by running the command 
@@ -502,6 +504,8 @@ the same which you used to deploy your cloudflare project, as only library has b
 
 See the documentation -> [Middlewares in Hono](https://hono.dev/guides/middleware)
 
+<span style="color:orange">**Again it is very -very similar to what we used to do inside the `Express.js`**</span>
+
 #### **Creating a simple auth middleware**
 ----------
 
@@ -511,26 +515,106 @@ import { Context } from 'hono/jsx'
 
 const app = new Hono()
 
-app.use(async (c, next) => {
-  if (c.req.header("Authorization")) {
-    // Do validation
+// This is very similar to How we used to declare Middlewares inside the Express.js
+async function authMiddleware(c, next){
+   if (c.req.header("Authorization")) {
+    // Do Validation logic here 
     await next()
   } else {
     return c.text("You dont have acces");
   }
-})
+}
 
-app.get('/', async (c) => {
+// And then to implement Middleware you can either use 
+// 1ST WAY
+app.use(authMiddleware) // This will be passed to all the routes present 
+
+// OR
+// You can manually pass this middleware to your specified route something which you used to do inside the Express.js (something used below)
+// This is BETTER APPORACH as it does not implement it to all the routes 
+// 2ND WAY
+app.get('/', authMiddleware, async (c) => {
   const body = await c.req.parseBody()
   console.log(body);
   console.log(c.req.header("Authorization"));
   console.log(c.req.query("param"));
 
-  return c.json({msg: "as"})
+  return c.json({msg: "Hello"})
 })
 
 export default app
 ```
+
+### **Connecting to DB in Hono**
+----------
+
+See the documentation -> [DB connection in Hono](https://www.prisma.io/docs/orm/prisma-client/deployment/edge/deploy-to-cloudflare-workers)
+
+Serverless environments have one big problem when dealing with databases.
+
+There can be many connections open to the DB since there can be multiple workers open in various regions.
+
+<img src = "image-11.png" width=400 height=250>
+
+**Connection pooling in prisma for serverless env**
+
+See the documentation -> [Connection pooling in Prisma](https://www.prisma.io/docs/accelerate)
+
+for cloudflare workers part -> [Connection pooling cloudflare](https:/www.prisma.io/docs/orm/prisma-client/deployment/edge/deploy-to-cloudflare-workers)
+
+**Step 1 ->** Install Prisma in your project 
+
+```javascript
+npm install --save-dev prisma
+```
+
+**Step 2 ->** Init Prisma 
+
+```javascript
+npm prisma init
+```
+**Step 3 ->** Create a basic schema 
+
+```javascript
+generator client{
+   provider = "prisma-client-js"
+}
+
+datasource db{
+   provider = "postgresql"
+   url = env("DATABASE_URL")
+}
+
+model User {
+   id Int @id @default(autoincrement())
+   name String 
+   email String 
+   password String
+}
+```
+
+**Step 4 ->** Create Migrations 
+
+```javascript
+npx prisma migrate dev --name init
+```
+
+**Step 5 ->** Signup to Prisma accelerate 
+
+```javascript
+"https://console.prisma.io/login"
+```
+Enable Accelerate
+
+<img src = "image-12.png" width=400 height=200>
+
+Generate an API key 
+
+
+
+
+
+
 
 
 
