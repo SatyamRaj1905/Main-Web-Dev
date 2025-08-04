@@ -422,6 +422,119 @@ npm create hono@latest my-app
 
 **Step 2 ->** Move to `my-app` and install the dependencies
 
+```javascript
+cd my-app 
+
+npm install // OR  npm i 
+```
+**Step 3 ->** Writing the first code inside the `src > index.ts`
+
+```javascript
+import {Hono} from "hono"
+
+const app = new Hono()
+
+app.get('/', (c) => c.text("Hello cloudflare workers!"))
+
+export default app 
+```
+**Notice to the level of similarity between the above code and that you used to write while using `Express.js`**, This is the advantage that this library gives
+
+### **Returning `response` in Hono**
+----------
+> :pushpin: Just use **`.text` or `.json` to return something similar to how you used to return in `express`**
+
+Example ->
+
+```javascript
+import {Hono} from "hono"
+
+const app = new Hono()
+
+app.get('/', (c) => {
+   return c.json({  // .text example is already present in the above code 
+      message : "Hi how are you"
+   })
+})
+
+export default app 
+```
+
+Now what are the big things which `express` gives you -> `body`, `headers`, `query parameters`, `middlewares`, `connecting a database`
+
+If you know how to do these things in `hono`, you are good to go for `99%` usecase. Lets discuss them one by one 
+
+### **Getting input from user (`body`, `headers` and `query parameters`) in Hono**
+
+To see how the above thing are achieved see the example ->
+
+```javascript
+import {Hono} from 'hono'
+
+const app = new Hono()
+
+app.get('/', async (c) => { // Reason for making this async is because in this if you are CONVERTING something to json, then you must have to "await" it and hence make the function "async" eventually[as you are using here conversion to json hence awaited it and made the function async], so dont get confused that although no database call is being used here then also why async, await
+   const body = await c.req.json() // This is how you get the BODY
+   console.log(body)
+   console.log(c.req.header("Authorization")) // This is how you get the HEADERs value corresponding to the "Authorization" key 
+   console.log(c.req.query("param")) // This is how you get the QUERY PARAMETERs
+
+   return c.text('Hello Hono!')
+})
+
+export default app 
+```
+Seeing the output(backend request sent from `postman`) ->
+
+<img src = "image-10.png" width=400 height=200>
+
+More detail can be seen here -> [Getting started with hono](https://hono.dev/getting-started/cloudflare-workers)
+
+**Deploying part is simple you know this already just use**
+
+```javascript
+npm run deploy
+```
+the same which you used to deploy your cloudflare project, as only library has been added not the command. 
+
+### **Creating Middlewares in Hono**
+----------
+
+See the documentation -> [Middlewares in Hono](https://hono.dev/guides/middleware)
+
+#### **Creating a simple auth middleware**
+----------
+
+```javascript
+import { Hono, Next } from 'hono'
+import { Context } from 'hono/jsx'
+
+const app = new Hono()
+
+app.use(async (c, next) => {
+  if (c.req.header("Authorization")) {
+    // Do validation
+    await next()
+  } else {
+    return c.text("You dont have acces");
+  }
+})
+
+app.get('/', async (c) => {
+  const body = await c.req.parseBody()
+  console.log(body);
+  console.log(c.req.header("Authorization"));
+  console.log(c.req.query("param"));
+
+  return c.json({msg: "as"})
+})
+
+export default app
+```
+
+
+
+
 
 
 
