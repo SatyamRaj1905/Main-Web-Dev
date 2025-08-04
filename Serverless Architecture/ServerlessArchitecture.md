@@ -358,13 +358,75 @@ We will eventually see how you can use other HTTP frameworks (like express) in c
 ----------
 :bulb:**Why cant we use Express ?? why does it (cloudflare) doesn't start off with a simple express boiler plate ??**
 
--> **Reason 1 -> Heavily relies on the `Node.js`**
+-> **Reason 1 -> Heavily relies on the `Node.js`**(and hence it is not compatible with cloudflare runtime)
 
 see the documentation -> [Rely on Node.js](https://community.cloudflare.com/t/express-support-for-workers/390844)
 
 **Crux of the above documentation is ->**
 
 <img src = "image-6.png" width=400 height=300>
+
+so the block which you see above are **some of the library which can be used to easify things**
+
+you can also find them here -> [Library for cloudflare workers](https://github.com/honojs/hono)
+
+### **Moving of `Express` dependent project to cloudflare project**
+
+:bulb:**Lets say now i have made a project which heavily relies on `Express`, so how to move it to cloudflare wokers ??**
+
+-> <span style="color:orange">**Create a generic `handler` that you can forward requests to from either `express` or `hono` or `native cloudflare handler`**</span>
+
+Basically, try to code in such a manner that it runs on all the above things (i.e. **GENERALISED WAY**)
+
+<img src = "image-7.png" width=400 height=200>
+
+A demo of writing the **generic way(PULL OUT AS MUCH AS YOU CAN INTO A FILE WHICH DOES NOT HEAVILY RELIES ON THE `Node.js` (things like -> database calls, etc..)) is given below** and the rest which cant be pulled out for them, **you have to write the seperate logic for both `express.js` and cloudflare [NO OTHER OPTION] but these part of code exists only `5%` rest `95%` of your code can be made GENERIC (as shown below)**
+
+<img src = "image-8.png" width=500 height=220>
+
+>:warning: <span style="color:orange">**Remember ->**</span>**You CANNOT USE WEBSOCKETs inside the cloudflare, IT IS ONLY MEANT FOR `http` server**
+
+## **Introduction to Hono**
+
+----------
+
+As we have now seen that **`Express` does not work on cloudflare and hence to gain the capiblities of it, a library is used known as `hono` which makes our life even easier also**
+
+:bulb:**What is Hono ??**
+
+see the documentation -> [Hono.js](https://hono.dev/concepts/motivation)
+
+Crux of the above documentation is **what leads to develop `hono.js`** and that is attached below 
+
+<img src = "image-9.png" width=500 height=240>
+
+:bulb:**What are the runtime which supports it ??**
+
+-> This is quite a big library and supports almost all the possible runtime for known cloud providers. List includes ->
+
+|           |            |                 |
+|-----------|------------|-----------------|
+| Cloudflare Workers | Cloudflare Pages | Deno         |
+| Bun      | Fastly Compute | Vercel         |
+| Netlify  | AWS Lambda | Lambda@Edge      |
+| Supabase Functions  | Node.js | Others      |
+
+### **Setting up Hono**
+----------
+**Step 1 ->** Initialize a new app with hono by running the command 
+
+```javascript
+npm create hono@latest my-app
+```
+`my-app` is the name of the project 
+
+**Step 2 ->** Move to `my-app` and install the dependencies
+
+
+
+
+
+
 
 
 
