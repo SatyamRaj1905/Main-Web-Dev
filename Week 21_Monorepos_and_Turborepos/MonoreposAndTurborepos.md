@@ -162,7 +162,7 @@ Below pic shows the relation ->
 
 <img src = "image-10.png" width=400 height=200>
 
-If you notice the `apps` folder you will see two folders -> `docs` and `web` and inside if you will see the code is same as that you see in `Next.js` (**basically these are two frontends that one for the WEBSITE and second for the DOCUMENTATION(`Next.js` backed code) in the `web` folder, you will write the logic for frontend and in the `docs` folder the documentation part(you can also delete it)**)
+If you notice the `apps` folder you will see two folders -> `docs` and `web` and inside if you will see the code is same as that you see in `Next.js` (**basically these are two frontends that one for the WEBSITE and second for the DOCUMENTATION(`Next.js` backed code but you can also add `react` or other frameworks) in the `web` folder, you will write the logic for frontend and in the `docs` folder the documentation part(you can also delete it)**)
 
 > **`apps` is the main folder where all the logic which cant be seperated out into the common is written (basically isme jitne v helper packages, component h wo bas IMPORT hoke use hote h)**
 >
@@ -203,6 +203,14 @@ Now you can also see the **Caching feature of turborepo** by **building the proj
 
 **This was also the selling point of Turborepo that they reduce the BUILD TIME significantly less**
 
+Now <span style="color:orange">**If you want to add more projects then**</span> -> **Just COPY any of the two folders present inside the global `apps` folder (i.e. `web` or `docs`) and then just go inside the newly made copied folder's `package.json` and inside that change the `"name"` to the one which you have kept for the copied project** and THAT's it, you have MADE A SINGLE REPO WHICH HAS 3 DIFFERENT PROJECT.
+
+You can also add the backend like the one which is shown below ->
+
+<img src = "image-12.png" width=400 height=230>
+
+Notice we have just made another folder named `server` and this will signify our backend of different project and inside that now we can write the logic of the backend.
+ 
 ### **Exploring root `package.json`**
 
 <img src = "image-11.png" width=400 height=300>
@@ -221,6 +229,12 @@ This represents what command runs when you run
 them (provided they have it)
 
 Same for `dev` and `lint`
+
+
+
+
+
+
 
 
 
