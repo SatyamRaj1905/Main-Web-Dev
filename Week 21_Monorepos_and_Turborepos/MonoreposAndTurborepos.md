@@ -136,13 +136,91 @@ Link to documentation -> [Docs](https://turbo.build/repo/docs)
 npx create-turbo@latest 
 ```
 
-**Step 2 ->** Select `npm workspaces` as the monorepo framework 
+**Step 2 ->** Select `pnpm` or `yarn` as the monorepo framework (basically means that from where all the codes should be coming(i.e. from which package ??))
 
->If it is taking a long time for you, you can clone this starter from https://github.com/100xdevs-cohort-2/week-16-1 and `run npm install` inside the root folder
+>If it is taking a long time for you,(which it can as it is very heavy operation) you can clone this starter from https://github.com/100xdevs-cohort-2/week-16-1 and `run npm install` inside the root folder
 
 By the end, you will notice a folder structure that look like this ->
 
+<img src = "image-4.png" width=500 height=230>
 
+### **Exploring the folder structure**
+----------
+Basically there are 5 modules inside the project ->
+
+__End user apps (websites/core backend)__
+
+1. `apps/web` - A Next.js website 
+2. `apps/docs` - A Docs website that has all the documentation related to your project
+
+__Helper packages__
+1. `packages/ui` - UI packages
+2. `packages/typescript-config` - Shareable TS configuration
+3. `packages/eslint-config` - Shareable ESLint configuration
+
+Below pic shows the relation ->
+
+<img src = "image-10.png" width=400 height=200>
+
+If you notice the `apps` folder you will see two folders -> `docs` and `web` and inside if you will see the code is same as that you see in `Next.js` (**basically these are two frontends that one for the WEBSITE and second for the DOCUMENTATION(`Next.js` backed code) in the `web` folder, you will write the logic for frontend and in the `docs` folder the documentation part(you can also delete it)**)
+
+> **`apps` is the main folder where all the logic which cant be seperated out into the common is written (basically isme jitne v helper packages, component h wo bas IMPORT hoke use hote h)**
+>
+> > **Put the end user applications here (appka user jisse interact krta h ex -> `Next.js` backend or frontend, `react` frontend, `Node.js` backend), they should be put here and**
+
+and now talking about the 2nd global folder -> `packages` 
+
+> **`packages` is the folder which will consist of all the logic that are common from all the other folders present**
+>
+> > **whatever reusuable code they(the project) need to have should be kept inside the `packages` folder, which is the BIGGEST ADVANTAGE of monorepo as you can share the packages among your different projects ex-> `ui` etc..**
+
+You can see in the `packages` folder, different sub folder are present for most of the important part which is present in the website like (`ui`, `components`, etc..)
+
+
+Now if you run the **pre-built code given at the time of initializing the project you will see that there are 2 different projects(similar only by appearance) running on the two different urls and are that two are present inside the same repo**
+
+<img src = "image-5.png" width=400 height=150>
+
+Now if you go https://localhost:3001 then you will see something like the below(left pic) and if you go to https://localhost:3001 (right pic) is the output ->
+
+<img src = "image-6.png" width=320 height=200> <img src = "image-7.png" width=320 height=200>
+
+Notice the **output in both the pages same which simply means they are using SIMILAR of SAME components as the one is using**
+
+OR simply saying -> **We have single `repo` which has multiple `projects` which share code from `packages/ui`**
+
+Notice if you go to the `web > app` folder in the below directed pic (left pic) and going inside the `button` component, you will redirected to `ui` components `button.tsx` file(right pic)
+
+<img src = "image-8.png" width=320 height=200> <img src = "image-9.png" width=320 height=200> 
+
+**One of the practical use case of this is you can build MULTIPLE WEBSITE without writing the logic for many things(such as components, ui, css code, etc.. )  and that too inside the single repo**
+
+For ex -> Zomato and Blinkit have similar looking ui which means that they could have just used the `monorepo` to build both the above website and that too inside the same repo so that they can use the component which are common to each other in both the website. basically in their repo of `web` and `docs` folder they could have `zomato` and `Blinkit` webiste inside their corresponding `app > page.tsx`.
+
+Now you can also see the **Caching feature of turborepo** by **building the project by running `yarn build` on the terminal**. <span style="color:orange">**You will notice that when you run this command first time, then it will take time but after then if you again RE-RUN the COMMAND WITHOUT MAKING A SINGLE CHANGE in the codebase, then the BUILD will be executed very fast (this is what we have learnt in caching that it caches the build so that optmisation can take place)**</span>, also if you now change something inside the codebase, you will see that again it will start to take time to build as **some code has been changed**
+
+<span style="color:orange">**The above feature plays very crucial part in CI/CD pipeline (as their continuous deployment of your code is occuring and your project needs to have very optimised so that it can travel faster in the CI/CD pipeline and updated in your website gets immeditately handled)**</span>
+
+**This was also the selling point of Turborepo that they reduce the BUILD TIME significantly less**
+
+### **Exploring root `package.json`**
+
+<img src = "image-11.png" width=400 height=300>
+
+`npm workspaces` is what the `monorepo` has done and `turbo build system` is what `turborepo` has made.
+
+__scripts__
+
+This represents what command runs when you run
+
+1. npm run build
+2. npm run dev
+3. npm run lint
+
+`turbo build` goes into all packages and apps and runs `npm run build` inside
+them (provided they have it)
+
+Same for `dev` and `lint`
 
 
 
