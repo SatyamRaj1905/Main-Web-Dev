@@ -230,6 +230,39 @@ them (provided they have it)
 
 Same for `dev` and `lint`
 
+Now from now on lets try to build and understand the rest part by doing some assignment.
+
+## **Assignment**
+
+:bulb:**You have to create a simple chat application by using the monorepo and turborepo ??**
+
+so starting to solve ->
+
+**Step 1 ->** Intitializing the empty monorepo project by running the command 
+
+```javascript
+npx create-turbo@latest
+```
+
+give the name and then `yarn` as package manager (if not then install it)
+
+
+Now you have created an empty monorepo project 
+
+inside the global `package.json`, you can see the `"workspaces"` key which has its values as `"apps/*"` and `"packages/*"` (which basically means that where the end app takes the code from), when you will reach DEVOPs, you will see another value here named as `"clis/*"`
+
+Now currently our project has two `Next.js` app (or frontend) named as `web` and `docs` present inside the global `apps` folder, but as we are just making a simple chat app, so stick to only one frontend (if it has another role like `admin`, then you have to make or use another frontend)
+
+so delete `docs` (for now)
+
+Now in the global (any of the file or folder present in the global), running the command `yarn dev` will BUILD the project and hence you will get the link to see your project.
+
+Proceeding further and creating an `http` and `websocket` server for our app 
+
+**Step 2 ->** Making `http server` and `ws server` folder inside the `apps` global folder.
+
+
+ 
 
 
 

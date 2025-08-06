@@ -393,6 +393,122 @@ C:\Users\rajsa\Desktop\newChangedFolder\Frontend\scripts>ls
 newChangedName.txt
 ```
 
+**Advanced Version -> MOVING AS WELL AS RENAMING**
+
+```json
+C:\Users\rajsa\Desktop>ls
+ Desktop                          Postman.lnk  'Screenshot 2025-07-06 135620.png'   desktop.ini
+'JusPay Online Assessment.docx'   Prep          demoFile.txt                        newChangedFolder
+
+C:\Users\rajsa\Desktop>mv demoFile.txt newChangedFolder/Frontend/demoFileName.txt
+
+C:\Users\rajsa\Desktop\newChangedFolder\Frontend>ls  // you can see the file moved from Desktop to Frontend and also changed its name from demoFile.txt to demoFileName.txt
+css  demoFileName.txt  images  scripts
+```
+
+#### **Copying the file or folder**
+
+##### **`cp -r folder_to_move where_to_move`**
+
+>:pushpin:**Used to COPY the files or folder from one place to another**
+
+```json
+C:\Users\rajsa\Desktop>ls
+ Desktop                          Postman.lnk  'Screenshot 2025-07-06 135620.png'   newChangedFolder
+'JusPay Online Assessment.docx'   Prep          desktop.ini                         test.txt
+
+C:\Users\rajsa\Desktop>cp test.txt newChangedFolder/Frontend
+
+C:\Users\rajsa\Desktop\newChangedFolder\Frontend>ls
+css  demoFileName.txt  images  scripts  test.txt
+
+C:\Users\rajsa\Desktop\newChangedFolder\Frontend>cd ../..
+
+C:\Users\rajsa\Desktop>ls
+ Desktop                          Postman.lnk  'Screenshot 2025-07-06 135620.png'   newChangedFolder
+'JusPay Online Assessment.docx'   Prep          desktop.ini                         test.txt
+```
+You can see above file `test.txt` **has been copied from one `Desktop` and is available at both inside the  `Desktop` and `Frontend`**
+
+## **How to get rid of Unnecessary things**
+----------
+
+### **Deleting a file**
+
+#### **`rm file_to_delete`**
+
+```json
+C:\Users\rajsa\Desktop>ls
+ Desktop                          Postman.lnk  'Screenshot 2025-07-06 135620.png'   newChangedFolder
+'JusPay Online Assessment.docx'   Prep          desktop.ini                         test.txt
+
+C:\Users\rajsa\Desktop>rm test.txt
+
+C:\Users\rajsa\Desktop>ls
+ Desktop                          Postman.lnk  'Screenshot 2025-07-06 135620.png'   newChangedFolder
+'JusPay Online Assessment.docx'   Prep          desktop.ini
+```
+See `test.txt` has been **removed from the `Desktop`**
+
+### **Deleting a folder**
+----------
+
+
+#### **`rm -r folder_to_delete_`**
+
+```json
+C:\Users\rajsa\Desktop>ls
+ Desktop                          Postman.lnk  'Screenshot 2025-07-06 135620.png'   newChangedFolder
+'JusPay Online Assessment.docx'   Prep          desktop.ini
+
+C:\Users\rajsa\Desktop>rm -r newChangedFolder
+
+C:\Users\rajsa\Desktop>ls
+ Desktop  'JusPay Online Assessment.docx'   Postman.lnk   Prep  'Screenshot 2025-07-06 135620.png'   desktop.ini
+```
+
+`newChangedFolder` has been **deleted**
+
+### **Hackers type command (changing the permission)**
+
+#### **`chmod`**
+
+>:pushpin:`chmod` **Change file permissions and hence has the ability to READ, WRITE, and EXECUTE permissions of a file**
+
+takes 4 things -
+
++ **who is it for ??** -> is it the **user (u), or the group (g) or the others(o)**
++ **What permissions are you doing ??** -> are you **adding (+) or removing (-)**
++ **What kind of permissions are you adding ** -> are you **reading (r), or writing (w) or reading and writing (rw) or read, write, and execute (rwx)**
++ **Folder or file you want to apply the above permission**
+    - **if File then go ahead as simple**
+    - **if Folder then you will ADD -R at the front**
+
+**For example ->** 
+
+```javascript
+// for folder
+chmod -R ugo+rw Frontend
+
+OR 
+// for file
+chmod ugo-r test.txt
+```
+
+<img src = "image-1.png" width=500 height=250>
+
+you can see the **Execute(`x`) permission has been given to the `GROUP` section for `newscript.sh` file**
+
+<img src = "image-2.png" width=500 height=150>
+
+You can see that the **Execute permission has been REMOVED from the file `file1.txt`**
+
+**We also have NUMERIC value to give permissions ->**
+
++ `1` -> for **Execute**
++ `2` -> for **Write**
++ `4` -> for **Read**
+
 
 
 
