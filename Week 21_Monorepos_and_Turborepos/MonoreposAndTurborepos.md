@@ -262,8 +262,6 @@ Proceeding further and creating an `http` and `websocket` server for our app
 **Step 2 ->** Making `http server` and `ws server` folder inside the `apps` global folder.
 
 
- 
-
 
 
 
