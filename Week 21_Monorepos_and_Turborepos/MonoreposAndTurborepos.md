@@ -657,9 +657,9 @@ so going inside the `apps > http-server > package.json` and then adding these tw
   "ui": "tui", // This means the ui which you see in terminal when building the project (Terminal UI), you can change to bui if you want to see the browser ui result 
   "tasks": { // THIS IS IMPORTANT (tells WHAT ALL TASKS IT PERFORMS)
     "build": { // BUT if we are pushing the code in production ("build" mode), then you want the turborepo to do bunch of optimisations and that are LISTED BELOW 
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "dependsOn": ["^build"], // This is basically to resolve, if there is DEPENDENCY GRAPH present then first the independent folder will BUILD then the dependent folder (For ex -> if the "web" folder depends on "ui" then "ui" folder will BUILD first completely then the "web" folder)
+      "inputs": ["$TURBO_DEFAULT$", ".env*"], // means WHAT ALL FILES ARE CONSIDERED for input (BASICALLY WHAT FILES IF CHANGED SHOULD BE CONSIDERED FOR RE-BUILD)  // 2
+      "outputs": [".next/**", "!.next/cache/**"] // This is how TURBOREPO KNOWS WHAT TO CACHE ? (means the folder which has been cached, reflect their output directly) basically the ".next" folder what you see in the folder structure after the build command is executed is what you basically need now is just this folder and even if the rest file and folder you delete it, still this project will run as the progress has been saved. BASICALLY, EVERYTHING WHICH HAS BEEN BUILT, is present in the ".next" folder and hence CACHE THIS FOLDER. (".next/**" means this thing only) and the one which has been already cached (shown by "!.next/cache/**"), IGNORE THESE(.next me pda cache folder) WHILE GIVING OUTPUT 
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -674,6 +674,39 @@ so going inside the `apps > http-server > package.json` and then adding these tw
   }
 }
 ```
+
+**Explanation of `// 2` code**
+----------
+
+>[!IMPORTANT]
+> <span style="color:orange">**Remember ->**</span> **In case of a `node.js` app, the `.env` file changing should NOT need a rebuild of the project BUT In case of a `next.js` app, the `.env` file changing DOES require a rebuild of the project**
+>
+> __Just google why this is ??__
+
+and hence if you are using in your project `Node.js` for making some part, then instead of `// 2` code you will put only `"inputs": ["$TURBO_DEFAULT$"]` , as `.env` file me change hone se v **re-build krne ka jarurat nhi h while you are using `node.js` project** but as here we are using `Next.js` so we have added `.env` file as in this **you must have to RE-BUILD the project once it changes**
+
+Now as our backend folder `http-server` has all the code or **logic present inside the `dist` folder made after compilation so to run this, you will have to add `turbo.json` inside this folder and OVERWRITE the global `turbo.json` as inside this the `"inputs" and "outputs"` start building from the `.next` folder present globally but we want to not to start from there instead build the backend seperately also**
+
+so making the `turbo.json` file inside the `apps > http-server` and writing the logic 
+
+```javascript
+{
+  "extends": ["//"], // basically extend the original one (global turbo.json)
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"] // But inside it change the value of "output" of "build" to be "dist" folder
+    }
+  }
+}
+```
+
+
+
+
+
+
+
+
 
 
 
