@@ -643,7 +643,38 @@ so going inside the `apps > http-server > package.json` and then adding these tw
 }
 ```
 
-**Now if you run `npm run dev` in the root folder `chat-app`**
+**Now if you run `npm run dev` in the root folder `chat-app`, you will see two task running (`web` frontend one on `3000` port) and (`http-server` backend one on `3001` port)**
+
+>[!IMPORTANT]
+> Now as **our frontend and backend on different urls("http://localhost:3000" and "http://localhost:3001") so `CORS` issue will come and you have to write the logic for it by installing `cors` library**
+
+### **about Global `turbo.json` present in the folder**
+----------
+
+```json
+{
+  "$schema": "https://turborepo.com/schema.json", // This is the schema file of turborepo so if their version will keep changing so their schema will also keeps changing, BASICALLY SCHEMA OF WHAT YOU ARE WRITING 
+  "ui": "tui", // This means the ui which you see in terminal when building the project (Terminal UI), you can change to bui if you want to see the browser ui result 
+  "tasks": { // THIS IS IMPORTANT (tells WHAT ALL TASKS IT PERFORMS)
+    "build": { // BUT if we are pushing the code in production ("build" mode), then you want the turborepo to do bunch of optimisations and that are LISTED BELOW 
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false, // basically says dont cache anything (if the code changes, let it REFRESH as when you are running locally("dev" mode) you want to develop and compile again and again so that i can see the output of the changes frequently)
+      "persistent": true
+    }
+  }
+}
+```
+
 
 
 
