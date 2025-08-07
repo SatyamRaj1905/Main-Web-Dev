@@ -259,7 +259,259 @@ Now in the global (any of the file or folder present in the global), running the
 
 Proceeding further and creating an `http` and `websocket` server for our app 
 
-**Step 2 ->** Making `http server` and `ws server` folder inside the `apps` global folder.
+**Step 2 ->** Making `http server` and `ws server` folder inside the `apps` global folder for the backend part 
+
+**Step 3 ->** Lets move forward on making the frontend part for the chat application
+
+:bulb:**What will it consists of ??**
+
+-> an __input box__ (which room you want to join ??) and a __button__(to make the user join to this room)
+
+so making the above 
+
+so going to `web > app > page.tsx` and remove everything which came pre-coded inside it, there are also some **default `css` code present in the `global.css` file so remove that also** 
+
+```javascript
+export default function Home(){
+    return(
+        <div style = {{ // you could use TAILWIND but to keep things easy, lets just use the RAW CSS here
+            height : "100vw",
+            width : "100vh",
+            background : "black",
+            display : "flex",
+            justifyContent : "center",
+            alignItems : "center"
+        }}>
+        // BUT ARE YOU DOING THINGS THE RIGHT WAY ACCORING TO MONOREPO -> NO, when you are using monorepo, then you must put these design elements at one common place which is in our case apps > packages > ui > src 
+        // Lets introduce a new component in the above written path for the below made INPUT BOX so that it can be used at repeatedly instead of only being used at this place
+            <input type = "text" placehoder = "Enter the room code"></input>
+            <button>Join Room</button>
+        </div>
+    )
+}
+```
+
+making the file named as `text-input.tsx` inside the `apps > packages > ui > src` and inside that seperating the `styling` code for the INPUT button made in the project 
+
+```javascript
+// When ever you are creating custom component and writing the common code for the components, try to involve the custom interface or basically custom datatype 
+interface PropType {
+    placeholder : string,
+}
+
+export function TextInput({placeholder} : PropType){ // as input box will have some input given by the user and hence it will be passed on as PROPS (or as argument in the function), as we are dealing with TypeScript so its better to give the type of this input which can be given by the user. (see the interface code written above)
+    return(
+        <input placeholder={placeholder} style = {{
+            padding : 10,
+            margin : 10,
+            borderColor : "Black",
+            borderWidth : 1
+        }}></input>
+    )
+
+}
+```
+and now using this custom made input button on the main page(`apps > web > app > page.tsx`) ->
+
+```javascript
+import {TextInput} from "../../../packages/ui/src/text-input" // you can IMPORT the component like this but then you are losing out bunch of monorepo benefits as (what is the path changes and also we can independently deploy the text-input.tsx file (then what will happen))
+// so using the monorepo way of importing (just go to the folder package.json and see the name, for ex -> if you go to the apps > packages > ui > package.json, you will see the name -> "@repo/ui", SO JUST USE THIS FOR IMPORTING INSTEAD OF WHOLE PATH DECLARATION AND THEN THE FILE YOU WANT TO IMPORT FROM, something like the below)
+import {TextInput} from "@repo/ui/text-input"
+// BUT THIS WILL STILL GIVE YOU ERROR -> REASON -> see // 2 explantion below 
+export default function Home(){
+    return(
+        <div style = {{ // you could use TAILWIND but to keep things easy, lets just use the RAW CSS here
+            height : "100vw",
+            width : "100vh",
+            background : "black",
+            display : "flex",
+            justifyContent : "center",
+            alignItems : "center"
+        }}>
+            <TextInput placehoder = "Room Name"></TextInput> // as placehoder to chahiye na TextInput component ko as passed as a props from the file where this component is made
+            <button>Join Room</button>
+        </div>
+    )
+}
+```
+
+**Explanation of `// 2` code**
+
+Although you have made the `TextInput` component and even give it the ability to get **EXPORTED by giving it `export` keyword, still you have not given the access to file in which it is present [AS WE ARE TALKING HERE OF EXPORTING COMPONENT PRESENT INSIDE A REPO TO WHOLE ANOTHER REPO]**
+
+so to achieve the above thing, you have to go to `apps > packages > ui > package,json` **file is present inside the `ui` folder so go to the `package.json` file of this folder as there only you will see the `"exports"` key which will have the file which are going to be exported**
+
+Now if __you are using the new turborepo version,__ then you will see that in the `"exports"` key you will have the value 
+
+```json
+"exports": {
+  "./button": "./src/button.tsx",
+  "./card": "./src/card.tsx",
+  "./code": "./src/code.tsx",
+  "./input": "./src/text-input.tsx" // so in this you will have to give manually your file name and corresponding key name 
+  // REMEMBER -> you have given the key as "input" so you will have to import using this name only 
+  // so now to import this you will write 
+  import {TextInput} from "@repo/ui/input"
+}
+```
+But **if you are using Newer version of turborepo, then it have pre coded the path by using the regex**
+
+so if you now go to the `apps > packages > ui > package,json` in the newer version of turborepo, you will see 
+
+```json
+"exports": {
+    "./*": "./src/*.tsx"
+},
+
+// Now the above code is the GENERALISED FORM of what we were doing above as this simply means that all the .tsx file present inside the src folder can be EXPORTED using /file_name 
+// thus REMOVING THE BURDEN OF MANUALLY ADDING THE FILE NAMEs TO BE EXPORTED 
+```
+
+coming back to the `apps > packages > ui`, In the big companies, thats how the ui library is made so that every developer can use it. seeing our `text-input.tsx` file code 
+
+```javascript
+// Now you can make the more elaborative version of this input box by adding the variant, theme, size, etc.. for ex ->
+interface PropType{
+    placeholder : string
+    size : "big" | "small" // added a new field and according to it 
+}
+
+
+export function TextInput({placeholder, size} : PropType){// taking "size" as input to use it 
+    return(
+        <input placeholder={placeholder} style = {{ 
+            padding : size == "big" ? 20 : 10, // simply means if the size is big then make this input box padding = 20 otherwise 10
+            margin : size == "big"  ? 20 : 10, // same as the above statement
+            borderColor : "Black",
+            borderWidth : 1
+        }}></input>
+    )
+}
+```
+so now if you write this instead of `<TextInput placehoder = "Room Name"></TextInput>` inside the `apps > web > app > page.tsx` then
+
+```javascript
+<TextInput placehoder = "Room Name" size = "big"></TextInput>
+```
+then on the ui, you will see the change in the input box, it will have padding == 20 and margin == 20
+
+Like this **You can make your OWN CUSTOM LIBRARY to be used for multiple projects** 
+
+>[!TIP]
+> **Always try to use this approach as this will save time for you upcoming project, you might will take more time at first but once you have made one library then you can use it anywhere and in any project**
+
+>[!IMPORTANT]
+> **If you really want to see what all are present in the UI Library go to this link -> [Razorpay UI storybook](https://blade.razorpay.com/?path=/docs/guides-intro--docs)**, [<span style="color:orange">**TRY TO EXPLORE IT AND STRUCTURE YOUR PROJECT UI TO MAKE THE FRONTEND PART VERY EASY FOR ALL YOUR PROJECTS**</span>]
+
+Now coming back to the project, now 
+
+**Step 4 ->**i have to write the logic that if the user clicks on the button `join room`, then what will happen, so coming back to the code present inside the `apps > web > app > page.tsx`
+
+and **clicking on the button will lead you to another route**
+
+```javascript
+"use client" // as useRouter is React hook and hence it is client component 
+import { TextInput } from "@repo/ui/text-input"
+import {useRouter} from "next/navigation" // as router Next.js me enable isi se hota h remember the Next.js notes on routing
+
+export default function Home(){
+    const router = useRouter()
+  return(
+    <div style = {{
+            height : "100vh",
+            width : "100vw",
+            background : "black",
+            display : "flex",
+            justifyContent : "center",
+            alignItems : "center"
+        }}>
+      <TextInput placeholder="Room Name" size = "small"></TextInput>
+      // Clicking on the button will lead you to the other route so writing the logic for it 
+      <button onClick = {
+        router.push("/chat/kk") // 2
+      }>Join Room</button>
+    </div>
+  )
+}
+```
+:bulb:**Can you see the problem in the `// 2` code**
+
+-> you have basically **HARDCODED the route as no matter what user will give the room name, you are redirecting them to `/chat/kk`, now this must be DYNAMIC (i.e. -> WHAT THE USER WILL GIVE ON THAT ROUTE ONLY IT SHOULD BE FORWARDED AND THE UI SHOULD CHANGE ACCORDING TO THAT ROUTE ONLY)**
+
+so how to make it DYNAMIC (or dependent on the user)
+
+**As here we need to store the value of the input box(the place where the user will put the input or room name) so that the route can then use this value to re-direct them according to the room name the user has given (as they will be redirected to that route) so `useState` or STATE VARIABLE is going to be used for storing the input from the user**
+
+you can also do this -> **extracting the text user will give in the input box so `useRef` can also be used**, but for now seeing the **state variable making approach**
+
+Basically i have just used the concept which we have learnt in `react` which is **to store anything in `react` only 2 hooks are used `useState` and `useRef`**
+
+Now lets see how you can mould your code and redirect the user to the route it has given as room name ->
+
+inside the `packages > ui > src > text-input.tsx`
+
+```javascript
+interface PropType{
+    placeholder : string,
+    size : "big" | "small",
+    onChange : (e : any) => void // the input box will take an onChange event handler whose event "e" is of "any" type (for now give it "any", later we will give its appropriate) and the function returns the type "void" as it has just the work of passing the input string to the STATE VARIABLE so that the value of the STATE VARIABLE can then be passed inside the route and thus it(route) will be dependent on user 
+}
+
+
+export function TextInput({placeholder, size, onChange} : PropType){ // will take the input "onChange" 
+    return(  
+        <input onChange = {onChange} placeholder={placeholder} style = {{
+            padding : size == "big" ? 20 : 10,
+            margin : 10,
+            borderColor : "Black",
+            borderWidth : 1
+        }}></input>
+    )
+}
+```
+
+**Explanation of certain part wrote above**
+
+The line `<input onChange = {onChange}` simply means that whenever the native input box value will change, it will call the `onChange` props passed 
+
+i.e. **Whenever the native input box changes, it will call the `onChange` prop passing in it i.e the function you are defining on `// 3` line (see below `onChange` part), that function will run**
+
+as in the below code `// 3` line, you have written the function to **alert user with "hi" message**
+
+so the __output will look like__ -> whenever you will write or remove some text from the input box on the ui(basically **make change on what it was initially**), you will see an **alert on the browser showing message `"hi"`**
+
+making change in the `apps > web > app > page.tsx`
+
+```javascript
+"use client" // as you are using onChange event handler in the below code so you have to make this client component to make it work and useRouter is also a client component 
+import { TextInput } from "@repo/ui/text-input"
+import {useRouter} from "next/navigation"
+export default function Home(){
+    const router = useRouter()
+  return(
+    <div style = {{ // CSS part will remain same as above you were writing
+        }}>
+        // 3
+      <TextInput onChange = {() => { // Added onChange event handler 
+        // and then using the state variable to store the value given by the user simultaneously as the user is giving the input
+      }} placeholder="Room Name" size = "small"></TextInput>
+      <button onClick = {
+        router.push("/chat/state_variable") // finally using the state variable declared above to store the value given by the user so that the ROUTE BECOMEs USER ORIENTED
+      }>Join Room</button>
+    </div>
+  )
+}
+```
+
+But as the above approach might feel overwhelming, so just remove the **making of user input route for now and stick to hardcoded routes and removing the `onChange` as props inside the `text-input.tsx`**[basically reverted back to what we have done till before the problem]
+
+
+
+
+
+
+
+
 
 
 
