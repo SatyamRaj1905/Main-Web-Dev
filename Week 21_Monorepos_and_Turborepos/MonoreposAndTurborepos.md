@@ -428,7 +428,7 @@ export default function Home(){
       <TextInput placeholder="Room Name" size = "small"></TextInput>
       // Clicking on the button will lead you to the other route so writing the logic for it 
       <button onClick = {
-        router.push("/chat/kk") // 2
+        router.push("/chat/123") // 2
       }>Join Room</button>
     </div>
   )
@@ -504,6 +504,148 @@ export default function Home(){
 ```
 
 But as the above approach might feel overwhelming, so just remove the **making of user input route for now and stick to hardcoded routes and removing the `onChange` as props inside the `text-input.tsx`**[basically reverted back to what we have done till before the problem]
+
+**Step 5 ->** Handling the request for going to the room
+
+so for doing the above task, create a file structure like this -> `apps > web > app > chat > [roomid]`
+
+```javascript
+import { TextInput } from "@repo/ui/text-input";
+
+export default function Chat() {
+  return (
+    <div style={{
+      width: "100vw",
+      height: "100vh",
+      display: "flex",
+      justifyContent: "space-between",
+      flexDirection: "column"
+    }}>
+      <div>
+        Chat room
+      </div>
+      <div>
+        <TextInput size="big" placeholder="Chat here"></TextInput>
+      </div>
+    </div>
+  );
+}
+```
+
+Now in the middle part, we will **append the chat**
+
+**Step 6 ->** Lets try to write the **Backend part**
+
+so going inside the `apps > http-server`, and then doing the **initial steps inside the said location in the terminal**
+
+```javascript
+npm init -y
+```
+to initialise `package.json` file and then 
+
+```javascript
+npx tsc --init
+```
+to initialise `ts-config.json` file 
+
+**same thing you will do for `ws-server` folder**
+
+Now we will create `src` folder in both the folders
+
+You will also have to change the `rootDir` and `outDir` to `./src` and `./dist` respectively inside the `tsconfig.json` and this step will also be done for both the folders.
+
+**Now comes the CATCH, can you see the repeatitive work being done inside the `tsconfig.json` file for both the folders and hence AGAIN AVOID CODE DUPLICATION**
+
+So for this only, if you go to `apps > packages > typescript-config` folder is given as **you can see that both the folder `ws-server` and `http-server` are using the same `tsconfig` file so its better to put that common file inside one file and then export them to these files**
+
+so making a new file named as `backends.json` inside the  `apps > packages > typescript-config` inside which we will copy paste the code present inside the `tsconfig.json` file of `ws-server` and `http-server` [:no_entry: Remove all the comments part, otherwise this will show error as it is .json file]
+
+so inside the `backends.json` file 
+
+```json
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
+    "rootDir": "./src", // 2
+    "outDir": "./dist", // 3
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+But if you put `// 2` and `// 3` in the above, then just write the `// 4` line (see below) then the compiler will think that there is `src` and `dist` folder present inside `apps > packages > typescript-config`
+
+BUT, as our `src` and `dist` folder is present in the `apps > http-server` (`dist` folder will be created after the code is compiled(as it is the folder containing `ts` to `js` conversion)), so **It will give ERROR inside the `tsconfig.json`** and to solve this, **we remove the `// 2` and `// 3` line of code from above and shift it downward (see `// 5` codeblock below)**
+
+and then inside the `tsconfig.json` file in `ws-server` and `http-server`, **Remove all things present and just IMPORT the above file by writing in both the `tsconfig.json` file of both the folders**
+
+```javascript
+{
+    "extends": "@repo/typescript-config/backends.json", // 4
+    "compilerOptions":{ // 5
+        "rootDir": "./src", 
+        "outDir": "./dist",
+    }
+}
+```
+**Step 7 ->** Putting some **dependency in the `ws-server` and `http-server`** by making file named `index.ts` in `apps > http-server > src` 
+
+first putting inside the `http-server`
+
++ It will require `express` as the 1st dependency 
+
+```javascript
+npm install express @types/express 
+// as we are using ts so add @types/express
+```
+
+and then using putting the dependency inside the `ws-server` 
+
++ It will require **Websocket or socket.io(depends on what you want to) for now lets stick to Websocket**
+
+```javascript
+npm install ws @types/ws 
+```
+
+**Step 8 ->** Let's introduce the endpoint inside the `index.ts` file present in `apps > http-server > src` 
+
+```javascript
+import express from "express"
+
+const app = express()
+
+app.get("/signup", (req, res) => {
+    res.send("Hello world")
+})
+
+app.get("/signin", (req, res) => {
+    res.send("Hello world")
+})
+
+app.get("/chat", (req, res) => {
+    res.send("Hello world")
+})
+
+app.listen(3001) // as on 3000 our frontend is being hosted which is named as "web" here so if you will not give this, it will give ROUTE CONFLICT ERROR
+```
+
+Now comes the **running and building part so for that we have to add the `"scripts"` where we will define what command will run when you run `npm run build` and `npm run dev`**
+
+so going inside the `apps > http-server > package.json` and then adding these two command inside the `"scripts"` key (you know what these commands do if not see the `ts` lecture)
+
+```javascript
+"scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b && node dist/index.js"
+}
+```
+
+**Now if you run `npm run dev` in the root folder `chat-app`**
+
+
 
 
 
