@@ -678,6 +678,11 @@ so going inside the `apps > http-server > package.json` and then adding these tw
 **Explanation of `// 2` code**
 ----------
 
+>[!NOTE]
+> **`inputs` is basically the file where the turbo keep an eye and if there is some change which happened, it will RE-BUILD that part of project**
+>
+> **`outputs` is basically where turbo keep an eye and cache these build folders**
+
 >[!IMPORTANT]
 > <span style="color:orange">**Remember ->**</span> **In case of a `node.js` app, the `.env` file changing should NOT need a rebuild of the project BUT In case of a `next.js` app, the `.env` file changing DOES require a rebuild of the project**
 >
@@ -699,6 +704,15 @@ so making the `turbo.json` file inside the `apps > http-server` and writing the 
   }
 }
 ```
+
+>[!TIP]
+> **If you are using `Next.js` for both frontend and backend, then you will have single applications (`apps > web`) but if you are using lets say `Next.js` for frontend and `Node.js` for backend then you will have two seperate applications for both frontend and backend**
+
+>[!IMPORTANT]
+> **Summary of what explained above -> When we run `npm run build`, `Next.js` generates cached files. we are telling turborepo NOT to cache `next.js`, except for the cache already present in the `.next` folder. when we run it again,it will use that cached data and avoid rebuilding everything.**
+
+
+
 
 
 
