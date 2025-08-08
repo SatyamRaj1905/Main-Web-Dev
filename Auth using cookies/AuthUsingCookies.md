@@ -174,6 +174,10 @@ BUT, there are some **downsides of this approach (will come to know why ??)**, a
 
 Lets understand the type of `SameSite` 
 
+### **`SameSite` types**
+----------
+
+
 + **None ->** Allow it from anywhere (**so CSRF attack will remain present here**), so <span style="color:orange">**Never use it unless it is for some random cookie(like theme info. -> dark or light)etc..**</span>
 
 <img src = "image-7.png" width=400 height=230>
@@ -209,9 +213,94 @@ Now lets say i have another website(see the above pic for better clarity of the 
 >
 > But as long as it is `GET` request and it uses top-level navigation, everything is fine even if it is malicious website
 
+## **Coding up the cookie based authentication**
 
+The process is pretty simple, rather than sending back the token and explicitly storing it on the `local storage`, you will just here send `set-cookie` header and browser will take care of sending it back 
 
+BUT we still need `jwt` (or any verifiable token that will be sent to the server by the browser), **Remember -> only how it is being sent to the server is DIFFERENT, EARLIER -> it is being sent in the AUTHORISATION header which is set EXPLICITLY in the `request`, NOW it will come INSIDE A COOKIE but in the end, you will get a token that you need to verify and based on that you will be able to get the identity of the user**
 
+**Step 1 ->** Initialize an empty `TS` project 
+
+```javascript
+npm init -y 
+npm tsc --init 
+```
+
+**Step 2 ->** Update `rootDir` and `outDir`
+
+```javascript
+"rootDir" : "./src"
+"outDir" : "./dist"
+```
+
+**Step 3 ->** Add required libraries
+
+```javascript
+import express from "express"
+import cookieParser from "cookie-parser"
+import cors from "cors" 
+import jwt, {JwtPayload} from "jsonwebtoken"
+import path from "path"
+```
+**Step 4 ->** Intialize express app, add middlewares
+
+```javascript
+const app = express()
+app.use(cookieParser())
+app.use(express.json())
+
+app.use(cors({
+    credentials : true,
+    origin : "http://localhost:5173"
+}))
+```
+
+**Step 5 ->** Add a dummy `sign in` endpoint
+
+```javascript
+app.get("/signin", (req, res) => {
+    const email = req.body.email
+    const password = req.body.password
+
+    // write db validations logic here, fetch id of user from db 
+    const token = jwt.sign({
+        id : 1
+    }, JWT_SECRET)
+    res.cookie("token", token)
+    res.send("Logged in!")
+})
+```
+
+**Step 6 ->** Add a protected backend route
+
+```javascript
+app.get("/user", (req, res) => {
+    const token = req.cookies.token 
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
+    // Get email of the user from the database logic here 
+    res.send({
+        userId : decoded.id 
+    })
+})
+```
+**Step 7 ->** Add a logout route
+
+```javascript
+app.post("/logout", (req, res) => {
+    res.cookie("token", "ads")
+    res.send({
+        message : "Logged out"
+    })
+})
+```
+
+**Step 8 ->** Listen on port 3000
+
+```javascript
+app.listen(3000)
+```
+
+Full code can also be accessed from here -> [Cookie based auth system](https://github.com/100xdevs-cohort-2/week-16-auth-1)
 
 
 
