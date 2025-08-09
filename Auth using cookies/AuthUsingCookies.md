@@ -1,5 +1,18 @@
 # **Authentication using Cookies**
 
+- [**Authentication using Cookies**](#authentication-using-cookies)
+  - [**How authentication works using jwt + localstorage**](#how-authentication-works-using-jwt--localstorage)
+  - [**Authentication using cookies**](#authentication-using-cookies-1)
+    - [**About cookies**](#about-cookies)
+    - [**Work flow to do authentication using cookies**](#work-flow-to-do-authentication-using-cookies)
+    - [**Properties of cookies**](#properties-of-cookies)
+    - [**Cross Site Request Forgery(CSRF) Attacks**](#cross-site-request-forgerycsrf-attacks)
+    - [**`SameSite` types**](#samesite-types)
+  - [**Coding up the cookie based authentication**](#coding-up-the-cookie-based-authentication)
+    - [**Backend part**](#backend-part)
+    - [**Frontend part**](#frontend-part)
+
+
 Till now you might have known that how authentication works ? 
 
 :bulb:**What is authentication ??**
@@ -214,6 +227,12 @@ Now lets say i have another website(see the above pic for better clarity of the 
 > But as long as it is `GET` request and it uses top-level navigation, everything is fine even if it is malicious website
 
 ## **Coding up the cookie based authentication**
+----------
+
+
+### **Backend part**
+----------
+
 
 The process is pretty simple, rather than sending back the token and explicitly storing it on the `local storage`, you will just here send `set-cookie` header and browser will take care of sending it back 
 
@@ -277,6 +296,8 @@ Till now we have used the `cors` like this -> `app.use(cors())`, but here we are
 > credentials : true,
 > origin : "http://localhost:5173"
 > })) __// Basically you have to put the url of FRONTEND in the "origin" part which is allowed to set the cookie__
+>
+> If the above is not the case then you do not have to do this thing
 
 **Step 5 ->** Add a dummy `sign in` endpoint
 
@@ -341,4 +362,119 @@ running first the `npm run build` and then `npm run start` and then sending the 
 You can clearly see in the right pic that you have got the token inside the `Set-Cookie` header. 
 
 
+Now **you can send and make cookie store inside the browser as many as you want like**
 
+```javascript
+app.get("/signin", (req, res) => {
+    const email = req.body.email
+    const password = req.body.password
+
+    const token = jwt.sign({
+        id : 1
+    }, JWT_SECRET)
+    res.cookie("token", token)
+    res.cookie("token5", token) // just add  another cookie with another name and value as per your needs (for simplicity, here we have taken the same value as that with "token" name)
+    res.send("Logged in!")
+})
+```
+
+and now if you see the in the `headers` section ->
+
+<img src = "image-13.png" width=400 height=230>
+
+you will see that there are 2 token coming with the name being `token` and `token5` storing the same value.
+
+Also if you now send a `request` to the `logout` route then you will see the output as 
+
+<img src = "image-14.png" width=400 height=230>
+
+you will now see that the `token` is **now empty**
+
+### **Frontend part**
+----------
+Coding up the `signin` frontend page 
+
+
+```javascript
+import { useState } from "react"
+import { BACKEND_URL } from "../config"
+import axios from "axios"
+
+export const Signin = () => {
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+
+    return <div>
+        <input onChange={(e) => {
+            setUsername(e.target.value);
+        }} type="text" placeholder="username" />
+        <input onChange={(e) => {
+            setPassword(e.target.value);
+        }} type="password" placeholder="password" />
+        <button onClick={async () => {
+            await axios.post(`${BACKEND_URL}/signin`, {
+                username,
+                password
+            }, {
+                withCredentials: true, // as our frontend and backend are on different website, so we must have to use CORS key knwon as "withCredentials" and set its value to "true" 
+                // You must be also thinking that the second parameter is used to send the headers, body, while using app.post and you are doing the same thing here(but at the start only we have learnt that no need to attch it in header, browser automatically attaches it(cookie)), see if CORS exists on the project, then only you do this otherwise NO NEED TO DO THIS(pass the second parameter "withCredentials")
+            });
+            alert("you are logged in")
+        }}>Submit</button>
+    </div>
+}
+```
+
+Now making the frontend for `user.tsx` file 
+
+```javascript
+import axios from "axios";
+import { useEffect, useState } from "react"
+import { BACKEND_URL } from "../config";
+
+export const User = () => {
+    const [userData, setUserData] = useState();
+
+    useEffect(() => { // When the component mounts for the first time 
+        axios.get(`${BACKEND_URL}/user`, { // Send a request to the backend
+            withCredentials: true,
+          })
+            .then(res => {
+                setUserData(res.data); // Get all the data from the backend 
+            })
+    }, []);
+
+    return <div>
+        You're id is {userData?.userId}
+        <br /><br />
+        <button onClick={() => {
+            axios.post(`${BACKEND_URL}/logout`, {}, {
+                withCredentials: true,
+            })
+        }}>Logout</button>
+    </div>
+}
+```
+Running the frontend, 
+
+**Output**
+
+<img src = "image-15.png" width=320 height=230> <img src = "image-16.png" width=320 height=230>
+
+left part -> `sign in` endpoint (Notice the cookie came back and stored inside the browser) and right part -> `user` endpoint (Notice the cookie is also sent on this route), even if you go to the random route of the same website then also the cookie will go with it 
+
+Now in this you will also see that **It also consists of the code on how to serve the frontend inside the backend (this was how the things used to happen in previous days (exmaple -> `EJS`)**`**. Go to the `backend` folder and you will see that `index.html` file is present there now if you see the content of it you will notice that you have made frontend on the backend route only and even if you go to `http://localhost:3000`, you will also see almost similar page like that you will see when running the frontend folder code
+
+The things to learn from the above para is that you do not have to send `"withCredentials" : true` as here `CORS` issue will not occur as **Frontend to backend me he likha h using `index.html` file and also ALL THE REQUEST ARE HAPPENING ON THE SAME REQUEST AS THAT OF BACKEND** [<span style="color:orange">**backend and frontend on the same endpoint JUST LIKE `Next.js`**</span>]
+
+:bulb:**If the frontend and backend can be hosted on the same endpoint by just using `express` then why to use `Next.js` ??**
+
+-> Because `Next.js` is **REACT + BACKEND** but the above approach is **NON-REACT (just by using the `html` and `js` you can do some task) + BACKEND**
+
+so if you now run the command `npm run build` and then `npm run start` inside the backend folder, then you will see output similar to this ->
+
+<img src = "image-17.png" width=500 height=250>
+
+Notice even in the backend you can see the basic `sign in` and `logout` button and it works the same way as that in frontend (cookie is generated and stored here also in the browser)
+
+`Logout` also works in the same way as that in frontend.
