@@ -1,5 +1,24 @@
 # **Next Auth**
 
+- [**Next Auth**](#next-auth)
+  - [**Why not use JWT + localstorage in case of `Next.js` ??**](#why-not-use-jwt--localstorage-in-case-of-nextjs-)
+  - [**Next Auth**](#next-auth-1)
+  - [**Catch All route**](#catch-all-route)
+  - [**Coding NextAuth**](#coding-nextauth)
+    - [**Setup**](#setup)
+    - [**Credentials as provider in NextAuth**](#credentials-as-provider-in-nextauth)
+    - [**Google and Github as provider in NextAuth**](#google-and-github-as-provider-in-nextauth)
+  - [**Some important authentication part**](#some-important-authentication-part)
+    - [**Logic to display on the main page fully functional authorization buttons (ex -\> signin, logout)**](#logic-to-display-on-the-main-page-fully-functional-authorization-buttons-ex---signin-logout)
+      - [**using `useSession` hook**](#using-usesession-hook)
+      - [**using `getServerSession` hook**](#using-getserversession-hook)
+  - [**Middlewares in `Next.js`**](#middlewares-in-nextjs)
+    - [**About Middlwares in `Next.js`**](#about-middlwares-in-nextjs)
+      - [**Use cases**](#use-cases)
+    - [**Coding up the middleware in `Next.js`**](#coding-up-the-middleware-in-nextjs)
+    - [**Selectively running middleware**](#selectively-running-middleware)
+
+
 NextAuth is __a library__ that lets you do `Authentication` in `Next.js`
 
 Can you do it without next-auth ?? - Yes
@@ -697,7 +716,7 @@ In just writing the above logic we were able to **achieve SERVER SIDE RENDERING 
 
 Now running the above code but before running it first make -> a file `.env` inside the global folder where **add the `NEXTAUTH_SECRET` variable here as**
 
-```java
+```javascript
 NEXTAUTH_SECRET = 123er45 // (any random for now)
 ```
 and then adding `secret` alos inside the codeblock of `route.tsx`
@@ -768,16 +787,196 @@ export async default function Home(){
 ```
 This helps to **achieve the PRE-RENDERED AUTHENTICATION (or simply saying SERVER SIDE AUTHENTICATION)**
 
+## **Middlewares in `Next.js`**
+----------
+
+Lets recap what we have learnt about the middlewares till now,
+
+:bulb:**What are Middlewares ??**
+
+-> Middlewares are __code that runs before / after your request handler.__
+
+It's commonly used for things like
+1. __Analytics__
+2. __Authentication__
+3. __Redirecting the user__
+
+>[!NOTE]
+> Till now **Middleware in `Next.js` is not so common due to its weird(IMMATURE, may get better over time) way of implementation and as middlewares are mostly used for authentication which in `Next.js`, NEXTAUTH beautifully fulfills the requirement and hence middlewares in `Next.js` is not so common**
+
+<img src = "image-26.png" width=430 height=300>
+
+**Above is the example of using the middleware for ANALYTICS PUTPOSE (here you are trying to COUNT the number of request came on `/` or `/requestCount` endpoint)**
+
+`app.use()` makes sure that everytime any of the `request` is going on `/` and `/requestCount`, first the **Middleware logic present inside it will run and then they will go to their respective routes and show the corresponding contend of that route**
+
+<img src = "image-27.png" width=430 height=300>
+
+**Above is the example of using the middleware for AUTHENTICATION PURPOSE (here you are giving the user access (or redirecting the user to the page) to a particular route only if through the Middleware, it has successfully passed and authenticated)**
+
+### **About Middlwares in `Next.js`**
+----------
+
+Documentation -> [Middlewares in `Next.js`](https://nextjs.orq/docs/app/building-your-application/routinq/middleware)
+
+Middleware allows you to run code before a request is completed.
+
+Then, based on the incoming request, you can modify the response by
+1. rewriting
+2. redirecting
+3. modifying the request or response headers
+4. or responding directly.
+
+#### **Use cases**
+----------
++ __Authentication and Authorization:-__ Ensure user identity and check session cookies before
+granting access to specific pages or API routes.
+
++ **Logging and Analytics:-** Capture and analyze request data for insights before processing by
+the page or API.
+
++ __Server-Side Redirects:-__ Redirect users at the server level based on certain
+conditions (e.g.. locale, user role).
+
++ __Bot Detection:-__ Protect your resources by detecting and blocking bot traffic.
+
+### **Coding up the middleware in `Next.js`**
+----------
+
+**Step 1 ->** Initializing an empty `Next.js` project 
+
+```javascript
+npx create-next-app
+```
+
+<img src = "image-28.png" width=600 height=200>
+
+**Step 2 ->** Install the dependencies 
+
+```javascript
+npm install
+```
+
+**Step 3 ->** Creating `middleware.ts` file inside the root folder 
+
+>[!IMPORTANT]
+> __While only one `middleware.ts` file is supported per project__, you can still organize you rmiddleware logic modularly. __Break out middleware functionalities into separate `.ts` or `.js` files and IMPORT them into your main `middleware.ts` file. This allows for cleaner management of route-specific middleware, aggregated in the `middleware.ts` for centralized control. By enforcing a single middleware file. it simplifies configuration, prevents potential conflicts, and optimizes performance by avoiding multiple middleware layers.__
+
+The above is also one of the reason why `middleware` in `Next.js` is weird as most other frameworks or library(like `express` and `react`, etc..) never say you that you should have only one `middleware.ts` file
+
+Now lets see how the ANALYTICS purpose of middleware in `Next.js` is fufilled 
+
+Below is the code to track the number of requests
+```javascript
+import {NextResponse} from 'next/server'
+import type {NextRequest} from 'next/server'
+
+let requestCount = 0
+
+export function middleware(request : NextRequest){
+    requestCount++
+    console.log("Number of requests is " + requestCount) // You can run some logic before the middleware does its work
+    const res = NextResponse.next() // doing the work of next() function while using middleware in next.js
+    return res // and even after the middleware you can also write the logic 
+}
+```
+
+So **Now before any of your endpoint(frontend or backend) is hit, this piece of code will run**
+
+**Example of implementing the above in Backend route as well**
+
+:bulb:**Create a requestCount middleware to track only requests that start with `/api`**
+
+**Add a dummy API route `api/user/route.ts`**
+
+```javascript
+import {NextResponse} from "next/server"
+
+export function GET(){
+    return NextResponse.json({
+        message : "hi there"
+    })
+}
+```
+
+**Update global `middleware.ts` made**
+
+```javascript
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+let requestCount = 0;
+export function middleware(request: NextRequest) {
+  requestCount++;
+  console.log("number of requests is " + requestCount);
+  return NextResponse.next();
+}
+```
 
 
+**Till now you have figured out the problem with middleware in `Next.js`**
 
+<span style="color:orange">**The biggest problem with the middleware is that it RUNS ON ALL ROUTES so if i want to make work middleware on some of the routes only, then `Next.js` middleware becomes MORE WEIRDER to implement**</span>
 
+:bulb: __Lets see how to restrict the middleware to some specific route in `Next.js` ?__
 
+### **Selectively running middleware**
+----------
 
+**Simply means how can you run the middleware on the particular route only ??** and this where it gets <span style="color:orange">**COMPLICATED and WEIRD**</span>
 
+**Approach 1 -> using `export config`**
+Now you can add the below line of codeblock inside the global `middleware.ts` file to **Restrict the middleware to run only on ONE TYPE OF paths**
 
+```javascript
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
+let requestCount = 0;
+export function middleware(request: NextRequest) {
+  requestCount++;
+  console.log("number of requests is " + requestCount);
+  return NextResponse.next();
+}
 
+// Adding this will restrict the above written middleware to run only on specific routes or path (For ex -> here the above code(middleware) will run only for endpoint which have -> "/api/any_thing", basically "api" ya iske baad kuch v route ho ye logic chlega otherwise nhi chlega)
+export const config = {
+  matcher: '/api/:path*',
+}
+
+// BUT AGAIN THE DONWSIDE of this is -> you can only give ONE MATCHER so (it will run only on one type of route) but what if i want this logic to run on both "/api/user" and "page/a.html" (then this thing will not work)
+```
+
+**Approach 2 -> perfect filtering by the below approach (little or very weird to be hones)**
+
+```javascript
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export function middleware(request: NextRequest) {
+  console.log(request.nextUrl.pathname)
+  if (request.nextUrl.pathname.startsWith('/admin')) { // Basically you are EXTRACTING the current path name (request.nextUrl.pathname) that STARTS WITH(.startsWith) name "/admin" 
+    return NextResponse.redirect(new URL('/signin', request.url)) // then write some logic here (be it checking one or as given here -> redirecting the user to "/signin" endpoint), you can also do the check here that those who have not access (i.e. not logged in) and trying to access a particular route, then that user will be redirected to signin page (again wrap it in "if" statement) // 2
+  }
+
+  if (request.nextUrl.pathname.startsWith('/dashboard')) { // similar to above if the current path consists of the name that starts with "/dashboard" then 
+    return NextResponse.next() // do the logic 
+  }
+}
+```
+**Clearly you can see that there are lots of `if` statements and that makes the implementation of middleware in `Next.js` WEIRD as well as UGLY Looking**
+
+**Extra knowledge about part `// 2`**
+
+-> here in this line of code in `Next.js`, **In the very first request it will get RE-DIRECTED to `/signin` page but if you were using `react` then the very first `request` won't RE-DIRECT the user(as it has some `html`, `css` and `js` code and only when `js` code present will run (as it is the file which have logic of re-directing), then only it will  RE-DIRECT the user to `sign in` page)**[ simple CSR v/s SSR stuff ].
+
+Reference -> [Example of Selectively running middleware](https://github.com/code100x/cms/blob/main/src/middleware.ts)
+
+The above `Reference` part is **used to Restrict two or more people logged in with same id at any particular point of time**[newer ones will get the access and the previous ones will log out]
+
+__Basically works on the token timeline (if the newer token has created(i.e. new user has logged in with same credentials) then just log out from the page where the previous token(outdated token) is present and hence redirect them back to the log in page (end the session basically for old user now))__[The above `reference` link has this logic only in coding way]
+
+And the above is one of the usecase of really using middleware in `Next.js`, other than this, things may get complicated and weird when it comes to implementing middlewars in `Next.js`
 
 
 
