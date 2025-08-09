@@ -237,10 +237,10 @@ npm tsc --init
 
 ```javascript
 import express from "express"
-import cookieParser from "cookie-parser"
-import cors from "cors" 
-import jwt, {JwtPayload} from "jsonwebtoken"
-import path from "path"
+import cookieParser from "cookie-parser" // 2
+import cors from "cors"  
+import jwt, {JwtPayload} from "jsonwebtoken" // "JwtPayload" is the TYPE, just given for the purpose of  typescript type safety check if you dont want give it to "any" type
+import path from "path" // will see below what this is for ?? 
 ```
 **Step 4 ->** Intialize express app, add middlewares
 
@@ -249,11 +249,34 @@ const app = express()
 app.use(cookieParser())
 app.use(express.json())
 
-app.use(cors({
+app.use(cors({ // 3
     credentials : true,
     origin : "http://localhost:5173"
 }))
 ```
+
+**Explantion of `// 2` code**
+
+**`cookieParser` as the name suggests is a MIDDLEWARE USED TO PARSE THE COOKIES into an easier and more understandable format**
+
+:bulb:**Can't we use `req.headers["Cookie"]` to extract the cookies from the `request header` ??**
+
+-> __Yes__ definitely we can do this and **you dont even need `cookieParser` but the `response` which you get while doing `req.headers["Cookie"]` will be a VERY LONG STRING which you have to PARSE TO get an object(consisting of token) (SUCH A TEDIOUS JOB) so instead of doing all this directly use the `cookieParser` library and this will automatically parse the `cookie` to the object**
+
+**Explanation `// 3` code**
+
+Till now we have used the `cors` like this -> `app.use(cors())`, but here we are using it different way reason for this??
+
+>[!IMPORTANT]
+> In `Express.js`, if you are **allowing `CORS` and you want the cookies to be set, then you must have to pass the `credentials : true` and give an origin(only from this you are able to SET the COOKIES, if from others you will try to set then `CORS` will not let you do and thats why you see that you are being re-directed to other website(which has been given in `CORS`) for signing in or signing up) while using `CORS`**
+
+>[!CAUTION]
+> __If your backend and frontend both are at different places (CORS case), then you must have to use the `CORS` in this manner only__ 
+>
+> app.use(cors({
+> credentials : true,
+> origin : "http://localhost:5173"
+> })) __// Basically you have to put the url of FRONTEND in the "origin" part which is allowed to set the cookie__
 
 **Step 5 ->** Add a dummy `sign in` endpoint
 
@@ -266,7 +289,8 @@ app.get("/signin", (req, res) => {
     const token = jwt.sign({
         id : 1
     }, JWT_SECRET)
-    res.cookie("token", token)
+    res.cookie("token", token) // this function will put the cookie in the set-cookie header and the user will be returned with this header, "token"(double quotes one) is just the name of the token (you can name it anything)
+    // THE ABOVE IS HOW YOU SET THE COOKIE FOR THE USER
     res.send("Logged in!")
 })
 ```
@@ -275,7 +299,10 @@ app.get("/signin", (req, res) => {
 
 ```javascript
 app.get("/user", (req, res) => {
-    const token = req.cookies.token 
+    // BELOW IS HOW YOU GET THE COOKIE FROM THE USER 
+    const token = req.cookies.token // This is how the server will extract the cookie sent by the browser (by default)
+    // if not done the above step then 
+    // const cookieString = req.headers["Cookies"] // and then the cookieString will be PARSED to extract the cookie
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
     // Get email of the user from the database logic here 
     res.send({
@@ -287,7 +314,9 @@ app.get("/user", (req, res) => {
 
 ```javascript
 app.post("/logout", (req, res) => {
-    res.cookie("token", "ads")
+    res.cookie("token", "") // set the cookie named as "token" to None (empty string)
+    // you can also do the below thing 
+    res.clearCookie("token")
     res.send({
         message : "Logged out"
     })
@@ -302,6 +331,14 @@ app.listen(3000)
 
 Full code can also be accessed from here -> [Cookie based auth system](https://github.com/100xdevs-cohort-2/week-16-auth-1)
 
+
+**Output ->**
+
+running first the `npm run build` and then `npm run start` and then sending the `request` from POSTMAN, you will see the below output ->
+
+<img src = "image-11.png" width=320 height=260> <img src = "image-12.png" width=320 height=260>
+
+You can clearly see in the right pic that you have got the token inside the `Set-Cookie` header. 
 
 
 
