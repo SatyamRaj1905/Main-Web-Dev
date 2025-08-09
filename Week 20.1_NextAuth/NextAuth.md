@@ -817,7 +817,7 @@ It's commonly used for things like
 ### **About Middlwares in `Next.js`**
 ----------
 
-Documentation -> [Middlewares in `Next.js`](https://nextjs.orq/docs/app/building-your-application/routinq/middleware)
+Documentation -> [Middlewares in `Next.js`](https://nextjs.org/docs/app/api-reference/file-conventions/middleware)
 
 Middleware allows you to run code before a request is completed.
 
