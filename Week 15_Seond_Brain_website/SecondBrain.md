@@ -26,7 +26,7 @@ POST /api/v1/signup
 
 **Constraints**
 
-1. username should be 3-10 letters
+1. Username should be 3-10 letters
 2. Password should be 8 to 20 letters, should have atleast one uppercase, one lowercase, one special character, one number 
 
 **Response**
@@ -160,36 +160,33 @@ Same thing is true for `tags`
 __User schema__ 
 
 ```javascript
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   username : {type : String, required : true, unique : true},
   password : {type : String, required : true}
 })
 
-const User = mongoose.model("User", userSchema)
-module.exports = User 
+export const userModel = model("User", userSchema)
 ```
 
 **Tags Schema**
 
 ```javascript
-const tagSchema = new mongoose.Schema({
+const tagSchema = new Schema({
   title : {type : String, required : true, unique : true}
 })
 
-const Tag = mongoose.model("Tag", tagSchema)
-module.exports = Tag 
+export const tagModel = model("Tag", tagSchema)
 ```
 
 **Link Schema**
 
 ```javascript
-const linkSchema = new mongoose.Schema({
+const linkSchema = new Schema({
   hash : {type : String, required : true},
   userId : {type : mongoose.Schema.Types.ObjectId, ref : "User", required : true} // 2
 })
 
-const Link = mongoose.model("Link", linkSchema)
-module.exports = Link
+export const linkModel = model("Link", linkSchema)
 ```
 
 **Explanation of `// 2` code**
@@ -210,6 +207,8 @@ const contentSchema = new Schema({
   tags : [{type : Types.ObjectId, ref : 'Tag'}], // 2
   tags : {type : Types.ObjectId, ref : 'User', required : true} // same as above Explanation
 })
+
+export const contentModel = model("Content", contentSchema)
 ```
 
 :bulb:**What is `enum` ??**
@@ -329,13 +328,159 @@ app.listen(3000, () => {
 });
 ```
 
-**Step 5 ->** Created the `db.ts` file inside the `src` folder 
+Connect to the `mongoDB` database now before proceeding to writing the **Schema** inside the `db.ts`
+
+**Step 5 ->** Created the `db.ts` file inside the `src` folder for making **Schema**
+
+```javascript
+import {model, Schema} from "mongoose"
+
+const userSchema = new Schema({
+  username : {type : String, required : true, unique : true},
+  password : {type : String, required : true}
+})
+
+export const userModel = model("User", userSchema) // you can also use module.exports = {userModel, and so on..} but this one is better
+```
+
+Now adding the logics to routes made above in `index.ts` along with the **ZOD validation**
+
+```javascript
+import express from "express"
+
+const app = express();
+
+app.use(express.json());
+
+// Register routes
+app.post("/api/v1/signup", (req, res) => {
+  const useranme = req.body.username;
+  const password = req.body.password;
+  
+
+});
+
+app.post("/api/v1/signin", (req, res) => {
+  
+
+});
+
+app.post("/api/v1/content", (req, res) => {
+  
+
+});
+
+app.get("/api/v1/content", (req, res) => {
+  
+
+});
+
+app.delete("/api/v1/content", (req, res) => {
+  
+
+});
+
+app.post("/api/v1/brain/share", (req, res) => {
+  
+
+});
+app.delete("/api/v1/brain/:shareLink", (req, res) => {
+  
+
+});
+
+
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
+```
+
+**Step 6 ->** Creating the `middleware.ts` file inside the `src` folder to handle all the **middlewares**
 
 ```javascript
 
 ```
 
+## **Extension of this project (Adding AI)** 
+----------
+:bulb:**You can add the AI capibilities inside this project so that the user can do some query and get the data from what is being present in the second brain database**
+
+For this below is the architecture :-
+
+<img src = "image-2.png" width=500 height=250>
+
+The green box(`tweet`) lets say present in the second brain has some content regarding the query `What is trumps stance....` so now this question will be asked from the user side when they will go to the website and as the website will have a chat box where they will query these questions now these queries will go to the `http` server and **as the `http` server is not knowing anything**  so it will redirect it to the `chatgpt` **whose api is openly available for you and you can use this API to hit your query**
+
+**Now there are two ways to hit the user query on chatgpt API**
+
++ Either __you directly give the query__
+  + In this, `ChatGPT` will give all the answer possible for this query **from HIS PERSPECTIVE**
++ Or __you can give the queery with **some context** and then hit the `ChatGPT` API__
+  + here the context will be the **green box `tweet`** (which contains some info. about the trumps stance (i.e. query)). **This will obviously be the better approach as now `ChatGPT` has some context and according to this only it will give the answer (YOUR PERSPECTIVE IS ALSO TAKEN INTO ACCOUNT)**\
+
+You have to do something like this ->
+
+<img src = "image-3.png" width=500 height=250>
+
+:bulb:**How to find the relevant tweets links from the hell lot of data inside my database ??**
+
+-> There are bunch of things you can do to achieve -
+
+1. **Elastic Search ->** Very fast search for big datas
+
+Link to official website -> [Elasticsearch](https://www.elastic.co/elasticsearch)
+
+Elasticsearch is __basically a search and analytics engine.__ Think of it like a super-fast, smart "Google" for your own data.
+
+__Core ideas__
+
++ __Index →__ like a database.
+
++ __Document →__ like a row in a database, but in `JSON` format.
+
++ __Query →__ how you ask Elasticsearch to find things.
 
 
- 
+2. **Vector databases embeddings**
+
+If you have ever seen any **chat with pdf website or any RAGs websites, they are build on this architecture**
+
+Forget about the `Vector databases` for now, first understand **What is `embeddings` ??**
+
+There is a very famous video created by **Andrej karpathy** which deals with how to build GPT and there `embeddings` has been discussed in a good way ->
+
+Link to the video -> [Build GPT from scratch](https://www.youtube.com/watch?v=kCc8FmEb1nY)
+
+Long story short but do you know **How chatGPT works ??**
+
+-> It is basically trained on a bunch of data which it gets from the internet but the main thing which helps it to get trained is what is called as **Embeddings**. 
+
+>[!IMPORTANT]
+> **Any text which you see can be converted to vectors and chatgpt understands this only**
+>
+> **So whenever any text or sentence comes to GPT, it gets converted to VECTORs using the EMBEDDINGs model being used by GPT**
+
+<img src = "image-4.png" width=600 height=100>
+
+Now notice the above pic, this is how GPT works -> **Text -----------> Numbers (vectors)** using the **embeddings model**. <span style="color:orange">**Notice wherever there is TRUMP in above pic (ex here -> in 1st and 2nd line) you can see similar VECTORs value V/S Some random words or text (ex here -> 3rd line (totally different))**</span>
+
+>[!IMPORTANT]
+> **Similar things always have similar vectors (or the embeddings being generated from them is SIMILAR)**
+
+You can explore some channels like [3 Blue 1 Brown](https://www.youtube.com/@3blue1brown)
+
+and specifically for the above explanation (which comes under the Transformers topic) **Transformers part** -> [3 Blue 1 Brown Transformers](https://www.youtube.com/watch?v=wjZofJX0v4M)
+
+**Summary -> How this is going to help us ??**
+
+-> So basically you will **convert all the data present inside the database via the embeddings and when it gets converted to vectors, YOU STORE THESE VECTORs** (which is called as VECTORs DATABASE) and now when the user query comes, you **convert the query into vector via embeddings model and then MATCH them with that present in your database**[<span style="color:orange">**The TOP(depends TOP 5 or TOP 10 or any number, depends on how accurate your results to be) most nearest matched query from the database according to what user's vectors looks like and then you will send this as context while hitting chatGPT API and thus reducing the work for chatGPT as well as getting only the relevent info. from the data present inside your database**</span>], hence achieving what you wanted to do.
+>[!TIP]
+> **Sbse pass jo v honge space dimension me from the user's vectors, they will be taken into account (i.e. will be most relevant for the output)**
+
+:bulb:**What is vector ??**
+
+-> The same thing which you have understood in the class 12th PCM (**Distance from the origin in all the three axis (x, y, and z)**). Now you have learnt that **Vector has 3 dimension and 4th dimension is Time (atleast for now what we have known)** but <span style="color:orange">**the vector here has nth dimensions**</span>
+
+Now lets come back to the track where we left off and proceed further with the project   
+
 
