@@ -483,4 +483,145 @@ and specifically for the above explanation (which comes under the Transformers t
 
 Now lets come back to the track where we left off and proceed further with the project   
 
+### **Coding the `signup` endpoint**
+----------
+
+Writing the logic for `signup` endpoint inside the `index.ts`
+
+```javascript
+import express from "express"
+import {z} from "zod"
+import bcrypt from "bcrypt"
+import { userModel } from "./db.js";
+import dotenv from "dotenv"
+import mongoose from "mongoose";
+
+
+const app = express();
+const saltRounds = 10
+
+app.use(express.json());
+
+dotenv.config()
+
+// Writing the logic to connect to the database before anything else
+async function startServer() {
+  if (!process.env.MONGO_DB_URI) {
+    throw new Error("MONGO_DB_URI not defined");
+  }
+
+  try {
+    await mongoose.connect(process.env.MONGO_DB_URI);
+    console.log("MongoDB connected");
+
+    app.listen(3000, () => {
+      console.log("Server running on port 3000");
+    });
+  } catch (err) {
+    console.error("DB connection failed:", err);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+// Register routes
+app.post("/api/v1/signup", async (req, res) => {
+
+  // Adding the zod validation
+  // First adding the schema 
+  const requireBody = z.object({
+    username : z.string().min(3).max(10),
+    password : z.string().min(8).max(20).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/)
+  })
+
+  // Then parsing the data
+  const parsedDataWithSuccess = requireBody.safeParse(req.body)
+
+  if(!parsedDataWithSuccess.success){
+    return res.json({
+      message : "Incorrect Format of Input"
+    })
+  }
+
+  const username = req.body.username;
+  const password = req.body.password;
+
+  // Hashing the password
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+
+    // Storing the information in the database
+    await userModel.create({
+      username : username,
+      password : hashedPassword
+    })
+    
+    return res.status(200).json({
+      message : "You are signed up"
+    })
+
+  } catch (error) {
+    return res.status(401).json({
+      message : "Sorry not able to signup"
+    })
+    
+  }
+});
+
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
+```
+
+>[!CAUTION]
+> **Always add `return` statement to every `res` code you write otherwise, the function will keep on running and the error will not be resolved forever**
+>
+> Ex -> you can see above `return res.json`, `return res.status(200).json({some data})`
+
+Corresponding to the above user `db.ts` look like the below :-
+
+```javascript
+import  {model, Schema} from "mongoose"
+const userSchema = new Schema({
+  username : {type : String, required : true, unique : true},
+  password : {type : String, required : true}
+})
+
+export const userModel = model("User", userSchema)
+```
+
+### **Running any `ts` project**
+
+**Step 1 ->** Define the `"scripts"` for running the code of the project
+
+going inside the `package.json` and then making the `"scripts"` section look like this 
+
+```javascript
+"scripts": {
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "dev": "npm run build && npm run start"
+}
+```
+**Step 2 ->** go to the root folder and then just run the below command 
+
+```javascript
+npm run build // and then after this 
+npm run start
+```
+
+### **Coding the `signin` endpoint**
+----------
+
+```javascript
+app.post("/api/v1/signin", async (req,res) => {
+  const {username, password} = req.body
+   
+
+})
+```
+
+
+
 

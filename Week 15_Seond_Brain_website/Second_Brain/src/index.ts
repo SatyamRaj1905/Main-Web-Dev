@@ -4,7 +4,6 @@ import bcrypt from "bcrypt"
 import { userModel } from "./db.js";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
-import { hasRestParameter } from "typescript";
 
 
 const app = express();
