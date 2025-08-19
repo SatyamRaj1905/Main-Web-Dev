@@ -4,6 +4,7 @@ import bcrypt from "bcrypt"
 import { userModel } from "./db.js";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken"
 
 
 const app = express();
@@ -76,6 +77,33 @@ app.post("/api/v1/signup", async (req, res) => {
 app.post("/api/v1/signin", async(req, res) =>{
   const username = req.body.username
   const password = req.body.password
+
+  // Checking first only if the user exists on the database
+  const userExist = await userModel.findOne({
+    username : username
+  })
+
+  if(!userExist){
+    return res.status(404).json({
+      message : "Username not exists please sign up first"
+    })
+  }
+  // Else now match the password also 
+  const passwordMatch = await bcrypt.compare(password, userExist.password)
+  if(passwordMatch){ // as username and password both are verified so now generate the token
+    const token = jwt.sign({
+      id : userExist._id
+    }, process.env.JWT_SECRET_USER as string)
+    return res.status(200).json({
+      message : "You are signed in"
+    })
+  }
+  else {
+    return res.status(403).json({
+      message : "Incorrect Credentials"
+    })
+  }
+
 
 })
 

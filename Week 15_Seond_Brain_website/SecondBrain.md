@@ -599,9 +599,9 @@ going inside the `package.json` and then making the `"scripts"` section look lik
 
 ```javascript
 "scripts": {
-    "build": "tsc -b",
-    "start": "node dist/index.js",
-    "dev": "npm run build && npm run start"
+  "build": "tsc -b",
+  "start": "node dist/index.js",
+  "dev": "npm run build && npm run start"
 }
 ```
 **Step 2 ->** go to the root folder and then just run the below command 
@@ -617,11 +617,15 @@ npm run start
 ```javascript
 app.post("/api/v1/signin", async (req,res) => {
   const {username, password} = req.body
+  try {
+    await const username =
+    
+  } catch (error) {
+    
+  }
    
 
 })
 ```
-
-
 
 
