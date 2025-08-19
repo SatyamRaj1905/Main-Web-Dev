@@ -1,28 +1,28 @@
-import mongoose from "mongoose";
-export declare const userModel: mongoose.Model<{
+import { Schema } from "mongoose";
+export declare const userModel: import("mongoose").Model<{
     username: string;
     password: string;
-}, {}, {}, {}, mongoose.Document<unknown, {}, {
+}, {}, {}, {}, import("mongoose").Document<unknown, {}, {
     username: string;
     password: string;
-}, {}, mongoose.DefaultSchemaOptions> & {
+}, {}, import("mongoose").DefaultSchemaOptions> & {
     username: string;
     password: string;
 } & {
-    _id: mongoose.Types.ObjectId;
+    _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;
-}, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any>, {}, {}, {}, {}, mongoose.DefaultSchemaOptions, {
+}, Schema<any, import("mongoose").Model<any, any, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, {
     username: string;
     password: string;
-}, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
+}, import("mongoose").Document<unknown, {}, import("mongoose").FlatRecord<{
     username: string;
     password: string;
-}>, {}, mongoose.ResolveSchemaOptions<mongoose.DefaultSchemaOptions>> & mongoose.FlatRecord<{
+}>, {}, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & import("mongoose").FlatRecord<{
     username: string;
     password: string;
 }> & {
-    _id: mongoose.Types.ObjectId;
+    _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;
 }>>;

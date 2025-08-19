@@ -95,7 +95,8 @@ app.post("/api/v1/signin", async(req, res) =>{
       id : userExist._id
     }, process.env.JWT_SECRET_USER as string)
     return res.status(200).json({
-      message : "You are signed in"
+      message : "You are signed in",
+      token : token
     })
   }
   else {
@@ -103,9 +104,9 @@ app.post("/api/v1/signin", async(req, res) =>{
       message : "Incorrect Credentials"
     })
   }
-
-
 })
+
+
 
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");

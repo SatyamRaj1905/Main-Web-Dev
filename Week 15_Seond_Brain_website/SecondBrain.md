@@ -205,7 +205,7 @@ const contentSchema = new Schema({
   type : {type : String, enum : contentTypes, required : true},
   title : {type : String, required : true},
   tags : [{type : Types.ObjectId, ref : 'Tag'}], // 2
-  tags : {type : Types.ObjectId, ref : 'User', required : true} // same as above Explanation
+  userId : {type : Types.ObjectId, ref : 'User', required : true} // same as above Explanation
 })
 
 export const contentModel = model("Content", contentSchema)
@@ -615,17 +615,125 @@ npm run start
 ----------
 
 ```javascript
-app.post("/api/v1/signin", async (req,res) => {
-  const {username, password} = req.body
-  try {
-    await const username =
-    
-  } catch (error) {
-    
-  }
-   
+app.post("/api/v1/signin", async(req, res) =>{
+  const username = req.body.username
+  const password = req.body.password
 
+  // Checking first only if the user exists on the database
+  const userExist = await userModel.findOne({
+    username : username
+  })
+
+  if(!userExist){
+    return res.status(404).json({
+      message : "Username not exists please sign up first"
+    })
+  }
+  // If the username match then now match the password also 
+  const passwordMatch = await bcrypt.compare(password, userExist.password)
+  if(passwordMatch){ // as username and password both are verified so now generate the token
+    const token = jwt.sign({
+      id : userExist._id
+    }, process.env.JWT_SECRET_USER as string)
+    return res.status(200).json({
+      message : "You are signed in",
+      token : token // and send the token
+    })
+  }
+  else { // If not then return them Incorrect Credentials signal
+    return res.status(403).json({
+      message : "Incorrect Credentials"
+    })
+  }
 })
 ```
+### **Coding the `content` part**
+----------
+First making the `Content` table using its schema in the `db.ts`
+
+```javascript
+const contentTypes = ['image', 'video', 'article', 'audio'] // Extend the array if  needed
+
+const contentSchema = new Schema({
+  link : {type : String, required : true},
+  type : {type : String, enum : contentTypes, required : true},
+  title : {type : String, required : true},
+  tags : [{type : mongoose.Types.ObjectId, ref : 'Tag'}],
+  userId : {type : mongoose.Types.ObjectId, ref : 'User', required : true}
+})
+
+export const contentModel = model("Content", contentSchema)
+```
+#### **Making the `POST /api/v1/content` endpoint**
+----------
+
+Logic for **adding the content** but there is an important point which should be noted and that is as this is **user-centric thing so you have to show the user their contents only** and for this we will have to <span style="color:orange">**introduce a middleware here**</span>
+
+### **Coding the Middleware part**
+----------
+so to make the user see __their content only__, we will have to make `middleware.ts` file inside the `src` folder
+
+```javascript
+import type { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+
+// Added the TYPES for the typesafety as we are now dealing with TYPESCRIPT
+export const middleware = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const header = req.headers["authorization"];
+    // Checking header aaya v h ya nhi
+    if (!header) {
+      return res.status(401).json({ error: "Authorization header missing" });
+    }
+
+    const token = header.split(" ")[1]; // 2
+
+    // Checking header ke andar token aaya ki nhi
+    if (!token) {
+      return res.status(401).json({ error: "Token missing" });
+    }
+
+    if (!process.env.JWT_SECRET_USER) {
+      throw new Error("JWT_SECRET_USER is not defined");
+    }
+
+    // Once the token is extracted then with the help of token and JWT_SECRET_USER we will verify the user 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_USER);
+
+    // @ts-ignore - extend Request type for userID // 2 ways -> EITHER you give the userId any types (Request suits here though) OR just ignore the error by writing @ts-ignore which we have done
+    req.userID = decoded.id;
+
+    next(); // if all things are great forward it to the page they were looking for
+  } 
+  catch (err) {
+    return res.status(403).json({ error: "Invalid or expired token" });
+  }
+};
+```
+
+```javascript
+app.post("/api/v1/content", async (req, res) => {
+  const type = req.body.type 
+  const title = req.body.title 
+  const link = req.body.link 
+  const 
+})
+```
+
+**Explanation of  `// 2` code**
+
+>[!NOTE]
+> about **`header.split(" ")[1]`**
+>
+> **Generally most APIs send `Authorization` header like the below**
+> 
+> `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+> 
+> so `const header = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."` will look like this with the following value
+> 
+> `header.split(" ")` **GIVES AN ARRAY** `["Bearer","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."]`
+> 
+> **Taking index `[1]` extracts just the JWT**
+> **`"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`**
 
 
