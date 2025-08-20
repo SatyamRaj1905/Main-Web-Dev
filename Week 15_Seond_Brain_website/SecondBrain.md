@@ -4,7 +4,7 @@
 ----------
 <img src = "image.png" width=500 height=250>
 
-## **Backend**
+## **Backend of the project**
 ----------
 
 ###  __Endpoints required__
@@ -822,10 +822,67 @@ app.delete("/api/v1/content", userMiddleware, async(req, res) => {
   await contentModel.deleteMany({
     contentId,
     // @ts-ignore
-    userId : req.userId
+    userId : req.userId // written so that user bas apna delete kr paye kisi aur ka nhi
+  })
+
+  return res.json({
+    message : "Deleted successfully"
   })
 })
 ```
+
+### **Making `POST ("/api/v1/brain/share")` endpoint**
+
+This endpoint will have **the logic of sharing any content made by you to the others**
+
+// This is ASSIGNMENT and you have to do this by yourself 
+
+### **Making `delete("/api/v1/brain/:shareLink")` endpoint**
+
+This endpoint will have the **logic of deleting the sharelink or basically revoking the access given to any used to see our content using the link we have shared**
+
+// This is ASSIGNMENT and you have to do this by yourself
+
+## **Frontend of the Project**
+----------
+
+### **Initializing the project**
+----------
+
+**Step 1 ->** As we will be using here `REACT` so
+
+```javascript
+npm create vite@latest
+```
+
+**Step 2 ->** Now do the remaining things required to setup the project 
+
+<img src = "image-8.png" width=400 height=260>
+
+**Step 3 ->** Installing all the dependancies 
+
+```javascript
+npm install
+```
+
+**Step 4 ->** Running the project 
+
+```javascript
+npm run dev 
+```
+
+### **What we have to design ??**
+----------
+
+Basically we have to make the below thing for our frontend part
+
+<img src = "image-9.png" width=500 height=250>
+
+Now making
+
+
+
+
 
 
 

@@ -150,7 +150,12 @@ app.delete("/api/v1/content", userMiddleware, async (req, res) => {
     // @ts-ignore
     userId : req.userId
   })
+
+  return res.json({
+    message : "Deleted successfully"
+  })
 })
+
 
 
 
