@@ -711,15 +711,6 @@ export const middleware = async (req: Request, res: Response, next: NextFunction
 };
 ```
 
-```javascript
-app.post("/api/v1/content", async (req, res) => {
-  const type = req.body.type 
-  const title = req.body.title 
-  const link = req.body.link 
-  const 
-})
-```
-
 **Explanation of  `// 2` code**
 
 >[!NOTE]
@@ -735,5 +726,15 @@ app.post("/api/v1/content", async (req, res) => {
 > 
 > **Taking index `[1]` extracts just the JWT**
 > **`"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`**
+
+```javascript
+app.post("/api/v1/content",middleware, async (req, res) => {
+  const type = req.body.type 
+  const title = req.body.title 
+  const link = req.body.link 
+  const 
+})
+```
+
 
 

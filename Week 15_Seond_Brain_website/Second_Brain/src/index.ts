@@ -1,10 +1,12 @@
 import express from "express"
 import {z} from "zod"
 import bcrypt from "bcrypt"
-import { userModel } from "./db.js";
+import { contentModel, userModel } from "./db.js";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken"
+import { userMiddleware } from "./middleware.js";
+
 
 
 const app = express();
@@ -74,7 +76,7 @@ app.post("/api/v1/signup", async (req, res) => {
   }
 });
 
-app.post("/api/v1/signin", async(req, res) =>{
+app.post("/api/v1/signin", async(req, res) => {
   const username = req.body.username
   const password = req.body.password
 
@@ -104,6 +106,23 @@ app.post("/api/v1/signin", async(req, res) =>{
       message : "Incorrect Credentials"
     })
   }
+})
+
+app.post("/api/v1/content", userMiddleware, async(req, res) => {
+  const link = req.body.link
+  const type = req.body.type
+  const title = req.body.title
+  await contentModel.create({
+    link,
+    type,
+    title,
+    // @ts-ignore
+    userId : req.userId,
+    tags : [] // for now lets leave it empty
+  })
+  return res.json({
+    message : "Content added"
+  })
 })
 
 
