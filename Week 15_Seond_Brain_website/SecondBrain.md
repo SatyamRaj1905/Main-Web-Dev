@@ -728,13 +728,105 @@ export const middleware = async (req: Request, res: Response, next: NextFunction
 > **`"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`**
 
 ```javascript
-app.post("/api/v1/content",middleware, async (req, res) => {
-  const type = req.body.type 
-  const title = req.body.title 
-  const link = req.body.link 
-  const 
+app.post("/api/v1/content", userMiddleware, async(req, res) => {
+  const link = req.body.link
+  const type = req.body.type
+  const title = req.body.title
+  await contentModel.create({
+    link,
+    type,
+    title,
+    // @ts-ignore
+    userId : req.userId,
+    tags : [] // for now lets leave it empty
+  })
+  return res.json({
+    message : "Content added"
+  })
 })
 ```
+
+### **Making the `GET api/v1/content` endpoint**
+----------
+Basically contains the logic for **fetching the data for the user content**, when the user is asking for their content, that logic we will write here
+
+```javascript
+app.get("/api/v1/content", async (req, res) => {
+  // @ts-ignore
+  const userId = req.userId
+  const content = await contentModel.find({
+    userId : userId
+  }).populate("userId") // 2
+
+  return res.json({
+    content
+  })
+
+})
+```
+
+**Explanation of `// 2` code**
+
+This was written to add the feature that **not only you get to see the `userId` but all the details realted to the `userId`(i.e. -> `username`, `password)`, AS WE HAVE RELATION WITH the `User` table so we are showing that by using the `// 2` line of code**
+
+<img src = "image-5.png" width=320 height=200> <img src = "image-6.png" width=320 height=200>
+
+In the left pic above, you can see that the `userId` is only being shown up, 
+
+:bulb:**But what if i want ki iss userId ke dam pe users se related extra data v mil jaye ?**
+
+-> To do the above task ->
+
+1. **Either ek aur query request bhejo** OR 
+2. **As we have created a RELATIONSHIP of the `content` table with `user` table hence we will take advantage of this** (above is what we have done)
+
+in the right pic, you can see the benefit of using `// 2` code (see it you can see that we got the info stored in the `User` table also regarding the `userId`)
+
+**BUT**
+
+**There is a problem you can see clearly, you have also EXPOSED THE PASSWORD of the user to the frontend also**
+
+so :bulb:**How to `populate` some parts of the table i have established the relationship with ??**
+
+-> The answer lies within the **`.populate()` function itself**, if you will see, you will notice these things :-
+
+1. **`path : string | string[]`**
+2. **`select ?: string | any`**
+3. **`model ?: string | Model<any, THelpers>`**
+4. **`match ?: any`**
+
+You can clearly see that **the second argument is the `the field` you want to display or filter out**
+
+so instead of `// 2` line of code, write this -> 
+
+```javascript
+.populate("userId", "username password") // Isse username and password dono he show kr diya jayega 
+
+.populate("userId", "username") // * Isse bas username he show hoga
+```
+and now if you re-run the code (using the `// *` code), you will see the following 
+
+<img src = "image-7.png" width=400 height=230>
+
+Only the `username` is being displayed and hence on the frontend also this will be displayed 
+
+### **Making the `DELETE /api/v1/content` endpoint**
+----------
+
+At this endpoint, **User will be able to delete his/her content**
+
+```javascript
+app.delete("/api/v1/content", userMiddleware, async(req, res) => {
+  const contentId = req.body.contentId
+
+  await contentModel.deleteMany({
+    contentId,
+    // @ts-ignore
+    userId : req.userId
+  })
+})
+```
+
 
 
 

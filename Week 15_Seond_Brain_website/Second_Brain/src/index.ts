@@ -1,4 +1,4 @@
-import express from "express"
+import express  from "express"
 import {z} from "zod"
 import bcrypt from "bcrypt"
 import { contentModel, userModel } from "./db.js";
@@ -122,6 +122,33 @@ app.post("/api/v1/content", userMiddleware, async(req, res) => {
   })
   return res.json({
     message : "Content added"
+  })
+})
+
+// Endpoint for fetching the user content
+
+app.get("/api/v1/content", async (req, res) => {
+  // @ts-ignore
+  const userId = req.userId
+  const content = await contentModel.find({
+    userId : userId
+  }).populate("userId", "username")
+
+  return res.json({
+    content
+  })
+
+})
+
+// Adding the Delete endpoint 
+
+app.delete("/api/v1/content", userMiddleware, async (req, res) => {
+  const contentId = req.body.contentId
+  
+  await contentModel.deleteMany({
+    contentId,
+    // @ts-ignore
+    userId : req.userId
   })
 })
 
