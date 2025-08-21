@@ -878,7 +878,75 @@ Basically we have to make the below thing for our frontend part
 
 <img src = "image-9.png" width=500 height=250>
 
-Now making
+Now starting off with the making of button (in the above `add content` and `share brain` one)
+
+>[!TIP]
+> **If your project is going to use one component often(there is very less difference between the components), make it GENERIC so that you can with minimal change using the previous logic can create the component easily**
+>
+> **This is how you REUSE the component and you do it this way only in INDUSTRY** <span style="color:orange">**called as UI Library (Ex -> Aceternity UI, ShadCN UI etc..)**</span>
+
+so using the above tip, we will make the above button generic as similar he lg rha h `add content` and `share brain` button (means **SCHEMA SAME H DONO KA**, features, logo, color etc.. may change)
+
+So we will try to make our own UI Library (mini one)
+
+Starting off with making a seperate folder named as `src > components` and then inside which made folder `ui` and inside which i will have file named as `Button.tsx`
+
+
+Writing the logic for the `Button.tsx` file to make a **generic button component to be re-used everywhere**
+
+But before adding the ui library, first **we will install the tailwind to ease our work** 
+
+**Adding the tailwind to the react project**
+
+Just refer to the documentation -> [Taiwlindcss installation](https://tailwindcss.com/docs/installation/using-vite)
+
+>[!IMPORTANT]
+> <span style="color:orange">**For making a perfect UI library**</span> **See the documentation of open source projects like `dub.sh`**
+>
+> **Link to it -> [Dub.sh UI Library](https://github.com/dubinc/dub/tree/main/packages/ui/src)**
+
+
+Now going inside the `Button.tsx` file made and **writing the logic to make the ui libray**
+
+>[!TIP]
+> **Always start with defining INTERFACE or TYPE (as per your wish) means what the BUTTON expects from the user**
+
+
+following the above point and implementing it inside the `Button.tsx`
+
+```javascript
+interface ButtonProps {
+  variant : "Primary" | "Secondary" // lets for now we have only two variant named as Primary(for dark) and Secondary(for light) 
+  size : "sm" | "md" | "lg" // size can also vary -> sm (small), md (medium), lg(large)
+  text : string 
+  startIcon ?: any // 2 Icon which you see in front of "Add content" button ("+" icon) 
+  endIcon ?: any // made OPTIONAL(above and this) as it may or may not be required (if you will not give "?" then typescript will start to complain if you will not give this while using this custom made button)
+  onClick : () => void
+}
+
+// Whoever wants to use this Button component he/she must have to follow or give the above type 
+
+export const Button = (props : ButtonProps) => { // Button takes some part as input and as it is of type ButtonProps so user will have to give all the properties present inside the ButtonProps to render this custom made button
+
+  return <button></button>
+
+}
+
+<Button variant = "Primary" size = "md" onClick = {() => {}} text = {"Hello"} /> // although not given startIcon and endIcon still the typescript is not complaining
+```
+**Explanation of `// 2` code**
+
+>[!CAUTION]
+> **Avoid giving the type "any" in the typescript as user can now use anything (like text, string, etc..) but here we want something like image**
+>
+> **The best type here is `ReactElement`** (try to search and read about this type)
+
+
+
+
+
+
+
 
 
 
