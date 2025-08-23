@@ -941,8 +941,28 @@ export const Button = (props : ButtonProps) => { // Button takes some part as in
 >
 > **The best type here is `ReactElement`** (try to search and read about this type)
 
+For icons part, go to the **icons documentation inside the tailwind css part**
 
+Link to the above is -> [How to add icons in TailwindCSS](https://heroicons.com/)
 
+and from the above website, you can add `as SVG` or `as JSX`, `SVG` **better as it is EASIER to scale means after zooming also, the icons will not lose their quality**
+
+:bulb:**How to add icons inside the tailwind project ??**
+
+-> Once you have copied the `SVG` format of the icon, **make a new folder named as `icons` inside the `src` folder**
+
+and then inside that **make another file names as *`icon_name.tsx`* and **inside this just PASTE the `SVG` format of the icon you pasted from the website** 
+
+and then **Wrap it in such a way that you have to export this component**
+
+```javascript
+export const PlusIcon = () => {
+   return <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+   </svg>
+}
+```
+ 
 
 
 
