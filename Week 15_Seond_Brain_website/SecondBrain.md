@@ -852,14 +852,40 @@ export const linkModel = model("Link", linkSchema)
 
 Now coming back to the `index.ts` file and making the `/api/v1/brain/share`
 
+**Made this endpoint POST because isme tm kuch na kuch data bhej rhe ho i.e. share kr rhe ho sbke sath**
+
 ```javascript
-app.post("/api/v1/brain/share", userMiddleware,  async(req, res) => {
+app.post("/api/v1/brain/share", userMiddleware, async(req, res) => {
   const share = req.body.share
   if(share){
+    // Below is the logic to see that whether the link has already been generated for the user previously if yes then just return it from the link table why to create one ALSO AS OUR USER SHOULD HAVE ONLY ONE SHAREABLE LINK
+    const existingLink = await linkModel.findOne({
+      // @ts-ignore
+      userId : req.userId
+    })
+
+    if(existingLink){
+      return res.json({
+        hash : existingLink.hash
+      })
+    }
+
+    // If the user sharable link is not present in the database inside the link table then only proceed to generate the shareable link and store it inside the database
+    const hashedLink = random(10) // used function random imported from "utils.ts" file see below for brief explanation
     await linkModel.create({
-      userId : req.userID
+      hash :  hashedLink, 
+      // @ts-ignore  
+      userId : req.userId
+    })
+  }else {
+    await linkModel.deleteOne({
+      // @ts-ignore
+      userId : req.userId
     })
   }
+  return res.status(200).json({
+    message : `/share/${hash}` // Return the sharable link to the user
+  })
 })
 ```
 
@@ -870,6 +896,8 @@ Now for the unique **shareable link for each user, you have generate the url whi
 and for making that we will create a seperate file for writing that logic which can be named as `src > utils.ts` inside which the below code exists ->
 
 ```javascript
+
+// Below is just the function to generate a random string of certain length given as input
 export function random(len : number){
     let options = "qwertyuiopasdfghjklzxcvbnm1234567890"
     let ans = ""
@@ -883,11 +911,58 @@ export function random(len : number){
 }
 ```
 
-### **Making `delete("/api/v1/brain/:shareLink")` endpoint**
+### **Making `GET ("/api/v1/brain/:shareLink")` endpoint**
 
 This endpoint will have the **logic of deleting the sharelink or basically revoking the access given to any used to see our content using the link we have shared**
 
+In simple words, **understand clearly UPAR ME HM APNE BRAIN KA SHARABLE LINK BNA RHE H AND HERE WE ARE WITH THE HELP OF THE LINK JO UPAR CREATE HUA H, KOI V USER HMARE BRAIN KO DEKH PAYE USING THAT LINK USKA LOGIC IMPLEMENT KR RHE H IN THIS ENDPOINT**
+
 // This is ASSIGNMENT and you have to do this by yourself
+
+As this should be completely OPEN endpoint, you dont have to **logged in to get the data or brain which the user has shared hence NOT ADDED `userMiddleware` in the below code**
+
+```javascript
+app.get("/api/v1/brain/:shareLink", async(req, res) => {
+
+  const hashUser = req.params.shareLink // use .query for "?" and .params for ":"
+  
+  const link = await linkModel.findOne({
+    hash : hashUser 
+  }) 
+
+  if(!link){
+    return res.status(411).json({
+      message : "Sharable link not correct"
+    })
+  }
+
+  // userId to mil gya ab using the "hash" present in the link table and now using this we have to find its CONTENTS (HERE YOU WILL SEE THE POWER OF RELATIONSHIP IN MONGODB)
+  const content = await contentModel.find({ // Content table me jo user corresponding user ka content h wo find kro and then uska content return kr do
+    userId : link.userId
+  })
+  
+  // Below is just the logic to return the user information also as upar me uska content return kiya h to uska personal info v de he do 
+  const user = await userModel.find({
+    userId : link.userId 
+  })
+
+  // We have just added an extra safe check below for the condition that lets say the user does not exists now (situation where user table se to data delete kr diya(user ne delete account kr diya) but corresponding to it, link table me entry nhi hta usse related then we might get error so to safe guard this) [Although you dont generally delete the data from the database and even so then you properly cascade that deletion]
+
+  if(!user){
+    return res.status(411).json({
+      message : "User not found, error should ideally not happen"
+    })
+  }
+
+  // also if you comment the above logic then ts will also start to complain on // 2 "user" that MAYBE USER CAN GET NULL so to solve that Either write above codeblock or // 2 type format
+
+  return res.json({
+    username : user.username, // 2 user?.username (this is known as OPTIONAL CHAINING) used to control the "null" statement
+    content : content
+
+  })
+})
+```
 
 ## **Frontend of the Project**
 ----------

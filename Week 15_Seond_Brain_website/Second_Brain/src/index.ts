@@ -1,6 +1,6 @@
 import express  from "express"
 import {z} from "zod"
-import bcrypt from "bcrypt"
+import bcrypt, { hash } from "bcrypt"
 import { contentModel, linkModel, userModel } from "./db.js";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
@@ -159,8 +159,19 @@ app.delete("/api/v1/content", userMiddleware, async (req, res) => {
 app.post("/api/v1/brain/share", userMiddleware, async(req, res) => {
   const share = req.body.share
   if(share){
+    const existingLink = await linkModel.findOne({
+      // @ts-ignore
+      userId : req.userId
+    })
+
+    if(existingLink){
+      return res.json({
+        hash : existingLink.hash
+      })
+    }
+    const hashedLink = random(10)
     await linkModel.create({
-      hash :  random(10), 
+      hash :  hashedLink, 
       // @ts-ignore  
       userId : req.userId
     })
@@ -171,7 +182,41 @@ app.post("/api/v1/brain/share", userMiddleware, async(req, res) => {
     })
   }
   return res.status(200).json({
-    message : "Sharable link created"
+    message : `/share/${hash}`
+  })
+})
+
+app.get("/api/v1/brain/:shareLink", async(req, res) => {
+  const hashUser = req.params.shareLink
+
+  const link = await linkModel.findOne({
+    hash : hashUser 
+  }) 
+
+  if(!link){
+    return res.status(411).json({
+      message : "Sharable link not correct"
+    })
+  }
+
+  const content = await contentModel.find({
+    userId : link.userId
+  })
+
+  const user = await userModel.find({
+    userId : link.userId 
+  })
+
+  if(!user){
+    return res.status(411).json({
+      message : "User not found, error should ideally not happen"
+    })
+  }
+
+  return res.json({
+    username : user.username, // 2 user?.username (this is known as OPTIONAL CHAINING) used to control the "null" statement
+    content : content
+
   })
 })
 
