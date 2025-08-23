@@ -1,12 +1,12 @@
 import express  from "express"
 import {z} from "zod"
 import bcrypt from "bcrypt"
-import { contentModel, userModel } from "./db.js";
+import { contentModel, linkModel, userModel } from "./db.js";
 import dotenv from "dotenv"
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken"
 import { userMiddleware } from "./middleware.js";
-
+import { random } from "./utils.js";
 
 
 const app = express();
@@ -156,6 +156,24 @@ app.delete("/api/v1/content", userMiddleware, async (req, res) => {
   })
 })
 
+app.post("/api/v1/brain/share", userMiddleware, async(req, res) => {
+  const share = req.body.share
+  if(share){
+    await linkModel.create({
+      hash :  random(10), 
+      // @ts-ignore  
+      userId : req.userId
+    })
+  }else {
+    await linkModel.deleteOne({
+      // @ts-ignore
+      userId : req.userId
+    })
+  }
+  return res.status(200).json({
+    message : "Sharable link created"
+  })
+})
 
 
 

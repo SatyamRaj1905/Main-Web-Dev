@@ -1,4 +1,5 @@
 import mongoose, {model, Schema} from "mongoose"
+import { required } from "zod/mini"
 
 const userSchema = new Schema({
   username : {type : String, required : true, unique : true},
@@ -15,5 +16,11 @@ const contentSchema = new Schema({
   userId : {type : mongoose.Types.ObjectId, ref : 'User', required : true}
 })
 
+const linkSchema = new Schema({
+  hash : String,
+  userId : {type : mongoose.Types.ObjectId, ref : 'User', required : true}
+})
+
 export const contentModel = model("Content", contentSchema)
 export const userModel = model("User", userSchema)
+export const linkModel = model("Link", linkSchema)

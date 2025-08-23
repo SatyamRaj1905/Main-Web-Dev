@@ -835,7 +835,53 @@ app.delete("/api/v1/content", userMiddleware, async(req, res) => {
 
 This endpoint will have **the logic of sharing any content made by you to the others**
 
-// This is ASSIGNMENT and you have to do this by yourself 
+// This is ASSIGNMENT and you have to do this by yourself
+
+Answer to the above assignment -> 
+
+first making the **Schema for the LINK inside the `db.ts`**
+
+```javascript
+const linkSchema = new Schema({
+  hash : String,
+  userId : {type : mongoose.Types.ObjectId, ref : 'User', required : true, unique : true} // defined relationship as discussed while designing the database
+})
+
+export const linkModel = model("Link", linkSchema)
+```
+
+Now coming back to the `index.ts` file and making the `/api/v1/brain/share`
+
+```javascript
+app.post("/api/v1/brain/share", userMiddleware,  async(req, res) => {
+  const share = req.body.share
+  if(share){
+    await linkModel.create({
+      userId : req.userID
+    })
+  }
+})
+```
+
+Now for the unique **shareable link for each user, you have generate the url which would be unique as same rha tb to CONFLICT occur kr jayega (2 user having same sharable link to kiska share hoga phir hence make it UNIQUE)**
+
+<span style="color:orange">**For generation of unique sharable link, you have to make a HASH (i.e. string) which will be unique**</span>
+
+and for making that we will create a seperate file for writing that logic which can be named as `src > utils.ts` inside which the below code exists ->
+
+```javascript
+export function random(len : number){
+    let options = "qwertyuiopasdfghjklzxcvbnm1234567890"
+    let ans = ""
+    let length = options.length
+
+    for(let i = 0; i < len; i++){
+        ans = ans + options[Math.floor((Math.random() * length))]
+
+    }
+    return ans;
+}
+```
 
 ### **Making `delete("/api/v1/brain/:shareLink")` endpoint**
 
