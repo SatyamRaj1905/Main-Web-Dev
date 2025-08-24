@@ -1,5 +1,4 @@
 import mongoose, {model, Schema} from "mongoose"
-import { required } from "zod/mini"
 
 const userSchema = new Schema({
   username : {type : String, required : true, unique : true},

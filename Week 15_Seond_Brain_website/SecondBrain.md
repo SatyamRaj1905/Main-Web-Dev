@@ -877,15 +877,20 @@ app.post("/api/v1/brain/share", userMiddleware, async(req, res) => {
       // @ts-ignore  
       userId : req.userId
     })
+    return res.status(200).json({
+      message : hash // Return the sharable link to the user
+    })
   }else {
     await linkModel.deleteOne({
       // @ts-ignore
       userId : req.userId
     })
+
+    return res.status(200).json({
+      message : "Removed Link"
+    })
   }
-  return res.status(200).json({
-    message : `/share/${hash}` // Return the sharable link to the user
-  })
+  
 })
 ```
 
@@ -942,8 +947,8 @@ app.get("/api/v1/brain/:shareLink", async(req, res) => {
   })
   
   // Below is just the logic to return the user information also as upar me uska content return kiya h to uska personal info v de he do 
-  const user = await userModel.find({
-    userId : link.userId 
+  const user = await userModel.findOne({
+    _id : link.userId 
   })
 
   // We have just added an extra safe check below for the condition that lets say the user does not exists now (situation where user table se to data delete kr diya(user ne delete account kr diya) but corresponding to it, link table me entry nhi hta usse related then we might get error so to safe guard this) [Although you dont generally delete the data from the database and even so then you properly cascade that deletion]

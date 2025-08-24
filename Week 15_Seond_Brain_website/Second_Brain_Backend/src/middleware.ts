@@ -19,7 +19,7 @@ export const userMiddleware = async (req: Request, res: Response, next: NextFunc
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET_USER)
       // @ts-ignore - extend Request type for userID
-      req.userID = decoded.id;
+      req.userId = decoded.id;
 
       next();
    } 
