@@ -1004,6 +1004,15 @@ Basically we have to make the below thing for our frontend part
 
 <img src = "image-9.png" width=500 height=250>
 
+>[!IMPORTANT]
+> **Always the first step of making the react app is DIVIDING THE FRONTEND into components**
+
+Dividing the components of the above frontend ->
+
+<img src = "image-10.png" width=500 height=250>
+
+**Basically the website consists of 4 components -> `Button`, `Card`, `Sidebar` and `SidebarItem`** so make the seperate file with their respective name with `.tsx` file 
+
 Now starting off with the making of button (in the above `add content` and `share brain` one)
 
 >[!TIP]
@@ -1089,6 +1098,115 @@ export const PlusIcon = () => {
 }
 ```
  
+#### **Making the `Card component`**
+----------
+
+Now if you see the `Card` component it basically has a **TOP** nav bar consisting of **logo, title, shareicon, deleteicon**, then comes the **MIDDLE** part consisting of **content**, then **HASH-TAG** part consisting of some of the hash-tags and finally **POSTED-ON** time and date.
+
+so making the `Card.tsx` file 
+
+```javascript
+// Card.tsx
+
+import { ShareIcon } from "../../icons/ShareIcon";
+
+interface CardProps {
+    title: string;
+    link: string;
+    type: "twitter" | "youtube";
+}
+
+export function Card({ title, link, type }: CardProps) {
+    return (
+        <div className="scale-90 origin-top-left">
+            <div className="bg-white p-2 border-1 border-slate-300 rounded-md fit-content shadow-md max-w-72 min-w-30 min-h-48 h-fit mt-6">
+                <div className="flex justify-between">
+                    <div className="flex items-center gap-2.5">
+                        <div className="pr-0.5 text-slate-500">
+                            <ShareIcon size="sm" />
+                        </div>
+                        <div className="text-sm font-medium">{title}</div>
+                    </div>
+                    <div className="flex items-center gap-2.5 pr-2 text-slate-500">
+                        <a href={link} target="_blank">
+                            <ShareIcon size="sm" />
+                        </a>
+                        <ShareIcon size="sm" />
+                    </div>
+                </div>
+                <div className="pt-4">
+                    {type === "youtube" && (
+                        <iframe
+                            className="w-full"
+                            src={link
+                                .replace("watch", "embed")
+                                .replace("?v=", "/")}
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    )}
+                    {type === "twitter" && (
+                        <blockquote className="twitter-tweet w-full scale-90 origin-top-left">
+                            <a href={link.replace("x.com", "twitter.com")}></a>
+                        </blockquote>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+```
+
+#### **How to embed any youtube video in your project ??**
+
+-> **Step 1 ->** First go to the video which you want to embed in the website 
+
+**Step 2 ->** Now click on the share button and inside it (there you will also see the option **embed the video**) **click on that**
+
+**Step 3 ->** You will get a **iframe** HTML tag with some code, **COPY it** will look something like the below -> 
+
+```javascript
+<iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/lPer78BkuGs?si=O6o24Nb3kONgREvB"
+    title="YouTube video player"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen
+></iframe>;
+```
+**Step 4 ->** After this, you have to **make some changes in it to make it work for your project**
+
+```javascript
+frameborder -> frameBorder
+referrerpolicy -> referrerPolicy
+allowfullscreen -> allowFullScreen  
+```
+
+>[!TIP]
+> **Basically you have to convert all of them to CAMEL-CASE NOTATION (as easy as that)**
+
+**Step 5 ->** Now just use this component as **normal component with some of the extra change you can do like ->**
+
+```javascript
+adding className to achieve tailwindcss
+
+src={link
+      .replace("watch", "embed") // This is done so that the video does not play it just embed as by default, if you will paste here any youtube video via url it will come with "watch" word so this line is for replacing that with "embed" word
+      .replace("?v=", "/")} // "?v" is also in the link and hence you have to replace it with "/" to REDIRECT to that video
+```
+
+
+>[!IMPORTANT]
+> <span style="color:orange">**`scale-90 origin-top-left`**</span> -> **Property of css which works same as that which you often recieve while zooming in or out the normal website** [Apply on Parent div]
+>
+> <span style="color:orange">**`**</span>
 
 
 

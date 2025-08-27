@@ -3,7 +3,7 @@ interface PlusIconProps {
 }
 
 const sizeVariants = {
-    sm: "size-2",
+    sm: "size-3",
     md: "size-4",
     lg: "size-6",
 };

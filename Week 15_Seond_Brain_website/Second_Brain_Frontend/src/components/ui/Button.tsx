@@ -1,3 +1,5 @@
+// Button.tsx
+
 import type { ReactElement } from "react";
 
 interface ButtonProps {
@@ -17,7 +19,7 @@ const variantStyles = {
 const defaultStyles = "rounded-md inline-flex mr-4";
 
 const sizeStyles = {
-    sm: "p-2",
+    sm: "p-1",
     md: "p-4",
     lg: "p-6",
 };
@@ -29,8 +31,8 @@ export const Button = (props: ButtonProps) => {
                 sizeStyles[props.size]
             }`}
         >
-            <div className="flex items-center pr-1">{props.startIcon}</div>
-            <div className="font-medium">{props.text}</div>
+            <div className="flex items-center pr-1 pl-1">{props.startIcon}</div>
+            <div className="font-medium text-sm">{props.text}</div>
             <div className="pr-2"></div>{props.endIcon}
         </button>
     );
