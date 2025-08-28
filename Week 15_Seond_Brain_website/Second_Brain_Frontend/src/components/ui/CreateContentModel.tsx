@@ -1,8 +1,13 @@
 import { CrossIcon } from "../../icons/CrossIcon";
 import { Button } from "./Button";
 
+type CreateContentModelProps = {
+    open : boolean
+    onClose : () => void
+}
+
 // We want this to make CONTROLLED COMPONENT
-export function CreateContentModel({ open, onClose }) {
+export function CreateContentModel({ open , onClose} : CreateContentModelProps) {
     return (
         <div>
             {open && (
@@ -14,9 +19,9 @@ export function CreateContentModel({ open, onClose }) {
                             </div>
                         </div>
                         <div>
-                            <Input placeholder={"Title"} />
-                            <Input placeholder={"Tags"} />
-                            <Input placeholder={"Link"} />
+                            <Input onChange={() => {}} placeholder={"Title"} />
+                            <Input onChange={() => {}} placeholder={"Tags"} />
+                            <Input onChange={() => {}} placeholder={"Link"} />
                         </div>
                         <div className="mt-4 flex justify-center">
                             <Button
@@ -32,7 +37,12 @@ export function CreateContentModel({ open, onClose }) {
     );
 }
 
-export function Input({ onChange, placeholder }: { onChange: () => void }) {
+type InputProps = {
+    onChange : () => void
+    placeholder : string
+}
+
+export function Input({ onChange, placeholder }: InputProps) {
     return (
         <div>
             <input

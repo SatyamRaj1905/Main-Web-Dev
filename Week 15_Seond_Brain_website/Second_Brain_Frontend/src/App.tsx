@@ -9,7 +9,7 @@ import { CreateContentModel } from "./components/ui/CreateContentModel";
 import { useState } from "react";
 
 function App() {
-    const [modelOpen, setModelOpen] = useState(true);
+    const [modelOpen, setModelOpen] = useState(false);
     return (
         <div className="p-4">
             <CreateContentModel

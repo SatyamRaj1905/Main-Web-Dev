@@ -16,7 +16,7 @@ const variantStyles = {
     Secondary: "bg-purple-300 text-purple-600",
 };
 
-const defaultStyles = "rounded-md inline-flex mr-4";
+const defaultStyles = "rounded-md inline-flex mr-4 cursor-pointer";
 
 const sizeStyles = {
     sm: "p-2",
