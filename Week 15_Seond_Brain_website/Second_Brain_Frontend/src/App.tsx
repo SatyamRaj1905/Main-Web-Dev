@@ -5,16 +5,26 @@ import { Button } from "./components/ui/Button";
 import { PlusIcon } from "./icons/PlusIcon";
 import { ShareIcon } from "./icons/ShareIcon";
 import { Card } from "./components/ui/Card";
+import { CreateContentModel } from "./components/ui/CreateContentModel";
+import { useState } from "react";
 
 function App() {
+    const [modelOpen, setModelOpen] = useState(true);
     return (
         <div className="p-4">
+            <CreateContentModel
+                open={modelOpen}
+                onClose={() => {
+                    setModelOpen(false);
+                }}
+            ></CreateContentModel>
+
             <div className="flex justify-end">
                 <Button
                     startIcon={<PlusIcon size="sm" />}
                     variant="Primary"
                     size="sm"
-                    onClick={() => {}}
+                    onClick={() => {setModelOpen(true)}}
                     text={"Add Content"}
                 />
                 <Button

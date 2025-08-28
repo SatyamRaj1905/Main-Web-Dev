@@ -8,7 +8,7 @@ interface ButtonProps {
     text: string;
     startIcon?: ReactElement;
     endIcon?: ReactElement;
-    onClick: () => void;
+    onClick ?: () => void;
 }
 
 const variantStyles = {
@@ -19,14 +19,14 @@ const variantStyles = {
 const defaultStyles = "rounded-md inline-flex mr-4";
 
 const sizeStyles = {
-    sm: "p-1",
+    sm: "p-2",
     md: "p-4",
     lg: "p-6",
 };
 
 export const Button = (props: ButtonProps) => {
     return (
-        <button
+        <button onClick={props.onClick}
             className={`${variantStyles[props.variant]} ${defaultStyles} ${
                 sizeStyles[props.size]
             }`}

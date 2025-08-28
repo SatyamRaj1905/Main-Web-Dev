@@ -1098,68 +1098,10 @@ export const PlusIcon = () => {
 }
 ```
  
-#### **Making the `Card component`**
+### **Making the `Card component`**
 ----------
 
 Now if you see the `Card` component it basically has a **TOP** nav bar consisting of **logo, title, shareicon, deleteicon**, then comes the **MIDDLE** part consisting of **content**, then **HASH-TAG** part consisting of some of the hash-tags and finally **POSTED-ON** time and date.
-
-so making the `Card.tsx` file 
-
-```javascript
-// Card.tsx
-
-import { ShareIcon } from "../../icons/ShareIcon";
-
-interface CardProps {
-    title: string;
-    link: string;
-    type: "twitter" | "youtube";
-}
-
-export function Card({ title, link, type }: CardProps) {
-    return (
-        <div className="scale-90 origin-top-left">
-            <div className="bg-white p-2 border-1 border-slate-300 rounded-md fit-content shadow-md max-w-72 min-w-30 min-h-48 h-fit mt-6">
-                <div className="flex justify-between">
-                    <div className="flex items-center gap-2.5">
-                        <div className="pr-0.5 text-slate-500">
-                            <ShareIcon size="sm" />
-                        </div>
-                        <div className="text-sm font-medium">{title}</div>
-                    </div>
-                    <div className="flex items-center gap-2.5 pr-2 text-slate-500">
-                        <a href={link} target="_blank">
-                            <ShareIcon size="sm" />
-                        </a>
-                        <ShareIcon size="sm" />
-                    </div>
-                </div>
-                <div className="pt-4">
-                    {type === "youtube" && (
-                        <iframe
-                            className="w-full"
-                            src={link
-                                .replace("watch", "embed")
-                                .replace("?v=", "/")}
-                            title="YouTube video player"
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerPolicy="strict-origin-when-cross-origin"
-                            allowFullScreen
-                        ></iframe>
-                    )}
-                    {type === "twitter" && (
-                        <blockquote className="twitter-tweet w-full scale-90 origin-top-left">
-                            <a href={link.replace("x.com", "twitter.com")}></a>
-                        </blockquote>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-```
 
 #### **How to embed any youtube video in your project ??**
 
@@ -1202,11 +1144,190 @@ src={link
       .replace("?v=", "/")} // "?v" is also in the link and hence you have to replace it with "/" to REDIRECT to that video
 ```
 
+#### **How to embed tweeter chat into your project**
+
+**Step 1 ->** First get to the post which you have to embed and then click on the __three dots of that post__
+
+**Step 2 ->** Now you will se **embed post** option, click on that you will get the code just **copy it** and it will look something like the below
+
+```javascript
+<blockquote class="twitter-tweet">
+  <p lang="zxx" dir="ltr">
+    <a href="https://t.co/JvyafDdhTB">
+      pic.twitter.com/JvyafDdhTB
+    </a>
+  </p>
+  &mdash; Elon Musk (@elonmusk)
+  <a href="https://twitter.com/elonmusk/status/1960712894019985678?ref_src=twsrc%5Etfw">
+    August 27, 2025
+  </a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8">
+</script>
+```
+
+**Explanation of the above code**
+
+The codeblock consists of two tags -> `blockquote` and `script` Now for the component part, we have to use **only the `blockquote` part** and for the `script` part de the below steps
+
+**Step 3 ->** Go inside the **Global `index.html` file** and then inside it just above the **`meta` and below the `link` tag, PASTE THE SCRIPT TAG part you got from copying the embed code from the tweeter** 
+
+**Step 4 ->** For the `blockquote` part, paste it in the component inside which you want to render the tweet. and then make some changes as given below 
+
+```javascript
+<blockquote className="twitter-tweet"> // class replaced with className
+    <a href="replace here with link of the post or make it dynamic if you want that data kahin aur se aake yahan render ho"></a>
+</blockquote>
+```
+
+**After removing all the components and making the change, you will be able to see the tweet**
+
+now making the `Card.tsx` file 
+
+```javascript
+// Card.tsx
+
+import { ShareIcon } from "../../icons/ShareIcon";
+
+interface CardProps {
+    title: string;
+    link: string;
+    type: "twitter" | "youtube";
+}
+
+export function Card({ title, link, type }: CardProps) {
+    return (
+        <div className="scale-90 origin-top-left">
+            <div className="bg-white p-2 border-1 border-slate-300 rounded-md fit-content shadow-md max-w-72 min-w-30 min-h-48 h-fit mt-6">
+                <div className="flex justify-between">
+                    <div className="flex items-center gap-2.5">
+                        <div className="pr-0.5 text-slate-500">
+                            <ShareIcon size="sm" />
+                        </div>
+                        <div className="text-sm font-medium">{title}</div>
+                    </div>
+                    <div className="flex items-center gap-2.5 pr-2 text-slate-500">
+                        <a href={link} target="_blank"> // adding target = blank helps to open the link in NEW BLANK TAB
+                            <ShareIcon size="sm" />
+                        </a>
+                        <ShareIcon size="sm" />
+                    </div>
+                </div>
+                <div className="pt-4">
+                    {type === "youtube" && (
+                        <iframe
+                            className="w-full"
+                            src={link
+                                .replace("watch", "embed")
+                                .replace("?v=", "/")}
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    )}
+                    {type === "twitter" && (
+                        <blockquote className="twitter-tweet w-full scale-90 origin-top-left">
+                            <a href={link.replace("x.com", "twitter.com")}></a>
+                        </blockquote>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+```
 
 >[!IMPORTANT]
-> <span style="color:orange">**`scale-90 origin-top-left`**</span> -> **Property of css which works same as that which you often recieve while zooming in or out the normal website** [Apply on Parent div]
+> <span style="color:orange">**`scale-90 origin-top-left`**</span> -> **Property of tailwind css which works same as that which you often recieve while zooming in or out the normal website** [Apply on Parent div]
 >
-> <span style="color:orange">**`**</span>
+> <span style="color:orange">**`h-fit`**</span> -> **Property of tailwind css which will help to give only that much height to the content which will be enough to engulf the elements/component present inside it** [No extra space vertically Apply to Parent div]
+>
+> <span style="color:orange">*`w-full`**</span> -> **Property of tailwind css which is equivalent to width : 100% in css** [Apply to child element and it will take the width 100% width of the parent]
+
+
+
+### **Making the `Add Content` functional**
+----------
+
+Clicking on the `Add Content` button a model should popup consisting of the FORM which has all the requirement to add a new content
+
+so to achieve the above thing, lets make a `CreateContentModel.tsx` file in `src > components > ui` and inside this we will write the code to display the form if the button `Add Content` is clicked.
+
+```javascript
+import {useState} from 'react'
+// We want this to make CONTROLLED COMPONENT 
+export function CreateContentModel({open, onClose}) {
+  const [modalOpen, setModelOpen] = useState(false) // Popup will open up
+
+  return (
+    <div>
+      <CrossIcon onClick = (){
+        setModelOpen(false)
+
+      } />
+
+    </div>
+  )
+}
+```
+
+**Controlled Component ->** In the end, if the user clicks on the `Add Content` button, a model will popup **and this open close will stored inside the state variable as you have re-render the dom as now the screen will have to show the model as popup**[It should be controlled by the user]
+
+-> Above is also the reason for taking **`open, onClose` as input parameter**
+
+Now the problem with the above code is that as **modelOpen is not defined here it is defined externally as this should be controlled by the user as "open" is coming as PROPS(from its PARENT) hence the above code will not work**
+
+:bulb:**What we want ??**
+
+-> If the user clicks `Add Content` button, a model should pop-up which consists of th form and it should also has **Croos Icon** so if the user clicks on the this then the user should again see the home page and the model should close
+
+**So thats why you have to signal the PARENT that `onClose` function has been called (which gets called when user clicks on the `CrossIcon` present in the model) so please change the `open` value from back to `false`**
+
+### **How to make a component appear over another component (MODEL)**
+
+----------
+
+**First you have to make the component which is going to appear just above the current component**
+
+making it 
+
+```javascript
+export function CreateContentModel({ open, onClose }) {
+    return (
+        <div>
+            {open && (
+                <div className="w-screen h-screen fixed bg-slate-500/60 top-0 left-0  z-50 flex justify-center items-center"> // 2
+                  
+                  
+                </div> 
+
+            )}
+        </div>
+    );
+}
+```
+
+**Explanation of `// 2` code**
+
+-> simply means take the width of the screen not the parent and same with height staring from the whole TOP and LEFT and going till last with OPAQUE value = 60 (opacity) making it fixed will fix its position tm scroll kro kuch v kro to v ye yhi rhega
+
+Now to achieve the **Opaque value** -> 
+
++ using **opacity-60(according to the need)** But the problem with this is that if you write in the `// 2` line then it will get **applied to the parent which is the form which will popup and hence the form will also become opaque** BUT we dont want it, the form should be **clearly visible** so use the second option
++ **using bg-slate-500/60** This will apart from providing the background color slate with value 500 it will also make that color with transperency 60 and hence you will now see that the form will be **clearly visible**
+
+**Comparisons ->**
+
+using `opacity-60` (left side) and `bg-slate-500/60` (right side)
+
+<img src = "image-12.png" width=320 height=200> <img src = "image-11.png" width=320 height=200> 
+
++ Added the `z-50` line as **card pta nhi kyun but slate background pe aa jaa rha tha but actually it should come on the main page to model ko utha diya bas iski madad se**
+
+Rest all `flex justify-center items-center` are **for the form that will be displyed on the middle if the model will appear**
 
 
 
