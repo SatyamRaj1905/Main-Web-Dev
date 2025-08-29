@@ -1287,7 +1287,6 @@ Now the problem with the above code is that as **modelOpen is not defined here i
 **So thats why you have to signal the PARENT that `onClose` function has been called (which gets called when user clicks on the `CrossIcon` present in the model) so please change the `open` value from back to `false`**
 
 ### **How to make a component appear over another component (MODEL)**
-
 ----------
 
 **First you have to make the component which is going to appear just above the current component**
@@ -1329,7 +1328,193 @@ using `opacity-60` (left side) and `bg-slate-500/60` (right side)
 
 Rest all `flex justify-center items-center` are **for the form that will be displyed on the middle if the model will appear**
 
+#### **Styling the overlay component**
 
+Now styling the component which is going to come as popup inside the `CreateContentModel.tsx` file
+
+```javascript
+import { CrossIcon } from "../../icons/CrossIcon";
+import { Button } from "./Button";
+
+type CreateContentModelProps = {
+    open : boolean
+    onClose : () => void
+}
+
+// We want this to make CONTROLLED COMPONENT
+export function CreateContentModel({ open , onClose} : CreateContentModelProps) {// 2
+    return (
+        <div>
+            {open && (
+                <div className="w-screen h-screen fixed bg-slate-500/60 top-0 left-0 z-50 flex justify-center items-center">
+                    <div className="bg-white p-4 rounded-md">
+                        <div className="flex justify-end mb-8">
+                            <div className="cursor-pointer" onClick={onClose}> // 3
+                                <CrossIcon size="md" />
+                            </div>
+                        </div>
+                        <div>
+                            <Input onChange={() => {}} placeholder={"Title"} /> // see custom Input component below
+                            <Input onChange={() => {}} placeholder={"Tags"} />
+                            <Input onChange={() => {}} placeholder={"Link"} />
+                        </div>
+                        <div className="mt-4 flex justify-center">
+                            <Button
+                                variant="Primary"
+                                size="sm"
+                                text="Submit"
+                            ></Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+type InputProps = { 
+    onChange : () => void
+    placeholder : string
+}
+ 
+// Defined the Input component seperately as this needs to be reused multiple times in the project
+export function Input({ onChange, placeholder }: InputProps) {
+    return (
+        <div>
+            <input
+                placeholder={placeholder}
+                type="text"
+                className="px-4 py-2 border-2 border-slate-200 rounded m-1"
+                onChange={onChange}
+            />
+        </div>
+    );
+}
+```
+**Explanation of `// 2` code**
+
+we have taken two props `open` and `onClose` passed to the component as INPUT as **these are user dependent entity SEE THE Controlled component theory written above**
+
+For the `CrossIcon` make a seperate file named as `CrossIcon.tsx` inside the `src > components > icons` and then from the website of heroicon **copied the `SVG` file of the `CrossIcon` and then doing the same thing as you were doing with other icons**
+
+```javascript
+interface CrossIconProps {
+    size: "sm" | "md" | "lg";
+}
+
+const sizeVariants = {
+    sm: "size-3",
+    md: "size-4",
+    lg: "size-6",
+};
+
+export const CrossIcon = (props: CrossIconProps) => {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            className={sizeVariants[props.size]}
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18 18 6M6 6l12 12"
+            />
+        </svg>
+    );
+};
+```
+
+The final component looks something like this ->
+
+<img src = "image-13.png" width=400 height=200>
+
+### **Implementing the model popup feature when clicking on the `Add Content` button**
+
+To make the model popup when clicking on the `Add Content` button and disappear when the `CrossIcon` present in the model is clicked, first of all we will make a **state variable to control the dom**
+
+so inside the `App.tsx` file, adding the state variable and writing the logic to get the above thing happen 
+
+```javascript
+// App.tsx
+
+import "./App.css";
+import { Button } from "./components/ui/Button";
+import { PlusIcon } from "./icons/PlusIcon";
+import { ShareIcon } from "./icons/ShareIcon";
+import { Card } from "./components/ui/Card";
+import { CreateContentModel } from "./components/ui/CreateContentModel";
+import { useState } from "react";
+
+function App() {
+    const [modelOpen, setModelOpen] = useState(false); // Made a state variable to define whether the model is open or not, initially set to false as we dont want it to appear at start only above the home page
+    return (
+        <div className="p-4">
+            <CreateContentModel
+                open={modelOpen} // Passed the value as PROPS to the CreateContentModel
+                onClose={() => { // Same as above
+                    setModelOpen(false);
+                }}
+            ></CreateContentModel>
+
+            <div className="flex justify-end">
+                <Button
+                    startIcon={<PlusIcon size="sm" />}
+                    variant="Primary"
+                    size="sm"
+                    onClick={() => {setModelOpen(true)}} // 4
+                    text={"Add Content"}
+                />
+                <Button
+                    startIcon={
+                        <div className="pr-0.5">
+                            <ShareIcon size="sm" />
+                        </div>
+                    }
+                    variant="Secondary"
+                    size="sm"
+                    onClick={() => {}}
+                    text={"Share Brain"}
+                />
+            </div>
+
+            <div className="flex gap-1">
+                <Card
+                    type="twitter"
+                    link="https://x.com/GlobeEyeNews/status/1960348787278328221"
+                    title="Trump V/S Modi"
+                />
+                <Card
+                    type="youtube"
+                    link="https://www.youtube.com/watch?v=2MTST0bEkP0"
+                    title="Trump V/S Modi"
+                />
+            </div>
+        </div>
+    );
+}
+
+export default App;
+```
+
+**Explanation of `// 4` code**
+As we want ki jaise he `Add Content` button pe **click ho mera model popup ho** and hence this part is being done by `// 4` which will set the `modelOpen` value to `true` with the help of `setModelOpen` value set to `true` and hence this value will be passed to the `open` variable present in the `CreateContentModel.tsx` as **Props**
+
+Now inside the `CreateContentModel.tsx`, they will get the values coming from `App.tsx` as props and then **as we want that if any one click on the `CrossIcon` button the popup should disappear** and hence writing the code for **Closing the model as `CrossIcon` is present inside this file only**
+
++ **Refer the `// 3` codeblock present in the `CreateContentModel.tsx` file [see above code is present]**
+
+### **Making of the SideBar component**
+----------
+
+Making a seperate file `SideBar.tsx` inside the `src > components > ui`
+
+```javascript
+
+```
 
 
 

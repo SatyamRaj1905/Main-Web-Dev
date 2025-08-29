@@ -1,3 +1,5 @@
+// CreateContentModel.tsx
+
 import { CrossIcon } from "../../icons/CrossIcon";
 import { Button } from "./Button";
 
@@ -14,7 +16,7 @@ export function CreateContentModel({ open , onClose} : CreateContentModelProps) 
                 <div className="w-screen h-screen fixed bg-slate-500/60 top-0 left-0 z-50 flex justify-center items-center">
                     <div className="bg-white p-4 rounded-md">
                         <div className="flex justify-end mb-8">
-                            <div onClick={onClose}>
+                            <div className="cursor-pointer" onClick={onClose}>
                                 <CrossIcon size="md" />
                             </div>
                         </div>
