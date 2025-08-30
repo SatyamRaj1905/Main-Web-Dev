@@ -12,8 +12,8 @@ interface ButtonProps {
 }
 
 const variantStyles = {
-    Primary: "bg-purple-600 text-white",
-    Secondary: "bg-purple-300 text-purple-600",
+    Primary: "bg-purple-600 text-white border border-purple-600 hover:bg-white hover:text-purple-600 transition-all duration-300 ease-in-out hover:scale-105",
+    Secondary: "bg-purple-300 text-purple-600 border border-purple-600 hover:bg-white hover:text-purple-600 transition-all duration-300 ease-in-out hover:scale-105",
 };
 
 const defaultStyles = "rounded-md inline-flex mr-4 cursor-pointer";
