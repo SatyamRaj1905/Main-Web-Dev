@@ -4,12 +4,12 @@ import { CrossIcon } from "../../icons/CrossIcon";
 import { Button } from "./Button";
 
 type CreateContentModelProps = {
-    open : boolean
-    onClose : () => void
-}
+    open: boolean;
+    onClose: () => void;
+};
 
 // We want this to make CONTROLLED COMPONENT
-export function CreateContentModel({ open , onClose} : CreateContentModelProps) {
+export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
     return (
         <div>
             {open && (
@@ -40,9 +40,9 @@ export function CreateContentModel({ open , onClose} : CreateContentModelProps) 
 }
 
 type InputProps = {
-    onChange : () => void
-    placeholder : string
-}
+    onChange: () => void;
+    placeholder: string;
+};
 
 export function Input({ onChange, placeholder }: InputProps) {
     return (

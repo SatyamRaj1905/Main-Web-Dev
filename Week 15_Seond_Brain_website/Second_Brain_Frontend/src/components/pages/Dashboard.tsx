@@ -23,7 +23,7 @@ export function Dashboard() {
                 ></CreateContentModel>
 
                 <div className="flex justify-end">
-                    <Button 
+                    <Button
                         startIcon={<PlusIcon size="sm" />}
                         variant="Primary"
                         size="sm"
@@ -61,4 +61,3 @@ export function Dashboard() {
         </div>
     );
 }
-
