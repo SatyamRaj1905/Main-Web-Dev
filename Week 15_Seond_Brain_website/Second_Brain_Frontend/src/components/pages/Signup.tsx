@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "../../config";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
 export const Signup = () => {
     const [loading, setLoading] = useState(false);
@@ -9,6 +10,7 @@ export const Signup = () => {
     const [showPassword, setShowPassword] = useState(false);
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
+    const navigate = useNavigate()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,6 +44,7 @@ export const Signup = () => {
                 password,
             });
             alert("Signed up successfully!");
+            navigate("/signin")
         } catch (err: any) {
             console.error(err);
             setError(err.response?.data?.error || "Signup failed!");

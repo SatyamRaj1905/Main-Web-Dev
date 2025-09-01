@@ -7,9 +7,11 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { userMiddleware } from "./middleware.js";
 import { random } from "./utils.js";
+import cors from "cors";
 const app = express();
 const saltRounds = 10;
 app.use(express.json());
+app.use(cors());
 dotenv.config();
 async function startServer() {
     if (!process.env.MONGO_DB_URI) {

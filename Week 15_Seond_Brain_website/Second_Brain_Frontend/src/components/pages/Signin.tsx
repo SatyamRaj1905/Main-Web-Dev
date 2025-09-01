@@ -1,17 +1,57 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import axios from "axios";
+import { BACKEND_URL } from "../../config";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
 export const Signin = () => {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const usernameRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
+    const navigate = useNavigate()
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
         setLoading(true);
 
-        // Mock async request
-        setTimeout(() => {
+        const username = usernameRef.current?.value || "";
+        const password = passwordRef.current?.value || "";
+
+        if (!/^[A-Za-z]{3,10}$/.test(username)) {
+            setError("Username must be 3-10 letters (A-Z, a-z).");
             setLoading(false);
-            alert("Signed in successfully!");
-        }, 2000);
+            return;
+        }
+
+        if (
+            !/^.*(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).*$/.test(
+                password
+            )
+        ) {
+            setError(
+                "Password must be 8-20 characters with at least 1 uppercase, 1 lowercase, 1 number, and 1 special character."
+            );
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await axios.post(`${BACKEND_URL}/api/v1/signin`, {
+                username,
+                password,
+            });
+            const jwt = response.data.token
+            localStorage.setItem("token", jwt)
+            navigate("/dashboard")
+        } catch (err: any) {
+            console.error(err);
+            setError(err.response?.data?.error || "Signin failed!");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -51,11 +91,7 @@ export const Signin = () => {
 
             {/* Right Side */}
             <div className="w-1/2 bg-gray-100 flex flex-col justify-center items-center p-10 relative">
-                <div
-                    className={`w-full max-w-md bg-white p-8 rounded-lg shadow-lg transition ${
-                        loading ? "opacity-50 pointer-events-none" : ""
-                    }`}
-                >
+                <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg relative">
                     <h2 className="text-2xl font-bold mb-6 text-gray-800">
                         Sign In
                     </h2>
@@ -63,31 +99,70 @@ export const Signin = () => {
                         onSubmit={handleSubmit}
                         className="flex flex-col space-y-4"
                     >
-                        <input
-                            type="text"
-                            placeholder="Username"
-                            className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
-                        />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
-                        />
+                        <div>
+                            <input
+                                ref={usernameRef}
+                                type="text"
+                                placeholder="Username"
+                                className={`border px-4 py-2 rounded w-full focus:outline-none focus:ring-2 ${
+                                    error.includes("Username")
+                                        ? "border-red-600 focus:ring-red-600"
+                                        : "border-gray-300 focus:ring-purple-600"
+                                }`}
+                            />
+                            {error.includes("Username") && (
+                                <p className="text-red-600 text-sm mt-1">
+                                    {error}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="relative">
+                            <input
+                                ref={passwordRef}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                disabled={loading}
+                                className={`border px-4 py-2 rounded w-full focus:outline-none focus:ring-2 ${
+                                    error.includes("Password")
+                                        ? "border-red-500 focus:ring-red-500"
+                                        : "border-gray-300 focus:ring-purple-600"
+                                }`}
+                            />
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-800"
+                            >
+                                {showPassword ? (
+                                    <EyeSlashIcon className="w-5 h-5" />
+                                ) : (
+                                    <EyeIcon className="w-5 h-5" />
+                                )}
+                            </button>
+                            {error.includes("Password") && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {error}
+                                </p>
+                            )}
+                        </div>
+
                         <button
                             type="submit"
-                            className="bg-purple-600 text-white px-4 py-2 rounded-3xl border border-purple-600 hover:bg-white hover:text-purple-600 transition-all duration-300 ease-in-out"
+                            disabled={loading}
+                            className="bg-purple-600 text-white px-4 py-2 rounded-3xl border border-purple-600 hover:bg-white hover:text-purple-600 transition-all duration-300 ease-in-out disabled:opacity-50"
                         >
-                            Submit
+                            {loading ? "Signing In..." : "Sign In"}
                         </button>
                     </form>
-                </div>
 
-                {/* Loader Overlay */}
-                {loading && (
-                    <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-30 rounded-lg">
-                        <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                )}
+                    {loading && (
+                        <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-70 rounded-lg">
+                            <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
