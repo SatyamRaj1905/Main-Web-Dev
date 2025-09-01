@@ -1478,6 +1478,7 @@ function App() {
                     size="sm"
                     onClick={() => {}}
                     text={"Share Brain"}
+                    
                 />
             </div>
 

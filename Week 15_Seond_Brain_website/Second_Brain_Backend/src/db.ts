@@ -5,7 +5,7 @@ const userSchema = new Schema({
   password : {type : String, required : true}
 })
 
-const contentTypes = ['image', 'video', 'article', 'audio'] // Extend the array if  needed
+const contentTypes = ['youtube', 'tweeter'] // Extend the array if  needed
 
 const contentSchema = new Schema({
   link : {type : String, required : true},

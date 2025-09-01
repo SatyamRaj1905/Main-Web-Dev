@@ -6,11 +6,20 @@ import { PlusIcon } from "../../icons/PlusIcon";
 import { ShareIcon } from "../../icons/ShareIcon";
 import { Card } from "../ui/Card";
 import { CreateContentModel } from "../ui/CreateContentModel";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "../ui/Sidebar";
+import { useContent } from "../../hooks/useContent";
+import { BACKEND_URL } from "../../config";
+import axios from "axios";
 
 export function Dashboard() {
     const [modelOpen, setModelOpen] = useState(false);
+    const { contents, refresh } = useContent();
+
+    // whenever the model is closed, it should re-fetch the data from the backend
+    useEffect(() => {
+        refresh();
+    }, [modelOpen]);
     return (
         <div>
             <Sidebar />
@@ -40,22 +49,30 @@ export function Dashboard() {
                         }
                         variant="Secondary"
                         size="sm"
-                        onClick={() => {}}
                         text={"Share Brain"}
+                        onClick={async () => {
+                            const response = await axios.post(`${BACKEND_URL}/api/v1/brain/share`, {
+                                share: true,
+                            }, {
+                                headers:{
+                                    "Authorization" : localStorage.getItem("token")
+                                }
+                            });
+                            const shareUrl = `http://localhost:5173/share/${response.data.hash}`
+                            alert(shareUrl)
+                        }}
                     />
                 </div>
 
-                <div className="flex gap-1">
-                    <Card
-                        type="twitter"
-                        link="https://x.com/GlobeEyeNews/status/1960348787278328221"
-                        title="Trump V/S Modi"
-                    />
-                    <Card
-                        type="youtube"
-                        link="https://www.youtube.com/watch?v=2MTST0bEkP0"
-                        title="Trump V/S Modi"
-                    />
+                <div className="flex gap-1 flex-wrap">
+                    {contents.map(({ type, link, title }, index) => (
+                        <Card
+                            key={index}
+                            type={type}
+                            link={link}
+                            title={title}
+                        />
+                    ))}
                 </div>
             </div>
         </div>

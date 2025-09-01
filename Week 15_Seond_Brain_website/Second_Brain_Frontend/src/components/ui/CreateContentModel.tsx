@@ -26,7 +26,12 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
             link,
             title,
             type,
+        }, {
+            headers:{
+                "Authorization" : localStorage.getItem("token")
+            }
         });
+        onClose() // whenver submit button is clicked, model should close 
     }
 
     return (
