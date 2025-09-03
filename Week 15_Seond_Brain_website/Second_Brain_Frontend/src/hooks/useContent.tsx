@@ -22,7 +22,7 @@ export function useContent() {
             });
     }
 
-    // Every 10 second it will fetch the data from backend, done to 
+    // Every 10 second it will fetch the data from backend, done to add the card from the datbase 
     useEffect(() => {
         refresh()
         let Interval = setInterval(() => {

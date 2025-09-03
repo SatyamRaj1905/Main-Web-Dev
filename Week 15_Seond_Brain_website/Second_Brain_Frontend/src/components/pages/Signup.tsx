@@ -76,7 +76,7 @@ export const Signup = () => {
                 </svg>
 
                 <h1 className="text-white text-3xl mt-6 font-bold z-10">
-                    Second Brain
+                    MindVault
                 </h1>
                 <p className="text-white text-center mt-4 z-10 max-w-xs">
                     Capture your favorite ideas from YouTube and Twitter posts,
