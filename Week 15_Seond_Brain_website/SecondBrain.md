@@ -2352,6 +2352,20 @@ export const Signin = () => {
     );
 };
 ```
+**And at last, PLEASE TRY TO LOOK AT THE PROJECT REPO TO GET BETTER UNDERSTANDING OF how the project is working**
+
+### **Running the project**
+----------
+To make it run locally,
+
+**Step 1 ->** First make sure your mongodb cluster is working fine or basically connected 
+
+
+**Step 2 ->** Now go to the `Second_Brain_Backend` folder in the terminal and just type `npm run dev` and execute it and you are good to go (**your backend is running now**), make sure to run the backend first as you may loose some data if the user signup/signin first
+
+**Step 3 ->** At last Inside the other terminal, go to the `Second_Brain_Frontend` and then just type `npm run dev` and execute this command (**your frontend link will start to work**)
+
+
 
 
 
