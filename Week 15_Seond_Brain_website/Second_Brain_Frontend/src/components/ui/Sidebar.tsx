@@ -1,6 +1,5 @@
 // Sidebar.tsx
 
-import { useNavigate } from "react-router-dom";
 import { BrainIcon } from "../../icons/BrainIcon";
 import { TweeterIcon } from "../../icons/TweeterIcon";
 import { YoutubeIcon } from "../../icons/YoutubeIcon";
@@ -17,7 +16,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ currentFilter, setFilter, onLogoutClick }: SidebarProps) {
-    const navigate = useNavigate();
     
     return (
         <div className="h-screen bg-white border-r-2 border-slate-300 w-64 fixed left-0 top-0 flex flex-col">
