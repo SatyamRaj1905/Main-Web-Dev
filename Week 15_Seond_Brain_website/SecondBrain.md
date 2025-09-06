@@ -1514,10 +1514,629 @@ Now inside the `CreateContentModel.tsx`, they will get the values coming from `A
 Making a seperate file `SideBar.tsx` inside the `src > components > ui`
 
 ```javascript
+// Sidebar.tsx
+
+import { BrainIcon } from "../../icons/BrainIcon";
+import { TweeterIcon } from "../../icons/TweeterIcon";
+import { YoutubeIcon } from "../../icons/YoutubeIcon";
+import { LogoutIcon } from "../../icons/LogoutIcon";
+import { SidebarItem } from "./SidebarItem";
+import { AllFileIcon } from "../../icons/AllFileIconl";
+import { Button } from "./Button";
+
+
+interface SidebarProps {
+    currentFilter: "all" | "youtube" | "twitter";
+    setFilter: (value: "all" | "youtube" | "twitter") => void; // for making the filter based on the category work
+    onLogoutClick:() => void
+}
+
+export function Sidebar({ currentFilter, setFilter, onLogoutClick }: SidebarProps) {
+    
+    return (
+        <div className="h-screen bg-white border-r-2 border-slate-300 w-64 fixed left-0 top-0 flex flex-col">
+            <div className="pt-4 pl-4">
+                <h1 className="pl-2 text-2xl pb-4 pt-2 font-semibold flex gap-4">
+                    {<BrainIcon size="lg" />} MindVault
+                </h1>
+                <div className="mt-4 flex flex-col gap-2">
+                    <SidebarItem
+                        text="All"
+                        icon={<AllFileIcon size="lg" />}
+                        selected={currentFilter === "all"}
+                        onClick={() => setFilter("all")}
+                    />
+                    <SidebarItem
+                        text="Tweets"
+                        icon={<TweeterIcon size="lg" />}
+                        selected={currentFilter === "twitter"}
+                        onClick={() => setFilter("twitter")}
+                    />
+                    <SidebarItem
+                        text="Videos"
+                        icon={<YoutubeIcon size="lg" />}
+                        selected={currentFilter === "youtube"}
+                        onClick={() => setFilter("youtube")}
+                    />
+                </div>
+            </div>
+            // Logout button is at the end of the screen
+            <div className="mt-auto pb-6 flex justify-center">
+                <Button
+                    startIcon={<LogoutIcon size="md" />}
+                    variant="Warning"
+                    size="sm"
+                    onClick={onLogoutClick}
+                    text={"Logout"}
+                />
+            </div>
+        </div>
+    );
+}
+```
+
+Making a generic `SidebarItem.tsx` file as the **filter portion have components common** so making that component
+
+```javascript
+// SidebarItem.tsx
+
+import type { ReactElement } from "react";
+
+interface SideBarItemProps {
+    text: string;
+    icon: ReactElement;
+    selected?: boolean; // just for highlighting which filter is currently applied 
+    onClick?: () => void;
+}
+
+export function SidebarItem({ text, icon, selected, onClick }: SideBarItemProps) {
+    return (
+        <div
+            className={`flex items-center text-gray-700 pl-5 cursor-pointer max-w-58 rounded transition-all duration-200
+            ${selected ? "bg-gray-300 font-semibold" : "hover:bg-gray-200"}`}
+            onClick={onClick}
+        >
+            <div className="p-2 pb-1">{icon}</div>
+            <div className="p-2 text-md">{text}</div>
+        </div>
+    );
+}
+```
+
+The above component is what being used in the `Sidebar.tsx`
+
+### **How to make the tweets load faster**
+----------
+Currently we are getting a problem and that is the tweets are loading too slow so to fix that you have to **embed the post like the below**
+
+**Step 1 ->** Remove the `script` tag used for the tweet to show it in global `index.html` file
+
+**Step 2 ->** Make a seperate file inside the folder where you want the tweets file to load, as here the tweets are loading inside the `Card.tsx` so making the folder named `TwitterScriptLoader.tsx` inside the same folder as that of `Card.tsx` which is `src > components > ui`
+
+```javascript
+// TwitterScriptLoader.tsx
+
+import { useEffect } from "react";
+
+export function TwitterScriptLoader() {
+    useEffect(() => {
+        // Only load once
+        if (!(window as any).twttr) {
+            const script = document.createElement("script");
+            script.src = "https://platform.twitter.com/widgets.js";
+            script.async = true;
+            document.body.appendChild(script);
+        }
+    }, []);
+
+    return null;
+}
+```
+
+**Step 3 ->** and then at last **Just import it inside the `App.tsx`** and add the component inside just above the line in `App.tsx`
+
+```javascript
+import { Dashboard } from "./components/pages/Dashboard";
+import { Signin } from "./components/pages/Signin";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Signup } from "./components/pages/Signup";
+import { TwitterScriptLoader } from "./components/ui/TwitterScriptLoader";
+
+function App() {
+    return (
+        <BrowserRouter>
+            <TwitterScriptLoader /> // Just below the BrowserRouter tag you have to add this component
+            <Routes>
+                <Route path="/signup" element = {<Signup />} />
+```
+
+**Step 4 ->** Finally inside the `Card.tsx` as here eventually you are going to load the tweets so writing the below line of code
+
+```javascript
+export function Card({ id, title, link, type, onDelete }: CardProps) {
+    // Ensure Twitter embeds are processed dynamically hence useEffect added
+    useEffect(() => {
+        if (type === "twitter" && (window as any).twttr?.widgets) {
+            (window as any).twttr.widgets.load();
+        }
+    }, [link, type]);
+```
+**That it now you will notice that the tweets will load up faster then previous**
+
+**Also as we are dealing with multiple pages so to make look CLEAN `App.tsx`, just add routes according to the page which it represent to**
+
+for example here -> we have seperated out the **Main page** and made a seperate route named as `/dashboard` and hence for that made another file `Dashboard.tsx` inside which 
+
+```javascript
+// Dashboard.tsx
+
+import "../../App.css";
+import { Button } from "../ui/Button";
+import { PlusIcon } from "../../icons/PlusIcon";
+import { ShareIcon } from "../../icons/ShareIcon";
+import { Card } from "../ui/Card";
+import { CreateContentModel } from "../ui/CreateContentModel";
+import { ConfirmDeleteModal } from "../ui/ConfirmDeleteModel";
+import { useEffect, useState } from "react";
+import { Sidebar } from "../ui/Sidebar";
+import { useContent } from "../../hooks/useContent";
+import { BACKEND_URL } from "../../config";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+export function Dashboard() {
+    const [modelOpen, setModelOpen] = useState(false); // for handling the model which will appear(DOM CHANGE) when you click on the Add Content button
+    const [deleteId, setDeleteId] = useState<string | null>(null); // for handling the model which will appear (DOM CHANGE) when you click the delete button(i have added a popup asking to make sure you want to delete the content)
+    const [filter, setFilter] = useState<"all" | "youtube" | "twitter">("all"); // for handling the Filter part (DOM CHANGE) 
+    const [logOut, setLogout] = useState(false); // for handling the model which will appear (DOM CHANGE) when you click the Logout button as i have made component (popup) which will appear when you click on Logout to confirm surity to leave
+
+    const navigate = useNavigate();
+
+    // Wrote Logout logic
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate("/signin");
+    };
+
+    // Below is the logic for automatically make disappear the model (popup) after i chose some option in it and fetch the data from the backend and show it on the dashboard
+    const { contents, refresh } = useContent();
+
+    useEffect(() => {
+        refresh();
+    }, [modelOpen]);
+
+    // Wrote Delete logic
+
+    const handleDelete = (id: string) => setDeleteId(id);
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
+        await axios.delete(`${BACKEND_URL}/api/v1/content`, {
+            headers: { Authorization: localStorage.getItem("token") },
+            data: { contentId: deleteId },
+        });
+        setDeleteId(null);
+        refresh();
+    };
+
+    // Wrote Filter logic
+
+    const filteredContents =
+        filter === "all" ? contents : contents.filter((c) => c.type === filter);
+
+    return (
+        <div>
+            <Sidebar
+                currentFilter={filter}
+                setFilter={setFilter}
+                onLogoutClick={() => setLogout(true)}
+            />
+            <div className="p-4 ml-64 min-h-screen bg-slate-100">
+                <CreateContentModel
+                    open={modelOpen}
+                    onClose={() => setModelOpen(false)}
+                    refresh={refresh}
+                />
+
+                <div className="flex justify-end gap-2">
+                    <Button
+                        startIcon={<PlusIcon size="sm" />}
+                        variant="Primary"
+                        size="sm"
+                        onClick={() => setModelOpen(true)}
+                        text={"Add Content"}
+                    />
+                    <Button
+                        startIcon={<ShareIcon size="sm" />}
+                        variant="Secondary"
+                        size="sm"
+                        text={"Share Brain"}
+                        onClick={async () => {
+                            const response = await axios.post(
+                                `${BACKEND_URL}/api/v1/brain/share`,
+                                { share: true },
+                                {
+                                    headers: {
+                                        Authorization:
+                                            localStorage.getItem("token"),
+                                    },
+                                }
+                            );
+                            const shareUrl = `http://localhost:5173/share/${response.data.hash}`;
+                            alert(shareUrl);
+                        }}
+                    />
+                </div>
+
+                <div className="flex gap-1 flex-wrap">
+                    {filteredContents.map(({ _id, type, link, title }) => (
+                        <Card
+                            key={_id}
+                            id={_id}
+                            type={type}
+                            link={link}
+                            title={title}
+                            onDelete={handleDelete}
+                        />
+                    ))}
+                </div>
+
+                <ConfirmDeleteModal
+                    isOpen={!!deleteId}
+                    onCancel={() => setDeleteId(null)}
+                    onConfirm={confirmDelete}
+                    text="Are you sure you want to delete this content as this action can't be undone"
+                    heading="Delete Content"
+                />
+                <ConfirmDeleteModal
+                    isOpen={logOut}
+                    onCancel={() => setLogout(false)}
+                    onConfirm={handleLogout}
+                    text="Are you sure you want to leave?"
+                    heading="Logout"
+                    confirmLabel="Exit"
+                />
+            </div>
+        </div>
+    );
+}
+```
+
+>[!IMPORTANT]
+> **`flex-wrap`** -> wraps the component inside the screen so if any component is going out of the screen it will automatically come in the next line
+
+Now making `ConfirmDeleteModel.tsx` file as that is being used here 
+
+```javascript
+// ConfirmDeleteModel.tsx
+
+import { motion } from "framer-motion";
+
+interface ConfirmDeleteModalProps {
+    isOpen: boolean; // for whether the model is open or not 
+    onConfirm: () => void; // what to do if confirm button is pressed
+    onCancel: () => void; // what to do if cancel button is pressed
+    text?:string // as we are making it dynamic this SAME MODEL IS USED TO SHOW THE POPUP WHEN LOGOUT button is clicked so making its content dynamic so that we can differentiate between delete and logout popup
+    heading?:string // Same as above explanation
+    confirmLabel?:string  // Same as above explanation
+}
+
+export function ConfirmDeleteModal({
+    isOpen,
+    onConfirm,
+    onCancel,
+    text,
+    heading,
+    confirmLabel
+}: ConfirmDeleteModalProps) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white p-6 rounded-2xl shadow-xl w-80"
+            >
+                <h2 className="text-lg font-semibold text-gray-800">
+                    {heading}
+                </h2>
+                <p className="text-sm text-gray-600 mt-2">
+                   {text}
+                </p>
+
+                <div className="flex justify-end gap-3 mt-6">
+                    <button
+                        onClick={onCancel}
+                        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600"
+                    >
+                        {confirmLabel}
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+}
+```
+
+>[!IMPORTANT]
+> **`backdrop-blur-sm`** -> The **Element itself remain sharp, whats behind it becomes blurred** which is different from `opacity` as in this the **Element itself gets blurred not the background**
+
+Final `Card.tsx` file looks something like this 
+
+```javascript
+// Card.tsx
+
+import { DeleteIcon } from "../../icons/DeleteIcon";
+import { ShareIcon } from "../../icons/ShareIcon";
+import { TweeterIcon } from "../../icons/TweeterIcon";
+import { YoutubeIcon } from "../../icons/YoutubeIcon";
+import { useEffect } from "react";
+
+interface CardProps {
+    id: string; // Mongo _id
+    title: string;
+    link: string;
+    type: "twitter" | "youtube";
+    onDelete: (id: string) => void; // delete handler
+}
+
+export function Card({ id, title, link, type, onDelete }: CardProps) {
+    // Ensure Twitter embeds are processed dynamically
+    useEffect(() => {
+        if (type === "twitter" && (window as any).twttr?.widgets) {
+            (window as any).twttr.widgets.load();
+        }
+    }, [link, type]);
+    return (
+        <div className="scale-90 origin-top-left">
+            <div className="bg-white p-2 border-1 border-slate-300 rounded-md shadow-md max-w-72 min-w-30 min-h-48 h-fit mt-8">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2.5">
+                        <div className="pr-0.5 text-slate-500">
+                            {type === "youtube" ? (
+                                <YoutubeIcon size="md" />
+                            ) : (
+                                <TweeterIcon size="sm" />
+                            )}
+                        </div>
+                        <div className="text-sm font-medium">{title}</div>
+                    </div>
+                    <div className="flex items-center gap-2.5 pr-2 pl-2 text-slate-500">
+                        <a
+                            href={link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <ShareIcon size="md" />
+                        </a>
+                        <button
+                            onClick={() => onDelete(id)}
+                            className="hover:bg-red-600 p-1 rounded-full transition-colors duration-200 hover:text-white"
+                        >
+                            <DeleteIcon size="md" />
+                        </button>
+                    </div>
+                </div>
+                <div className="pt-4">
+                    {type === "youtube" && (
+                        <iframe
+                            className="w-full"
+                            src={link
+                                .replace("watch", "embed")
+                                .replace("?v=", "/")}
+                            title="YouTube video player"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    )}
+                    {type === "twitter" && (
+                        <blockquote className="twitter-tweet w-full scale-90 origin-top-left">
+                            <a href={link.replace("x.com", "twitter.com")}></a>
+                        </blockquote>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+```
+
+and **Finally at last making the `Sigin.tsx` and `Signup.tsx` file for the authentication part**
+
+**Just make the `Signup.tsx` file and by making some minor change, you can generate the `Signin.tsx` file also**
+
+```javascript
+import { useRef, useState } from "react";
+import axios from "axios";
+import { BACKEND_URL } from "../../config";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
+
+export const Signup = () => {
+    const [loading, setLoading] = useState(false); // as Loading ke time pe DOM CHANGE hoga
+    const [error, setError] = useState(""); // Error(Input constraint fulfill nhi kr rha user) show krne ke time pe DOM CHANGE hoga
+    const [showPassword, setShowPassword] = useState(false); // Password show krna h ya user ko ya nhi (added a feature that user can see his password while setting it), yahan v DOM CHANGE hoga hence 
+    const usernameRef = useRef<HTMLInputElement>(null); // as i have to extract the value from the input field named as username and password so given the type HTMLInputElement for ts safety and useRef being used to refer to that input box 
+    const passwordRef = useRef<HTMLInputElement>(null); // same as above explanation
+    const navigate = useNavigate()
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        const username = usernameRef.current?.value || "";
+        const password = passwordRef.current?.value || "";
+
+        // Without going to the backend and then getting the response that Input constraint are not being fulfilled checked on the frontend itself and show them the error
+        // Below are the input constraint
+
+        if (!/^[A-Za-z]{3,10}$/.test(username)) {
+            setError("Username must be 3-10 letters (A-Z, a-z).");
+            setLoading(false);
+            return;
+        }
+
+        if (
+            !/^.*(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).*$/.test(
+                password
+            )
+        ) {
+            setError(
+                "Password must be 8-20 characters with at least 1 uppercase, 1 lowercase, 1 number, and 1 special character."
+            );
+            setLoading(false);
+            return;
+        }
+
+        try {
+            await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+                username,
+                password,
+            });
+            alert("Signed up successfully!");
+            navigate("/signin") // after successful signup, user will be redirected to signin endpoint to signin
+        } catch (err: any) {
+            console.error(err);
+            setError(err.response?.data?.error || "Signup failed!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex min-h-screen relative">
+            {/* Left Half Side of the signup component */}
+            <div className="w-1/2 bg-purple-600 flex flex-col justify-center items-center p-10 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-72 h-72 bg-purple-400 rounded-full opacity-30 -translate-x-20 -translate-y-20"></div>
+                <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-800 rounded-full opacity-30 translate-x-20 translate-y-20"></div>
+
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-64 h-64 text-white z-10"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9 6 9-6M12 13v6"
+                    />
+                </svg>
+
+                <h1 className="text-white text-3xl mt-6 font-bold z-10">
+                    MindVault
+                </h1>
+                <p className="text-white text-center mt-4 z-10 max-w-xs">
+                    Capture your favorite ideas from YouTube and Twitter posts,
+                    take notes, and share insights with ease.
+                </p>
+
+                <div className="absolute top-10 left-20 w-6 h-6 bg-white rounded shadow animate-bounce"></div>
+                <div className="absolute top-1/2 right-10 w-8 h-8 bg-white rounded shadow animate-pulse"></div>
+                <div className="absolute bottom-10 left-1/3 w-4 h-4 bg-white rounded shadow animate-bounce"></div>
+            </div>
+
+            {/* Right Half Side */}
+            <div className="w-1/2 bg-gray-100 flex flex-col justify-center items-center p-10 relative">
+                <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg relative">
+                    <h2 className="text-2xl font-bold mb-6 text-gray-800">
+                        Sign Up
+                    </h2>
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex flex-col space-y-4"
+                    >
+                        <div>
+                            <input
+                                ref={usernameRef}
+                                type="text"
+                                placeholder="Username"
+                                className={`border px-4 py-2 rounded w-full focus:outline-none focus:ring-2 ${
+                                    error.includes("Username")
+                                        ? "border-red-600 focus:ring-red-600"
+                                        : "border-gray-300 focus:ring-purple-600"
+                                }`}
+                            />
+                            {error.includes("Username") && (
+                                <p className="text-red-600 text-sm mt-1">
+                                    {error}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="relative">
+                            <input
+                                ref={passwordRef}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                disabled={loading}
+                                className={`border px-4 py-2 rounded w-full focus:outline-none focus:ring-2 ${
+                                    error.includes("Password")
+                                        ? "border-red-500 focus:ring-red-500"
+                                        : "border-gray-300 focus:ring-purple-600"
+                                }`}
+                            />
+                            <button
+                                type="button"
+                                disabled={loading}
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-800"
+                            >
+                                {showPassword ? (
+                                    <EyeSlashIcon className="w-5 h-5" />
+                                ) : (
+                                    <EyeIcon className="w-5 h-5" />
+                                )}
+                            </button>
+                            {error.includes("Password") && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {error}
+                                </p>
+                            )}
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="bg-purple-600 text-white px-4 py-2 rounded-3xl border border-purple-600 hover:bg-white hover:text-purple-600 transition-all duration-300 ease-in-out disabled:opacity-50"
+                        >
+                            {loading ? "Signing Up..." : "Sign Up"}
+                        </button>
+                    </form>
+
+                    {loading && (
+                        <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-70 rounded-lg">
+                            <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 ```
 
+>[!IMPORTANT]
+> **`focus:ring-purple-600`** -> used on `<input>` tag, **higlight the given property when you focus on the input box** means initially it will have some property and as soon as it will be higlighted or will meet some condition, it will automatically apply its corresponding given property on the element
+>
+> For ex -> in the above case, if the error is there (basically user is not meeting the input constraint), then the input box which is not meeting the constraint will have ring or border **difference between ring and border is that ring is temporary/highlight effect outside the box while Border = permanent, structural styling.**
 
+**Similar to th**
 
 
 
