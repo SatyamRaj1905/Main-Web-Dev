@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 
 interface ButtonProps {
-  variant: "Primary" | "Secondary";
+  variant: "Primary" | "Secondary" | "Warning";
   size: "sm" | "md" | "lg";
   text: string;
   startIcon?: ReactElement;
@@ -16,6 +16,8 @@ const variantStyles = {
     "bg-purple-600 text-white border border-purple-600 hover:bg-white hover:text-purple-600 transition-all duration-300 ease-in-out hover:scale-105",
   Secondary:
     "bg-purple-300 text-purple-600 border border-purple-600 hover:bg-white hover:text-purple-600 transition-all duration-300 ease-in-out hover:scale-105",
+  Warning :
+    "bg-red-600 text-white border border-black transition-all duration-300 ease-in-out hover:scale-105",
 };
 
 const defaultStyles = "rounded-md inline-flex mr-4 cursor-pointer";

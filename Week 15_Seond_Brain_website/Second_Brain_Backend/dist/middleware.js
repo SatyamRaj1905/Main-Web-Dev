@@ -1,12 +1,8 @@
+// middleware.ts
 import jwt from "jsonwebtoken";
 export const userMiddleware = async (req, res, next) => {
     try {
-        const header = req.headers["authorization"];
-        // Checking header aaya v h ya nhi
-        if (!header) {
-            return res.status(401).json({ error: "Authorization header missing" });
-        }
-        const token = header.split(" ")[1];
+        const token = req.headers["authorization"]; // ✅ directly read the token
         if (!token) {
             return res.status(401).json({ error: "Token missing" });
         }
@@ -14,7 +10,7 @@ export const userMiddleware = async (req, res, next) => {
             throw new Error("JWT_SECRET_USER is not defined");
         }
         const decoded = jwt.verify(token, process.env.JWT_SECRET_USER);
-        // @ts-ignore - extend Request type for userID
+        // @ts-ignore - extend Request type for userId
         req.userId = decoded.id;
         next();
     }

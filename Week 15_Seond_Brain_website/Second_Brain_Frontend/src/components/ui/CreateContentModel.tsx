@@ -1,4 +1,4 @@
-// CreateContentModel.tsx
+// CreataContentModel.tsx
 
 import { useRef, useState } from "react";
 import { CrossIcon } from "../../icons/CrossIcon";
@@ -9,41 +9,54 @@ import axios from "axios";
 type CreateContentModelProps = {
     open: boolean;
     onClose: () => void;
+    refresh: () => void; // added
 };
 
-type ContentType = "youtube" | "tweeter";
-
-export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
+type ContentType = "youtube" | "twitter";
+    
+export function CreateContentModel({
+    open,
+    onClose,
+    refresh,
+}: CreateContentModelProps) {
     const titleRef = useRef<HTMLInputElement>(null);
     const linkRef = useRef<HTMLInputElement>(null);
-    const [type, setType] = useState<ContentType>("youtube"); // default youtube content is allowed
+    const [type, setType] = useState<ContentType>("youtube"); // default youtube
 
     async function addContent() {
         const title = titleRef.current?.value;
         const link = linkRef.current?.value;
 
-        await axios.post(`${BACKEND_URL}/api/v1/content`, {
-            link,
-            title,
-            type,
-        }, {
-            headers:{
-                "Authorization" : localStorage.getItem("token")
+        if (!title || !link) return alert("Please fill all fields");
+        const token = localStorage.getItem("token");
+        if (!token) return alert("You must be logged in to add content");
+
+        await axios.post(
+            `${BACKEND_URL}/api/v1/content`,
+            {
+                link,
+                title,
+                type,
+            },
+            {
+                headers: { Authorization: token },
             }
-        });
-        onClose() // whenver submit button is clicked, model should close 
+        );
+
+        onClose(); // close modal
+        refresh(); // refresh dashboard content
     }
 
     return (
         <div>
-            {open && ( // if open === true then only render the model
+            {open && (
                 <div
                     className="w-screen h-screen fixed bg-slate-500/60 top-0 left-0 z-50 flex justify-center items-center"
-                    onClick={onClose} // ✅ click outside closes modal
+                    onClick={onClose}
                 >
                     <div
                         className="bg-white p-4 rounded-md"
-                        onClick={(e) => e.stopPropagation()} // ❌ prevent inside clicks from closing
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex justify-end mb-8">
                             <div className="cursor-pointer" onClick={onClose}>
@@ -68,14 +81,14 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
                                     onClick={() => setType("youtube")}
                                 />
                                 <Button
-                                    text="Tweeter"
+                                    text="Twitter"
                                     size="sm"
                                     variant={
-                                        type === "tweeter"
+                                        type === "twitter"
                                             ? "Primary"
                                             : "Secondary"
                                     }
-                                    onClick={() => setType("tweeter")}
+                                    onClick={() => setType("twitter")}
                                 />
                             </div>
                         </div>

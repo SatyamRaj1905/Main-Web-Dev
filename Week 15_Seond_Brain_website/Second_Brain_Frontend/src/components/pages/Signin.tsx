@@ -10,7 +10,7 @@ export const Signin = () => {
     const [showPassword, setShowPassword] = useState(false);
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,12 +43,15 @@ export const Signin = () => {
                 username,
                 password,
             });
-            const jwt = response.data.token
-            localStorage.setItem("token", jwt)
-            navigate("/dashboard")
+
+            const token = response.data.token;
+            if (!token) throw new Error("Token missing from response");
+
+            localStorage.setItem("token", token); // ✅ Save token
+            navigate("/dashboard"); // Navigate to dashboard
         } catch (err: any) {
             console.error(err);
-            setError(err.response?.data?.error || "Signin failed!");
+            setError(err.response?.data?.message || "Signin failed!");
         } finally {
             setLoading(false);
         }
@@ -58,9 +61,9 @@ export const Signin = () => {
         <div className="flex min-h-screen relative">
             {/* Left Side */}
             <div className="w-1/2 bg-purple-600 flex flex-col justify-center items-center p-10 relative overflow-hidden">
+                {/* Left background graphics */}
                 <div className="absolute top-0 left-0 w-72 h-72 bg-purple-400 rounded-full opacity-30 -translate-x-20 -translate-y-20"></div>
                 <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-800 rounded-full opacity-30 translate-x-20 translate-y-20"></div>
-
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="w-64 h-64 text-white z-10"
@@ -75,7 +78,6 @@ export const Signin = () => {
                         d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9 6 9-6M12 13v6"
                     />
                 </svg>
-
                 <h1 className="text-white text-3xl mt-6 font-bold z-10">
                     MindVault
                 </h1>
@@ -83,10 +85,6 @@ export const Signin = () => {
                     Capture your favorite ideas from YouTube and Twitter posts,
                     take notes, and share insights with ease.
                 </p>
-
-                <div className="absolute top-10 left-20 w-6 h-6 bg-white rounded shadow animate-bounce"></div>
-                <div className="absolute top-1/2 right-10 w-8 h-8 bg-white rounded shadow animate-pulse"></div>
-                <div className="absolute bottom-10 left-1/3 w-4 h-4 bg-white rounded shadow animate-bounce"></div>
             </div>
 
             {/* Right Side */}
@@ -156,12 +154,6 @@ export const Signin = () => {
                             {loading ? "Signing In..." : "Sign In"}
                         </button>
                     </form>
-
-                    {loading && (
-                        <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-70 rounded-lg">
-                            <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

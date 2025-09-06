@@ -4,14 +4,21 @@ import { useEffect, useState } from "react";
 import { BACKEND_URL } from "../config";
 import axios from "axios";
 
-export function useContent() {
-    const [contents, setContents] = useState([]);
+export interface Content {
+    _id: string;
+    title: string;
+    link: string;
+    type: "twitter" | "youtube";
+}
 
-    function refresh() { // you can use async await instead of .then and .catch
-        const response = axios
-            .get(`${BACKEND_URL}/api/v1/content`, {
+export function useContent() {
+    const [contents, setContents] = useState<Content[]>([]);
+
+    function refresh() {
+        axios
+            .get<{ content: Content[] }>(`${BACKEND_URL}/api/v1/content`, {
                 headers: {
-                    Authorization: localStorage.getItem("token"),
+                    Authorization: localStorage.getItem("token") || "",
                 },
             })
             .then((response) => {
@@ -22,15 +29,14 @@ export function useContent() {
             });
     }
 
-    // Every 10 second it will fetch the data from backend, done to add the card from the datbase 
     useEffect(() => {
-        refresh()
-        let Interval = setInterval(() => {
-            refresh()
-        }, 10*1000)
-        return () => { // implemented cleanup 
-            clearInterval(Interval)
-        }
+        refresh();
+        let interval = setInterval(() => {
+            refresh();
+        }, 10 * 1000);
+
+        return () => clearInterval(interval);
     }, []);
-return {contents, refresh};
+
+    return { contents, refresh };
 }
