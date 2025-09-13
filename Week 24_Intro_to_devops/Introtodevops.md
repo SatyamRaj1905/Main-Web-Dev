@@ -101,11 +101,101 @@ ifconfig or ipconfig
 >
 > Finding your wi-fi address by running the above command is simple (just see for the human readable ip address and that is the ip address of the wifi)
 >
-> **You can also use `npx server` if you are still not able to see the ip address, this gives the ip address of the network your laptop is connected to**
+> **You can also use `npx serve` if you are still not able to see the ip address, this gives the ip address of the network your laptop is connected to**
+>
+> also using the above command __you can see all the device contents of the device from which you have ran `npx serve`__ in any device which is connected to the same network as that of the device in which `npx serve` is done (try to do it in your windows terminal and go to the given site from any device, you will be able to see your pc contents in any device it returns)
+
+**Hosts file**
+
+You can override what your domain name resolves to by overriding the hosts file.
+
+```javascript
+vi /etc/hosts
+127.0.0.01 harkirat.100xdevs.com
+```
+
+### **Homoglyph attack**
+----------
+
+
+Attack in which the hacker makes you a visit a website which looks same like the authentic website(UI is copied end to end) hence **tricking the user to enter the sensitive information to fill in the fake website** and hacking the user.
+
+Now you can do the same above thing in your space also. so basically you can point the `facebook.com` ip address to your machine and then whenever someone tries to login from your machine (i.e. connected to your router), then it will go to your machine instead of `facebook.com` and you will be able to get the **username and password** and rest you know 
+
+For this -> 
+
+**Step 1 ->** 
+
+```javascript
+sudo vi /etc/hosts // this has all the list of dns names which you are using or you have made for your convenience
+```
+
+**Step 2 ->** 
+
+```javascript
+// Add a new your ip address for the facebook.com something like the below (basically made a new entry in the above file)
+
+127.0.0.1 facebook.com 
+// this will make sure that anyone who will search facebook.com and is connected to your network will be redirected to 127.0.0.1 (which is your ip address) 
+```
+>[!CAUTION]
+> **Make sure to delete the entry from `sudo vi /etc/hosts` time to time nahi to pta chla facebook nhi chal rha(as it is running on local network) and you are blaming the company**
+
+Even if you do 
+
+```javascript
+ping facebook.com 
+
+// Output will be -> 127.0.0.1 
+```
+**Basically you have just change the pointing of `facebook.com` to your machine ip address instead of facebook machine**
+
+**Step 3 ->** and now you just have to make a **good signin page of facebook.com such that no one is able to distuinguish between the original and yours made** and write the logic to get the contents of the input box of username and password and then re-direct them to original facebook.com so that **unko shak na ho** and also you have not made the page after the login
+
+## **How to deploy apps (actual hosting) ??**
+
+----------
+
+1. Renting servers on a cloud
+2. Rending compute yourself in datacenters
+3. Self hosting (buying a CPU rack in your house)
+4. Serverless providers
+5. Cloud native options (k8s)
+
+Great video to look at -> [How to deploy your website](https://www.youtube.com/watch?v=gViEtIJ1DCw)
+
+### **What is VM ?**
+----------
+
+**VM stands for Virtual Machine**
+
+<img src = "image-4.png" width=500 height=250>
+
+VMS run on a physical server (called the host) but are abstracted through a layer of virtualization software called a __hypervisor__ (e.g., VMware, KVM). __This hypervisor divides the host machine's resources (CPU, memory, storage) into separate virtual machines.__(Benefit -> if anyone wants small machine, then it can be provided basically effectively distributing the machine).
+
+Each VM acts like a completely independent machine, even though they share the underlying
+hardware. You can run different operating systems and applications in different VMS on the same physical server.
+
+VMS are highly flexible and easy to scale. You can quickly spin up, modify, or delete VMs, and you can consolidate multiple workloads on a single server.
+
+__The virtualization layer introduces a slight overhead in terms of performance because the hypervisor needs to manage resources and ensure each VM operates independently.__ However, with modern hypervisors and powerful hardware, this overhead is minimal.
+
+<img src = "image-5.png" width=400 height=300>
+
+The performance problem present in the Virtual machine is handled by 
+
+## **Bare metal Servers**
+----------
 
 
 
-**Loopback Address**
+
+
+
+
+
+
+
 
 
 
