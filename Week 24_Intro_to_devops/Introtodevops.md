@@ -93,9 +93,24 @@ app.listen(port, () => {
 **Step 2 ->** Find the IP of your machine on the local network 
 
 ```javascript
-ifconfig or ipconfig
+ifconfig or ipconfig 
 ```
 
-**Loopback address**
+>[!IMPORTANT]
+> `ifconfig` or `ipconfig` -> **using this will show you all the Network interfaces (different ways to reach to your computer)**
+>
+> Finding your wi-fi address by running the above command is simple (just see for the human readable ip address and that is the ip address of the wifi)
+>
+> **You can also use `npx server` if you are still not able to see the ip address, this gives the ip address of the network your laptop is connected to**
+
+
+
+**Loopback Address**
+
+
+
+
+
+
 
 
