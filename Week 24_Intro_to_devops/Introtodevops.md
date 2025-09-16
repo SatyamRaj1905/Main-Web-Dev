@@ -187,6 +187,63 @@ The performance problem present in the Virtual machine is handled by
 ## **Bare metal Servers**
 ----------
 
+In a bare-metal setup, __an operating system (OS) runs directly on the physical hardware without a hypervisor in between. There's no virtualization layer.__
+
+__Since there's no hypervisor, bare-metal systems tend to offer better performance__, as the OS can directly access all the server's resources without sharing them with other instances. This is especially important for high-performance applications like __large databases__, __gaming servers__, or __crypto mining__ etc..
+
+**But it comes with some drawback too ->** With bare-metal, you're typically limited to the resources (CPU, memory, storage) of the actual physical server. __You can't dynamically allocate resources like you can in a VM.__ (you cant do like this that if the traffic is high, make all the machine work and when traffic is low, shut down the vm)
+
+<img src = "image-6.png" width=400 height=300>
+
+## **SSH Protocol, password based auth**
+----------
+
+The SSH protocol (Secure Shell) is a __cryptographic network protocol that allows secure communication between two systems,__ typically for remote administration. It's most commonly used to log into remote servers and execute commands, but it also facilitates secure file transfers and other operations.
+
+
+### **Key features of SSH :-**
+
+1. __Encryption:__ SSH encrypts the data that's sent between the client and the server, so __even if someone intercepts the connection, they can't read the data.__ This makes it much more secure thin older protocols like Telnet or FTP, which transmit data in plaintext.
+
+**You get a shell or terminal like inerface to interact with your machine hosted somewhere**
+
+2. __Authentication:__ SSH can use two methods of authentication: (below are the only ways to connect to your VM hosted somewhere)
++ __Password-based:__ You enter a password to authenticate yourself to the remote system.
++ __Public Key-based:__ A more secure method, where the __client uses a private key to authenticate, and the server checks it against the corresponding public key.__ This
+eliminates the need for passwords and provides an extra layer of security.
+1. __Integrity:__ SSH ensures the integrity of data, meaning that __data cannot be tampered with while it's in transit.__ If someone tries to alter the data being sent, the connection will be immediately disrupted.
+
+Till now, we have studied HTTP protocol and this is another protocol
+
+**This is important to learn because the most safe way to interact with your VM present on the server.**
+
+Now from now onwards you need to have a cloud account on any of the below cloud provider to proceed as this will give you practical knowledge :-
+
+__AWS__       __Azure__     __GCP__     -> Slightly expensive but more reliable
+
+
+__Civo__      __Vulter__    __DigitalOcean__  -> Economical and cheaper but less reliable 
+
++ but for learning purpose, DigitalOcean and Civo are far better and economcal for student
+
+Now once you have got a VM and its public IP address, now just go to your terminal (local) and run 
+
+```java
+ssh root@public_ip_you_got
+```
+
+after entering the password, you will now enter into the machine but in the machine that is now in the datacenter so **whatever terminal command you will enter here that will get refleceted on the machine present on the datacenter so now if you clone some repo of your project from github and then run `npm run dev`, the website will start to run and you can give the ip to anyone to see your project across internet if you do `mkdir test` then a folder named as test will be created on the machine you rented.**
+
+### **SSH Protocol, ssh key pair based**
+
+----------
+
+Before understanding what ssh key pair is, lets first understand 
+Generate a new public private keypair
+
+```javascript
+ssh-keygen
+```
 
 
 
