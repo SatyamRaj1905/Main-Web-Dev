@@ -268,13 +268,118 @@ You can see in the above pic that **Public key is available to everyone** and **
 
 **The above is how the `Public-Private keypair` and why it is advantageous**
 
-In short, the best usecase of it is **you give the public key to everyone** and whenever
+In short, the best usecase of it is **you give the public key to everyone** and whenever **you want to convey some message to everyone, just sign it with your private key and send it to everyone** **By using the public key they (everyone) will verify that it is you who have sent this message**
 
-Generate a new public private keypair
+>[!IMPORTANT]
+> `Public-Private keypair` are made in such a way that **if you sign a message using private key then it can be decoded only using public key and VICE VERSA is also true**
+
+>[!NOTE]
+> **The concept is very similar to JWT authentication (difference between `.verify` and `.decode`) you can see the JSON but can verify only using JWT secret token**
+
+**How this will solve the above problem ??**
+
+-> Lets say now you have a team of developers working on your machine, so now to get access to your machine, they will use their **public key to login** and as soon as they will make some mistake, i can using their **public key** can identify who has made mistake[1st problem solved].
+
+-> also if you want to revoke permissions from some third person, you just need to remove the **public key of that person from your machine and in this way you can control your VM** [2nd problem solved]
+
+Now how this will make you enter into your friend or other machine and remain there for too long is that you just have to put your public key inside your friends machine (which will basically tell the system that this person can come inside and can access the machine) hence making you enter into your friends machine.
+
+**as long as you have your friends ip and he has ssh port open, i can access whatever i want (even the cookies which might contain some passwords of the reowned site)**
+
+Now where these public keys are stored (even you should also check in your laptop) that at below path is there something present if yes, then there are chances that someone has put his/her public key inside your machine and is getting access through it  
 
 ```javascript
-ssh-keygen
+cat ~/.ssh/authorized_keys
 ```
+
+Run the above command and if you see some file or directory get cautious some one has saved his/her public key here.
+
+### **How to hack without getting noticed and remain for time inside in others laptop ??**
+----------
+
+Whenever you get any machine, just run the below command and run this command
+
+```javascript
+cat ~/.ssh/authorized_keys
+```
+
+Then **Paste you public key here and that's it you are good to go**
+
+Now whenver you want to connect to the other machine just **find out their Ip and run the command**
+
+```javascript
+ssh root@the_ip_of_your_friend
+```
+and as you have already authourised to the others machine by putting yours public key in the other machine so you will get access to the other machine. **BINGO**
+
+:bulb: **How to get their ip address ??**
+
+-> Either use the `ping` command in their laptop and see it (too vaigh way to do) or slightly better way is run `npx serve` in your machine and then give link to the other machine now when they will try to see the files using the ip or link you gave them and which this command has provided, you will also get the **ip of the other machine or anyone who has visited your link**
+
+:bulb: **How will you get your public or private key ??**
+
+-> Below is the process
+
+
+### __Generating a new public private keypair__
+
+```javascript
+ssh-keygen // ssh ka key generate kr do 
+```
+Running this will ask you where you want to store you public-private key with by-default location to store it  (but you can change but make sure to keep it inside the `.ssh` folder only) 
+
+Now after this comes the trickier part 
+
+**Step 2 ->** Now you will be asked to put the **Passphrase** which can be anything (even `Enter` will also work), **If this is enabled then you have to enter this passphrase also to get into the other machine**[Its like password to make enter your public key into the other machine]
+
+**Step 3 ->** Enter or see your public private keypair by running the below command
+
+// you can see the file present by doing `ls` also and then you will see the below files present there
+
+```javascript
+cat ~/.ssh/id_rsa.pub  // .pub simply means that that is PUBLIC key
+cat ~/.ssh/id_rsa // and if not .pub and corresponding same name pair then it PRIVATE key 
+```
+
+**Step 4 ->** Now go to the other's machine and put your public key in that machine in the folder 
+
+```javascript
+cat ~/.ssh/authorized_keys
+```
+and now you are good to go **you have hacked your friend's laptop or other machine**
+
+**Step 5 ->** Just run the below command in your machine whenever you want to get the access of your friend mahine 
+
+```javascript
+ssh root@ip_of_your_friend
+```
+and you can interact with your friend machines using the terminal.
+
+### **Algorithms for public key cryptography**
+----------
+The `ssh-keygen` tool can generate SSH key pairs using several different cryptographic algorithms, depending on what you choose during the key creation process. By default, it
+typically uses RSA, but you can specify other algorithms as well. Here are the most commonly used algorithms:
+
+1. __RSA (Rivest—Shamir—Adleman)__
++ __Default Algorithm__ (for most systems): The ssh-keygen tool uses RSA by default when
+creating keys.
++ RSA is a widely-used public-key algorithm that provides strong security.
+2. __Ed25519__
++ A newer and more secure option: Ed25519 is a modern elliptic curve algorithm that is
+designed to provide both high security and efficiency.
++ It's faster, more secure for the same key size, and less prone to certain vulnerabilities compared to RSA.
+
+```javascript
+ssh-keygen -t ed25519
+```
+
+3. __ECDSA (Elliptic Curve Digital Signature Algorithm)__
+
++ Another __elliptic curve algorithm,__ which is considered a more secure and efficient alternative to RSA for most use cases.
+
+
+
+
 
 
 
