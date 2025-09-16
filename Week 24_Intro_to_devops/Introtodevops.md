@@ -238,12 +238,45 @@ after entering the password, you will now enter into the machine but in the mach
 
 ----------
 
-Before understanding what ssh key pair is, lets first understand 
+Before understanding what ssh key pair is, lets first understand why this was needed ??
+
+-> can you notice the problem with SSH protocol from the above paragraph, you have to share the password **for someone else to make changes in this project and collaborate efficiently** but there are many problems to this approach ->
+
+1. It is very hard to identify who made the mistake if something happens wrong in the VM
+2. If someone gave it someone else and that person does some vulnerable task with your VM then your project might get lost.
+
+For the above reason, **ssh keypair came into existence** as soon people realised that **passwords are not the best option to connect to the machine**
+
+>[!CAUTION]
+> **SSH Keys are very important from the safety point, if you understand this then you can have access to any of your friend device for the lifetime access without even making them notice**
+
+You have also seen this `SSH` while cloning a project from github (you have 2 options -> `HTTPS` or `SSH`) so `SSH` one is very helpful if you have **PRIVATE repo and then you want to clone that repo**
+
+**What is public-private keypair ??**
+
+-> Before undestanding this first understand what is **public key cryptography**
+
+**Public key cryptography**
+
+-> Lets understand this by taking an example -> Osama bin laden which was a reowned terrorist and he want to make an annnouncement that he is planning to do something big so to **stay away from CIA, FBI etc.. and convey the message at the same time, he has**
+
+**Pubic - Private key pair** as the name suggest he has one **Public key** -> which he gives to everyone (to news agency like aajtak) and one **Private key** -> which will help him to broadcast the message.
+
+<img src = "image-7.png" width=600 height=250>
+
+You can see in the above pic that **Public key is available to everyone** and **the message is SIGNED with private key which created a jibrish text** now whoever has public key using it they can decode the **Jibrish text** and verify also that as it is of osama public key so osama officialy has sent this and can find out that he is going to attack and thats how osama will convey the message without sharing much details about himself.
+
+**The above is how the `Public-Private keypair` and why it is advantageous**
+
+In short, the best usecase of it is **you give the public key to everyone** and whenever
+
 Generate a new public private keypair
 
 ```javascript
 ssh-keygen
 ```
+
+
 
 
 
