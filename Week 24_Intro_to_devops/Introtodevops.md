@@ -1,5 +1,24 @@
 # **VMs and Deploying a MERN app**
 
+
+- [**VMs and Deploying a MERN app**](#vms-and-deploying-a-mern-app)
+  - [**Why deploying on the internet, isn't localhost enough ?**](#why-deploying-on-the-internet-isnt-localhost-enough)
+  - [**Domains V/S IPs**](#domains-vs-ips)
+    - [**Localhost**](#localhost)
+    - [**Ping command**](#ping-command)
+    - [**Local Network, routing(mild hosting)**](#local-network-routingmild-hosting)
+    - [**Homoglyph attack**](#homoglyph-attack)
+  - [**How to deploy apps (actual hosting) ??**](#how-to-deploy-apps-actual-hosting)
+    - [**What is VM ?**](#what-is-vm-)
+  - [**Bare metal Servers**](#bare-metal-servers)
+  - [**SSH Protocol, password based auth**](#ssh-protocol-password-based-auth)
+    - [**Key features of SSH :-**](#key-features-of-ssh)
+    - [**SSH Protocol, ssh key pair based**](#ssh-protocol-ssh-key-pair-based)
+    - [**How to hack without getting noticed and remain for time inside in others laptop ??**](#how-to-hack-without-getting-noticed-and-remain-for-time-inside-in-others-laptop)
+    - [__Generating a new public private keypair__](#generating-a-new-public-private-keypair)
+    - [**Algorithms for public key cryptography**](#algorithms-for-public-key-cryptography)
+
+
 ## **Why deploying on the internet, isn't localhost enough ?**
 
 ---
@@ -376,6 +395,7 @@ ssh-keygen -t ed25519
 3. __ECDSA (Elliptic Curve Digital Signature Algorithm)__
 
 + Another __elliptic curve algorithm,__ which is considered a more secure and efficient alternative to RSA for most use cases.
+
 
 
 
