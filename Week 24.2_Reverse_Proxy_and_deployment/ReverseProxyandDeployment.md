@@ -214,6 +214,157 @@ The same is true for our website (as it does not have `https` protocol) but as d
 
 <img src = "image-6.png" width=400 height=200>
 
+**Reason ->** **OS restricts the use of default port for various protocol**, although there are ways to overpass even the OS decisions (learn about `sudo` command)
+
+Even if you  were able to run the website at **PORT 80**, then **one very important problem will come**
+
++ **CANT START MULTIPLE APPS ON THE SAME PORT**
+
+>[!CAUTION]
+> **Two processes can't have same port**
+>
+> will lead to **PORT Conflict**
+
+We need something like -> if port 80 pe request aa rhi from lets say `clothes.com` then it should go to `clothes website` of yours and if port 80 pe request aa rhi h from `shoes.com` then it should go to `shoes website` of yours
+
+basically we need **REVERSE PROXY**
+
+:bulb:**What is proxy ??**
+
+-> You can understand this as a **Mediator to connect between the two network**. **VPN** is one of the example -> you __forward__ your request to some server which has access to that restricted content and through that server you are able to see the restricted content (this is called as **Forward Proxy**)
+
+Now coming to **What is reverse proxy ??**
+
+-> Instead of user going on the seperate `3000` and `3001` port or running your project on the seperate port, you are **introducing nginx in the middle** which will work as the **Middleman**, [`nginx` __runs at port 80__ and it decides where to send the request i.e. -> if it coming from `clothes website` then it will forward it to the **port 8080** and if coming from `shoes website` then it will forward it to the **port 8081**]
+
+<img src = "image-7.png" width=450 height=250>
+
+:bulb:**How this is reverse proxy ??**
+
+-> A user is sending the request to `nginx` and that is being **proxied to the different ports according to the reqeust from the website it came from**
+
+Its not actually fully reverse but still it known as reverse proxy. 
+
+### **Nginx**
+----------
+Link to documentation -> [Nginx](https://www.nginx.com/resources/glossary/nginx/)
+
+**NGINX** is open source software for web serving, **reverse proxying** , caching, load balancing, media streaming, and more. It started out as a web server desgined for maximum performance and stability. In addition to its HTTP server capabilities, NGINX can also function as a proxy server for email (IMAP, POP3, and SMTP) and a reverse proxy and load balancer for HTTP, TCP and UDP servers.
+
+>[!NOTE]
+> Dont think that extra hop aane se **slow ho jayega NGINX, it will but not to that extent which you are thinking**
+
+#### **Installing Nginx**
+----------
+
+Run this command in the **ubuntu machine or inside your VM instance**
+
+```javascript
+sudo apt update
+sudo apt install nginx 
+```
+
+This should start a `nginx server` on port 80
+
+Try visiting the website :-
+
+<img src = "image-8.png" width=500 height=200>
+
+>[!IMPORTANT]
+> Remember to **open the port 80 if you have not by going inside the network security settings and adding the port 80 in the `Edit inbound rules > cutom TCP, anywhere` options**
+>
+> as you may have started the nginx but as it runs on port 80 so without opening it will not be able to do its work
+
+and now if you go to the port 80 followed by the url of your website then you will see something like the below :-
+
+<img src = "image-9.png" width=450 height=220>
+
+Further configuration is still required as you although have pointed port 80 to `nginx` but what about the next step which was to **point the nginx to a port on which your website is present**
+
+So now **Go and explore the domain name** 
+
+-> Popular website for getting the domain name -> **Squarespace** and **Godaddy**
+
+**Setting the custom domain name from SquareSpace**
+
+Go to the `Add records` option and then just fill the required details of your website
+
+<img src = "image-10.png" width=600 height=150>
+
+Now sometimes it take time(even hours) to propagate this DNS. 
+
+**How to check ?**
+
+-> just run the below command 
+
+```javascript
+ping your_DNS_name
+```
+
+and if you see the ip then you are good to go, your website has propagated with this DNS.
+
+**Now you have to configure NGINX to point at these DNS you made**
+
+basically you have to go from (__left image below__) to (__right image below__)
+
+<img src = "image-11.png" width=320 height=200> <img src = "image-12.png" width=320 height=200>
+
+you have to change the configuration of NGINX.
+
+Now lets run now 2 node.js process on different ports (basically 2 different projects and with different ports on which they are listening at)
+
+Now coding the logic part where you are going to configure the NGINX in such a way that  **respective website respective port pr jaye**
+
+>[!IMPORTANT]
+> **All the configuration in the NGINX happens through a file present at**
+>
+> just run the below command to reach inside that file 
+>
+> `sudo vi /etc/nginx/nginx.conf`  // sudo means **Super User DO** as to achieve something like this you have to be Superuser
+
+You will get some pre-dafault file so get rid of all of them and then inside it paste the below code 
+
+```javascript
+
+sudo rm sudo vi /etc/nginx/nginx.conf
+sudo vi /etc/nginx/nginx.conf
+
+
+events {
+    # Event directives...
+}
+http { // Any http request
+    server { // coming on the server 
+    listen 80; // on port 80 
+    server_name clothesapp.lOOxdevs.com;  // whose domin name is clothesapp.100xdevs.com 
+
+    location/{ // that should reverse proxy on ("/" basically means any request coming to this port)
+        proxy_pass http://localhost:8080; // port 8080
+        // Everything below is
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+    }
+    // similarly you can add another server if you are using multiple projects 
+    server{
+        listen 80;
+        server_name shoesapp.100xdevs.com;
+        location/{ 
+            proxy_pass http://localhost:8081; // port 8081
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+        }
+    }
+}
+
+sudo nginx -s reload
+```
 
 
 
