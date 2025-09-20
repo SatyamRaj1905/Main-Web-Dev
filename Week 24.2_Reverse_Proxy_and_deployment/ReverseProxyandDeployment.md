@@ -1,5 +1,15 @@
 # **Reverse Proxy and deployemnt of the project**
 
+- [**Reverse Proxy and deployemnt of the project**](#reverse-proxy-and-deployemnt-of-the-project)
+  - [**AWS**](#aws)
+    - [**Steps to create your own VM in aws**](#steps-to-create-your-own-vm-in-aws)
+    - [**Steps to connect to your created VM instance**](#steps-to-connect-to-your-created-vm-instance)
+  - [**Reverse Proxies**](#reverse-proxies)
+    - [**Nginx**](#nginx)
+      - [**Installing Nginx**](#installing-nginx)
+    - [**Assignment**](#assignment)
+
+
 
 ## **AWS**
 ----------
@@ -245,6 +255,8 @@ Now coming to **What is reverse proxy ??**
 
 Its not actually fully reverse but still it known as reverse proxy. 
 
+Some of the other reverse proxy are `traefic`, `HA Proxy`, `Apache`
+
 ### **Nginx**
 ----------
 Link to documentation -> [Nginx](https://www.nginx.com/resources/glossary/nginx/)
@@ -340,15 +352,16 @@ http { // Any http request
 
     location/{ // that should reverse proxy on ("/" basically means any request coming to this port)
         proxy_pass http://localhost:8080; // port 8080
-        // Everything below is
+        // Everything below is used when you are working with the WEB SOCKET (ignore for now)
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_cache_bypass $http_upgrade;
     }
+    // basically the above code is saying that whenever any http request is coming from port 80 with server name clothesapp.100xdevs.com forward it to the port 8080 and similar one is for the below another server made
     }
-    // similarly you can add another server if you are using multiple projects 
+    // similarly you can add another server if you are using multiple projects (just keep on adding sections as you are running multiple projects on the same VM instance)
     server{
         listen 80;
         server_name shoesapp.100xdevs.com;
@@ -363,8 +376,29 @@ http { // Any http request
     }
 }
 
-sudo nginx -s reload
+sudo nginx -s reload  // Reloads the Nginx 
 ```
+
+Now doing the above thing you were able to **create two clean urls without having the tension of giving their respective ports while using their URLs to visit the projects**
+
++ **We just need to open the port 80 and automatically user will be able to redirect to the respective website as per the DNS it has given**
+
+-> Now going by the above approach we have still one problem which is -> `http` instead of `https` and hence for including that in your project you need to learn **Certificate Management**
+
+Link to documentation -> [Certificate Management](https://certbot.eff.org/)
+
+But above it the **DUMB way to deploy using HTTPS**
+
+### **Assignment**
+----------
+1. Get a GCP account and do this there
+2. Replace `nginx` with `traefic`, `HA Proxy`, `Apache`
+3. Try deploying a react app
+4. Get a domain (go to **Namecheap** [it has cheaper domain names])
+5. Try **ASGs**(Auto scaling groups in AWS)
+6. Try to do **certificate management yourself**
+7. Forever or pm2 (process management) [now if you will shut down your laptop, everything will be gone away to deal with this process management is used]
+
 
 
 
