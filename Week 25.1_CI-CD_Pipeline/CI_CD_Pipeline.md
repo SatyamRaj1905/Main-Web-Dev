@@ -104,9 +104,23 @@ jobs:
       - name: Install Dependencies 
         run: npm install // run npm install then 
 
+      - name: Generate Prisma client 
+        run: npm run db:generate // if the project is using prisma then you have generate its client also to make the project work // 2
+
       - name: Run Build
         run: npm run build // and finally run npm run build 
+
+
+// Also learn about actions/---something-- to know about what they do from the internet
 ```
+make sure to add the `db:generate` required command in the `package.json` file which is 
+
+```json
+"scripts":{
+    "db:generate": "cd packages/db && npx prisma generate && cd ../.."
+}
+```
+
 
 > :pushpin: **Its not important to learn or memorise the steps, you can GOOGLE what are all the steps you require and tweak them according to the need.**
 >
@@ -117,6 +131,18 @@ jobs:
 + You should see the workflow run 
 
 <img src = "image-3.png" width=400 height=100>
+
+Now generally you will see this file being very strict like **adding test so that if a certain pull request does not pass an appropriate number of tests then that pull request will automatically get discarded and ignore the merge request of that**
+
+**That's how you CREATE A CI PIPELINE**
+
+### **Lets add a deploy step**
+
+----------
+
+Now that **CI has been done**, lets understand **CD** 
+
+
 
 
 
