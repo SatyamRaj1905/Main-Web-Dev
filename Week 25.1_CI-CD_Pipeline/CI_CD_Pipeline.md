@@ -402,4 +402,22 @@ server {
 }
 ```
  
+As you have used port 443 (https) so 
+
++ **Install certbot and Refresh certificate**
+
+```javascript
+sudo certbot --nginx
+```
+
+## **Assignments**
+----------
+
+1. Get a DB on `neon.tech`/ `RDS`/ `Aevein` and add a DB migration step to the DB
+2. Pass in the DB credentials while starting the docker image
+3. Start the docker image so that it restarts if it goes down (similar to pm2)
+ 
+**Advanced ->** The **Deploy to EC2 CI/CD part of the code** -> try replacing this title part code with something called as **Elastic Beanstalk** (present in the AWS) [An easy way to make application that can scale up and down by themselves]
+
+Or try learning about **ASGs (Auto scaling groups)**
 
