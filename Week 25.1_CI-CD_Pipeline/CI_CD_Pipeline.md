@@ -171,7 +171,7 @@ RUN npm run build
 CMD ["npm", "run", "start-user-app"]
 ```
 
-+ **Add `start-user-app` script to the root `package.json`** 
++ **Add `start-user-app` script to the root `package.json`**(basically you have added a script that builds this project) 
   
 ```json
 "start-user-app": "cd ./apps/user-app && npm run start"
@@ -180,14 +180,13 @@ CMD ["npm", "run", "start-user-app"]
 The above were the steps to **containerise your project**
 
 > :pushpin: **For every single project you should have seperate DOCKERISED file, you cannot make a single docker file even though it is monorepo**
->
-> Also **Dockerfile should be present in the root folder (any other place can become complex process to run)**
+
 
 
 Now running the below command will 
 
 ```javascript
-docker build -t mynextapp .
+docker build -t mynextapp -f docker/Dockerfile.user .
 ```
 
 **containerise our project**
@@ -199,7 +198,87 @@ docker run -p 3000:3000 mynextapp
 ```
 and this will run your project locally
 
+Now the next step is to again add a workflow that runs every time a commit is added to the `master` branch. 
 
+The deployment should not happen when someone creates a pull request , deployment should happen when someone commits and that too on the `master` branch, then only deployment should occur.
+
+In industry there is another branch named as `dev` and all of the code is first commited on this branch and then eventually deploy to an copy app and then in the interval of 2 weeks (generally), you merge all the code from `dev` branch to the `master` branch and then it released to the production. **These are called as RELEASE CYCLES**.[Every 2 weeks, you are __releasing__ `dev` to `master`]
+
+Now after **dockerising** you now have to **Create the CD pipeline that**
+
++ **clones the repo**
++ **Builds the docker file**
++ **Pushes the docker image**
+
+If you see the architecture then step 4 -> Pushes to the EC2 will not be done for now as it changes for different platforms 
+
+and for the above task as it is automation related task so make another file named as `deploy.yml` inside the `.github/workflows` 
+
+**So creating the CI/CD pipeline for the above 3 tasks**
+
+```json
+name: Build and Deploy to Docker Hub
+
+on:
+  push:
+    branches:
+      - master // Now you have to push to master branch only to proceed further as this is CI for deployment part 
+
+jobs:
+  build-and-push: // name of the job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/Dockerfile.user 
+          push: true
+          tags: 100xdevs/web-app:latest # Replace with your Docker Hub username and repository
+      
+      - name: Verify pushed image 
+        run: docker pull 100xdevs/web-app:latest  # Replace with your Docker Hub username and repository
+```
+
+Again the above code has been googled to very extent basically the steps on how to use docker in the CI/CD pipeline and many others, and again there is no problem in doing that 
+
+ofcourse for the above task, you have to create a repo on the dockerhub as **github dockerhub pe files and folder kis jagah pe push krega** so go to the website and create a repo
+
+Now in the above repo we have create on the dockerhub, github will do the above 3 task and on the ubuntu machine and then push it to the dockerhub
+
+Now if the github is pushing the files to dockerhub, then **it must have your credentials of the dockerhub** 
+
+:bulb:**How to generate the credentials in the dockerhub for github ??**
+
++ Go to the dockerhub dashboard
++ Inside account dropdown menu select `My Account`
++ CLick on the `Security` option then 
++ and then on `New Access Token` and then `github` and give the permissions to `Read, write and delete`(basically github has access to this file config type) and then click on `generate`
++ and finally you will get an ACCESS TOKEN (this is your **password in other words**)
+
+
+Now :bulb:**How to give this password to github ??**
+
++ Go to the your repo `settings` (repo which is doing the deployment)
++ go to the option `Secrets and variables`, and then `actions`[as your github actions is what pushing to dockerhub]
++ Now click on the `Repository Secrets`
++ Give the name `DOCKERHUB_USRENAME` and secrets as value `100xdevs` (whatever your username is on the dockerhub)
++ finally click on the `Add secret` button to add the username to the github
++ Similar to the above we will make another `Repository secrets` and give it the name `DOCKER_PASSWORD` and secrets value as the same as that of the `Access token` which you got from the dockerhub
++ and hence you have given both username and password to the github to interact it with dockerhub
+
+-> <span style="color:orange">**The reason you have not put their values directly in the `workflow` folder of github (although this is also automation part) is that you dont want your username and password to be made available to every person in the world**</span>
+
+and now if you want to access them then you can access them by using `${{secrets.DOCKER_USERNAME}}` and `${{secrets.DOCKER_PASSWORD}}` (as seen and used in the above code)
 
 
 
