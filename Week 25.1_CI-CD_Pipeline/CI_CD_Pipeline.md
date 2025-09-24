@@ -142,6 +142,65 @@ Now generally you will see this file being very strict like **adding test so tha
 
 Now that **CI has been done**, lets understand **CD** 
 
+For this you must be having a VM machine. and also you can do the below things without using the docker (by installing all the required things for your project like -> `node.js` installed, `prisma` installed and so on.. on your machine).
+
++ **Create dockerfiles for the `apps` you have**
+
+**Create `docker/Dockerfile.user`** (basically all the docker realted files are kept inside the `docker` named folder(you can name anything as per your wish))
+
+```python
+FROM node:20.12.0-alpine3.19
+
+WORKDIR /usr/src/app
+
+COPY package.json package-lock.json turbo.json tsconfig.json ./
+
+COPY apps ./apps
+COPY packages ./packages
+
+# Install dependencies
+RUN npm install
+# Can you add a script to the global package.json that does this?
+RUN cd packages/db && npx prisma generate && cd ../..
+# OR instead of the above line you can also replace it with 
+RUN npm run db:generate # see above if you are not able to understand how this replacement came
+
+# Can you filter the build down to just one app?
+RUN npm run build
+
+CMD ["npm", "run", "start-user-app"]
+```
+
++ **Add `start-user-app` script to the root `package.json`** 
+  
+```json
+"start-user-app": "cd ./apps/user-app && npm run start"
+```
+
+The above were the steps to **containerise your project**
+
+> :pushpin: **For every single project you should have seperate DOCKERISED file, you cannot make a single docker file even though it is monorepo**
+>
+> Also **Dockerfile should be present in the root folder (any other place can become complex process to run)**
+
+
+Now running the below command will 
+
+```javascript
+docker build -t mynextapp .
+```
+
+**containerise our project**
+
+Now after the above command is executed, **running the project**
+
+```javascript
+docker run -p 3000:3000 mynextapp
+```
+and this will run your project locally
+
+
+
 
 
 
