@@ -1,4 +1,84 @@
-# **CI-CD Pipeline**
+# **CI-CD Pipeline and Process Management**
+
+## **Process Management**
+----------
+
+generally called as **PM2**
+
+Keeps a process running unless stopped explicitly, very common feature present in machine such as EC2. 
+
+### **Key Features**
+----------
++ **Keeps apps running continuously**
++ **Automatically restarts crashed apps**
++ **Provides monitoring and logging**
++ **Supports running multiple app instances for better performance**
+
+The above is what the process management does and even the above is what it actually means
+
+### **Installing pm2 with some useful terminal command**
+----------
+
+For installing `pm2` on your VM, run the below command 
+
+```javascript
+npm i -g pm2
+// but as mostly your VM has OS as ubuntu selected hence 
+sudo npm i -g pm2 // this will work for linux based os as in linux most of the thing, you have to give permissions as SUPERUSER and hence "SUperuserDO" command is tagged at start to forcefully install anything
+```
+
+The best thing which will happen after this is that even though now if you will kill the process, **with the help of pm2, the process will still be running and its instance will be stored**. 
+
+You can check the status of your process which has pm2 installed by running the below command 
+
+```javascript
+pm2 status 
+
+// OR 
+
+pm2 ls // this is better as it will give all the pm2 installed process list with their active status 
+```
+You will still see the `Online` status of the process you killed by using the `kill` command.
+
+Even though the server stopped for some hardware failure and pm2 still not able to restart the server automatically then you can just do 
+
+```javascript
+pm2 start index.js  // so instead of using node index.js for running the project you will run this
+```
+
+and to **stop the pm2** just run the command 
+
+```javascript
+pm2 stop 
+```
+
+**Basically no one can stop the malfunction inside the server which can lead to server stopping but we can atleast stop the MANNUAL restarting of the server once it again comes online and this is what the pm2 does**
+
+<span style="color:orange">**Pm2 ensures that whenver the server will get restored, it will automatically restarts the process present on the server so that you dont have to manually start it and also you dont have to check repeatedly that whether server restored or not so that you can restart the process, PM2 will handle that**</span>
+
+> :pushpin: to get all the commands of pm2 just run the command `pm2 examples`
+
+
+```javascript
+lsof -i :3000 // will give you the process running on some port (here on 3000) // it has PROCESS ID
+
+// if you do 
+lsof // just this then you will get a list of all the process with their PROCESS ID that are running on what port 
+
+// and if you want to kill the process running on particular port just use 
+kill process_id_of_process_you_are_trying_to_kill
+```
+Also if you want to see the output of the server (or basically **response of the server which is running**)
+
+use the below command 
+
+```javascript
+curl your_link  
+```
+
+`curl` command basically acts **as the POSTMAN but for the terminal** so instead of using postman and if you are inside ther terminal and want to see the output or response of the server then just use this `curl` command.
+
+
 
 ## **What is CI/CD ??**
 
