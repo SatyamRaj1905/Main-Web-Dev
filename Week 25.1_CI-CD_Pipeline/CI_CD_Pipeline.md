@@ -1,5 +1,23 @@
 # **CI-CD Pipeline and Process Management**
 
+- [**CI-CD Pipeline and Process Management**](#ci-cd-pipeline-and-process-management)
+  - [**Process Management**](#process-management)
+    - [**Key Features**](#key-features)
+    - [**Installing pm2 with some useful terminal command**](#installing-pm2-with-some-useful-terminal-command)
+  - [**What is CI/CD ??**](#what-is-cicd-)
+    - [**Continuous Integration**](#continuous-integration)
+    - [**Continuous Deployment**](#continuous-deployment)
+  - [**CD in Github**](#cd-in-github)
+    - [**Architecture diagram**](#architecture-diagram)
+    - [**Monorepo we're dealing with in this notes**](#monorepo-were-dealing-with-in-this-notes)
+  - [**How to create CI/CD Pipeline**](#how-to-create-cicd-pipeline)
+  - [**Create the CI pipeline**](#create-the-ci-pipeline)
+    - [**Building a pipeline for the repo**](#building-a-pipeline-for-the-repo)
+    - [**Lets add a deploy step**](#lets-add-a-deploy-step)
+    - [**Pulling the docker image**](#pulling-the-docker-image)
+  - [**Assignments**](#assignments)
+
+
 ## **Process Management**
 ----------
 
