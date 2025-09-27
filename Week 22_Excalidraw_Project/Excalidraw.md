@@ -32,3 +32,16 @@ Example -> just go to inside the `docs` folder above and then run `pnpm run dev`
 
 As here we are just going to need one frontend for excalidrws hence in the `Apps` folder, just delete the `docs` folder or `web` 
 
+
+## **Structuring the project**
+----------
+
+So as we are making the excalidraw with the enhanced functionality that others can also collaborate inside the project.
+
+Starting off with the `backend` which will have two parts 
+
++ **`http-backend`** // to get to the routes
++ **`ws-backend`** // websocket backend for the collaboration
+
+so making two folders inside the `apps` folder named as `http-backend` and `ws-backend` and the same time **running the `npm init -y` command**
+
