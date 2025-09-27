@@ -1,5 +1,22 @@
 # **Monorepos and Turborepos**
 
+- [**Monorepos and Turborepos**](#monorepos-and-turborepos)
+  - [**Monorepos**](#monorepos)
+    - [**Why Monorepos ??**](#why-monorepos)
+    - [**Common Monorepo framework in `Node.js`**](#common-monorepo-framework-in-nodejs)
+    - [**Build System V/S Build System Orchestrator V/S Monorepo framework**](#build-system-vs-build-system-orchestrator-vs-monorepo-framework)
+      - [**Build System**](#build-system)
+      - [**Build System Orchestrator**](#build-system-orchestrator)
+      - [**Monorepo framework**](#monorepo-framework)
+  - [**Turborepo as a build system orchestrator**](#turborepo-as-a-build-system-orchestrator)
+    - [**Intializing a simple turborepo**](#intializing-a-simple-turborepo)
+    - [**Exploring the folder structure**](#exploring-the-folder-structure)
+    - [**Exploring root `package.json`**](#exploring-root-packagejson)
+  - [**Assignment**](#assignment)
+    - [**about Global `turbo.json` present in the folder**](#about-global-turbojson-present-in-the-folder)
+  - [**Explanation of `// 2` code**](#explanation-of--2-code)
+
+
 ## **Monorepos**
 ----------
 As the name suggests, a single repository (on github lets say) that __holds all your frontend, backend and devops code.__
