@@ -72,6 +72,10 @@ Now you can **copy-paste** the code written inside the `base.json`, inside the `
 ```javascript
 {
     "extends" : "@repo/typescript-config/base.json" // Basically you have EXTENDED the code present in the typescript-config folder, base.json file to this tsconfig.json file present 
+    "compilerOptions" : { // this is done to get the output in this respective folder if you dont know this see the ts class
+        "rootDir": "./src",
+        "outDir": "./dist"
+    }
 }
 ```
 but before using this, you have to first install `@repo/typescript-config` as a **dependency in the `package.json`** file of both the folder as follows
@@ -97,6 +101,59 @@ but before using this, you have to first install `@repo/typescript-config` as a 
 ```
 
 and now run `pnpm install` in the root folder to install this dependency
+
+Now you have to add some `scripts` such as **build, dev and start** in all two folder `package.json`
+
+```javascript
+{
+  "name": "http-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -b", // Compile the code
+    "start": "node ./dist/index.js", // Run the code 
+    "dev": "npm run build && npm run start"  // Both compile and run the code
+  },
+  "dependencies":{
+    "@repo/typescript-config":"workspace:*"
+  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
+```
+
+Now we will proceed to the making of **websocket server and http server**
+
+so making two folders named as `src` in both the two folders named as `ws-backend` and `http-backend` and inside `src` making an `index.ts` file 
+
+
+### **Making of `http-backend`**
+----------
+
+Now inside the `index.ts` file making an express server but before using it first installing it (as we have to install this in the `http-backend` folder only hence run the below command when you reach to this folder via terminal)
+
+```javascript
+pnpm add express @types/express
+```
+
+and using this will install `express` as the dependency and now you can use it in the `index.ts`
+
+Similarly you have also made `ws-backend` folder and hence you will have to make a **Websocket server** and for this we will again use a library known as **`ws`** to install that just go the folder where you want to use it and run in the terminal
+
+```javascript
+pnpm add ws @types/ws 
+```
+
+and now you have installed **ws** library also for **creating the websocket server**
+
+coming back to the `index.ts`
+
+```java
+
+```
 
 
 
