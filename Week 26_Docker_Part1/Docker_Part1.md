@@ -62,7 +62,7 @@ simply saying you can run `node index.js` on your machine but maybe on some othe
 docker run -d -p 27017:27017 mongo 
 ```
 
-+ Docker isnt the only way to create containers. (container eventually become the synonym of docker)
++ Docker isnt the only way to create containers. (container eventually become the synonym of docker). **Podman is another something like docker**
 
 ## **History of docker**
 ----------
@@ -85,5 +85,121 @@ Go to the site -> [Dcoker install](https://docs.docker.com/desktop/) and then sc
 docker --version
 ```
 
- 
+If you are able to see the version of docker then you are good to go, docker has been successfully installed in your computer but if you are not getting it then definitely you have ran into some problem and hence try to see the videos on youtube or try reinstalling it.
+
+## **Docker architecture**
+----------
+
+<img src = "image-3.png" width=500 height=250>
+
+As an application/full stack developer, you need to be comfortable with the
+following terminologies -
+
+I. Docker Engine
+2. Docker CLI - Command line interface
+3. Docker registry
+
+**Understanding the component**
+----------
+
+1. **Docker Engine ->** Docker Engine is an open-source `containerization` technology that allows containerization developers to package applications into container.(**basically this is only responsible for making containers**)
+
+Containers are standardized executable components combining application source code with the operating system (OS) libraries and dependencies required to run that code in any environment.
+
+2. **Docker CLI ->** The command line interface lets you talk to the
+`docker enginer` and __lets you start/stop/list containers__
+
+```javascript
+docker run -d -p 27017:27017 mongo
+```
+
+__Docker cli is not the only way to talk to a docker engine. You can hit the docker `REST` API to do the same things__
+
+3. **Docker Registry ->** `docker registry` is __how Docker makes money.__
+   
+It is similar to `github` but it lets you push images rather than sourcecode
+
+Docker's main registry -> https://www.docker.com/products/docker-hub/
+
+Mongo image on docker registry -> https://hub.docker.com/_/mongo
+
+If you in the future will make the image(understand it as package) then you will also push this in docker registry so that everyone can use it, its very similar to `node package manager`, there also different packages are inside it and you just use them via cli command. There are various places where you can push your images but `hub.docker` one is the official by docker but there are different services that also provide this feature like `AWS ECR` (**It is like container registry**)
+
+Now see the power of container, just run this command while making sure that **your docker desktop is running in background**
+
+```javascript
+docker run mongo 
+```
+and runnning this only **you are able to make run the mongo locally and thus can use it even**
+
+:bulb:**How to verify it ??**
+
+-> go to the mongoDB compass app/GUI for pc and there you will see something like the below interface 
+
+<img src = "image-4.png" width=600 height=250>
+
+now as you have run `mongo` **locally not on some cloud container** hence you will see the default port(`27017`) for mongo to run locally (**localhost**), and then try to connect to the **default localhost website given (`mongodb://localhost:27017`)** then you will still not be able to connect to although you can think that ideally it should have run as we have given command `docker run mongo`
+
+It **is because of PORT MAPPING (will study in the upcoming section)** but for now just make changes and run the below command
+
+```javascript
+docker run -p 27017:27017 mongo 
+```
+
+You can and **should delete any service after using it as the services still takes the space in your pc** so to do that 
+
+```javascript
+docker rmi mongo --force
+```
+above we have removed mongo but you can remove any service from docker which you installed previously by running `docker run -p port_no. service_name` by using similar command 
+
+**To see what are the services present in your docker locally run the below command**
+
+```javascript
+docker images
+```
+
+## **Images V/S Containers**
+----------
+
+:round_pushpin: **A good interview question is what is thee difference between docker image and container ??**
+
+### **Docker image**
+----------
+
+A Docker image is a __lightweight, standalone, executable package that includes everything needed to run a piece of software, including the code, a runtime, libraries, environment variables, and config files.__
+
+> :pushpin: **A good mental model <span style="color:orange">**way to rememeber is,**</span> for an image is `Your codebase on github`**
+>
+> It is basically <span style="color:orange">**Everything needed to run that software**</span>
+
+<img src = "image-5.png" width=400 height=250>
+
+
+### **Docker container**
+----------
+
+A container __is a running instance of an image. It encapsulates the application or service and its dependencies, running in an isolated environment.__
+
+
+> :pushpin: **A good mental model <span style="color:orange">**way to remember is,**</span> for a container is when you run `node Index ts` on your machine from some source code you got from github**
+>
+> It is basically **Things which is starting or stopping is called as container**, you basically start or stop the container not the image and this container will be made after you run any service on docker (also for every service a seperate container run)
+
+**To see the number of container running run the below command**
+
+```javascript
+docker ps
+```
+
+This will show all the container which is running locally with their **process id** to **stop and container run the below command with the container process id**
+
+```javascript
+docker kill PROCESS_ID
+```
+The above command does not mean that **images are not present, its like you have not started them or basically stopped them**
+
+**thats why you say "An image in execution is called as Container"**
+
+
 
