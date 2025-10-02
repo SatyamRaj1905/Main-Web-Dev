@@ -201,5 +201,61 @@ The above command does not mean that **images are not present, its like you have
 
 **thats why you say "An image in execution is called as Container"**
 
+<img src = "image-6.png" width=400 height=200>
 
+You can also run multiple times any image as shown above
+
+for example -> lets say you want to run 3 mongo container for some reason so for this 
+
+**Just split your terminal into 3 parts and then in each of them just run**
+
+```javascript
+docker run mongo
+```
+and that's it you have ran 3 mongo container locally on your machine.
+
+<img src = "image-7.png" width=600 height=250>
+
+:bulb:**YOu might be having doubt that why port conflict is not happening here, why and how they automatically got different ports ??**
+
+-> which will be answered in the upcoming pages.
+
+but for the port conflict question, as you have not **given the port in all the above command hence you are not getting port conflict but eventually you will get that also and then we will see how it works and how to fix it**
+
+### **Port mapping**
+----------
+
+<img src = "image-8.png" width=600 height=250>
+
+One great thing about docker is that as it seperates out the container from your machine so although you ran `mongo` image and the container started on port `27017` (which is the default port for mongo), still **your machine port `27017` is empty and hence you can run anyother process on this port**
+
+**Basically container ke port `27017` pe `mongo` chal rha h and your pc ke port `27017` pe `node process` or any other service chal rha h AS WE KNOW THAT DOCKER CREATES AN ISOLATED ENVIRONMENT**
+
+Now if you want that your pc ka port get linked to the container ka port, then in that case, you **use PORT MAPPING** so that you can map your two ports to each other and this is what you see while running the docker command 
+
+```javascript
+docker run -p 27017:27017 mongo
+```
+basically you are telling that your machine port `27017` is mapped to the container port `27017` and that's what the above image also says 
+
+YOu can see the benefit in the picture itself, you can run two process at the same time with just changing the port of you machine (obviously same port will result in port conflict)
+
+example is shown in the above picture 
+
+```javascript
+docker run -p 27017:27017 mongo
+docker run -p 27018:27017 mongo
+```
+
+now these both are two independent mongo containers(here in this case both can have different database) running locally on your machine
+
+
+<img src = "image-10.png" width=320 height=200> <img src = "image-9.png" width=320 height=200>
+
+can you see the database present in one is not present in the other
+
+
+In both the container, you can put different data as they are independent
+
+so till now you have understood why port mapping is required -> without port mapping you will not be able **to start the container locally**
 
