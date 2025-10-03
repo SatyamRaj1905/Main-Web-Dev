@@ -259,3 +259,99 @@ In both the container, you can put different data as they are independent
 
 so till now you have understood why port mapping is required -> without port mapping you will not be able **to start the container locally**
 
+basically **the first port depends on you (which port you want to open) and second thing depends on the by default image in the dockhub registry.**
+
+### **Common docker commands**
+----------
+
+#### **docker images**
+
+shows you all the images that you have on your machine
+
+#### **docker ps**
+
+shows you all the containers you are running on your machine 
+
+#### **docker run**
+
+Lets you start a container 
+
++ **-p** -> lets you create a port mapping
++ **-d** -> lets you run in detached mode
+
+
+#### **docker kill**
+
+Lets you stop any container if (provide it with container id)
+
+#### **docker build**
+
+Lets you build an image. We will see this after we understand how to create your own `dockerfile`
+
+#### **docker push**
+
+Lets you push your image into registry
+
+#### **docker exec**
+
+Lets you **execute something inside the container**. (lets say you want to run a command or any specific files inside the container then you used this command to execute that inside your container)
+
+see the below image for better understanding
+
+<img src = "image-11.png" width=600 height=200>
+
+you can see now you are inside the container just by using the comand 
+
+```javascript
+docker exec -it process_id sh 
+```
+
+**sh ->** means `shell` or terminal, you are getting **shell access**
+
+**it ->** means in `interactive` mode
+
+Using the above command you are inside the container and has got the shell access of this container and hence can **run any terminal command to get information about the files and folder present in this container**
+
+## **Dockerfile**
+----------
+
+:bulb:**What is dockerfile ??**
+
+If you want to create an image from your own code, that you can push to `dockerhub` , you need to create a `dockerfile` for your application.
+
+A Dockerfile is a __text document that contains all the commands a user could call on the command line to create an image.__
+
+If you want to make your own image(which eventually you would), then you must have to use this 
+
+Perks of making dockerfile ->
+
++ If you want to containerise something then you will have to use this 
++ Containerising will let your project available to all over the world.
+
+:bulb:**How to conatinerise some project ??**
+
+-> see for everything you want to containerise, there can be some slight changes if it realted to database, or any node process etc.. (**But concept remain same**)
+
+For now first taking example of how to containerise a `node` process ??
+
+so first making a simple node process project 
+
+just make a `index.js` file and then inside it write this code 
+
+
+```javascript
+const express = require("express")
+
+const app = express()
+
+app.get("/", (req, res) => {
+  res.send("Hello world")
+})
+
+app.listen(3000)
+```
+
+also using `npm install express` to install express as it is being used in the project
+
+now running the project by using `node index.js`
+
