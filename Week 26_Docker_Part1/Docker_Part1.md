@@ -334,7 +334,7 @@ Perks of making dockerfile ->
 
 For now first taking example of how to containerise a `node` process ??
 
-so first making a simple node process project 
+so first making a simple node process project named as `NodejsProject` folder
 
 just make a `index.js` file and then inside it write this code 
 
@@ -354,4 +354,63 @@ app.listen(3000)
 also using `npm install express` to install express as it is being used in the project
 
 now running the project by using `node index.js`
+
+**to containerise any project, it is done by Dockerfile**
+
+:bulb:**How to write the dockerfile ??**
+
+A dockerfile has 2 parts ->
+
+1. **Base image**
+2. **Bunch of commands that you run on the base image (to install dependencies like Node.js)**
+
+Lets write our own dockerfile
+
+so as you made `NodejsProject` folder for your `node` process, now make another file named as **Dockerfile** inside the root folder (eventually we will see it elsewhere also) but for the time being make it in the root folder.
+
+inside the dockerfile you **describe how your project will be built**(what all dependency are there in your project for ex -> your porject has `express`, `mongoDb`, `environment` variables, exposes 3000 port, `node.js` dependency) so **write all this things inside this file** 
+
+> :pushpin:<span style="color:orange">**This (`Dockerfile`) is like a configuration file describing everything you need to start this project locally**</span>
+>
+> You have to give **step by step process** to how to run their project locally
+
+
+Now if you see to your project, to run it locally -> you have to run in this manner ->
+
+1. install `node.js`
+2. clone the repo/ copy the `index.js` file and the `package.json` file
+3. run npm install
+4. run `node index.js`
+
+so basically our task is to **write the above steps in docker understandable format and then write it inside the `Dockerfile`**
+
+<img src = "image-12.png" width=600 height=200>
+
+Lets understand all of the above one by one ->
+
+1. **Base image (FROM)->** Basically every Dockerfile starts with some **base or starting point**. you can treat this as the first thing to do while make an image. Now taking the above example -> i have to install `node.js` first so i can do **either build from scratch** in this case base image value will be **`scratch`** or inside the `Dockerfile`
+
+```javascript
+FROM scratch 
+
+// and then do npm install
+```
+
+OR  
+
+you can also do this **why not take the preinstalled `node` image present on the dockerhub and take it as base image** as eventually in both the approach you are first installing the `node.js` the difference is that in one you are doing all things form **scratch** and in other you have just used the **readymade `node` image** and hence as our project is `node.js` project so directly used it as base image
+
+:bulb:**what if i have `node` and `go` mixed project ??**
+
+-> in this case you can choose any one of them as base image and then install th other one 
+
+> :pushpin: **Usually base image is taken mostly the image which is present on the dockerhub (already built by someone) to avoid complexity but yes you can use `scratch` and then build everything from scratch**
+>
+> Most of the times you will  see `FROM ubuntu` (`ubuntu` as the base image) when the project contains of different types of langauges, libraries and frameworks
+
+For now if you see the image we have used `FROM node:22-alpine` as we are dealing with just a simple `node` project and also `alpine` is **just the SMALLER VERSION of `node`**(smaller size as compared to traditional `node`) but yes you can use the common `node` also
+
+2. **Working directory (WRKDIR) ->** what is your working directory (**where do you want to store all the code finally ??**)
+
+Common ones are -> `WRKDIR /usr/bin/app`, `WRKDIR /app` but again its up to you and your project that where do you want to write all the code 
 
