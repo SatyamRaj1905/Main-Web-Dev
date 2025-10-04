@@ -303,7 +303,16 @@ see the below image for better understanding
 you can see now you are inside the container just by using the comand 
 
 ```javascript
-docker exec -it process_id sh 
+docker exec -it container_name_or_id sh 
+```
+
+**`it` only in INTERACTIVE mode you will be able to get access to the terminal of the container**
+
+or you can also run any command like 
+
+```javascript
+docker exec container_name_or_id ls /path  // gives you the file and folder present inside the /path 
+docker exec container_name_or_id mkdir app // makes a new directory app in the current directory
 ```
 
 **sh ->** means `shell` or terminal, you are getting **shell access**
@@ -396,6 +405,7 @@ FROM scratch
 // and then do npm install
 ```
 
+
 OR  
 
 you can also do this **why not take the preinstalled `node` image present on the dockerhub and take it as base image** as eventually in both the approach you are first installing the `node.js` the difference is that in one you are doing all things form **scratch** and in other you have just used the **readymade `node` image** and hence as our project is `node.js` project so directly used it as base image
@@ -413,4 +423,97 @@ For now if you see the image we have used `FROM node:22-alpine` as we are dealin
 2. **Working directory (WRKDIR) ->** what is your working directory (**where do you want to store all the code finally ??**)
 
 Common ones are -> `WRKDIR /usr/bin/app`, `WRKDIR /app` but again its up to you and your project that where do you want to write all the code 
+
+
+3. **Copy command (COPY ..) ->** first `.` represents **copy everything from this folder** and the second `.` represents **to everything in this docker container**
+
+you can also do like this `COPY ./index.js ./index.js` this will take the current folder `index.js` file and put it inside the docker container `index.js` which is inside the `WRKDIR`
+
+<img src = "image-13.png" width=400 height=170>
+
+But `COPY..` -> this will **copy everything from your folder and push it to the work directory**, Now is the issue -> **copying everything will let copy `node_modules` folder also which ideally SHOULD NOT BE COPIED** 
+
+:warning: <span style="color:orange">**Hence you should take care of the above point while using `COPY..` command**</span>
+
+To achieve the above aim, you can use **`.dockerignore` file** -> which **works same as `.gitignore` file.**[Ignores all the files and folders included in this file and hence `COPY..` can be used hassle-free], as we want **fresh installment into the new machine as maybe that machine has different way of installing `node.js` on their machine**
+
+4. **Running the command (RUN) ->** Used to run a specific command which will used to **run your project**
+
+ex -> in the above picture ->
+
+```javascript
+RUN npm install 
+RUN npm run build  // if it was a ts project then you have to run this also
+RUN prisma migrate // this and below command if you were using prisma also in your project
+RUN prismae generate 
+```
+
+5. **Port Number (EXPOSE port_no) ->** Lets you tell the port at which the project will run. You dont need this compulsorly
+
+6. **Final command (CMD) ->** Very slight difference with the `RUN` command you saw above. `RUN` is **used when you are generating/ CREATING the image** but `CMD` is **used when you are RUNNING the image** basically `CMD` says **what to run when the container will start ??**
+
+:warning:<span style="color:orange">**You can only have 1 `CMD` in your `Dcokerfile` BUT you can have multiples `RUN`**</span>
+
+```java
+CMD ["node", "index.js"]
+```
+so when someone will run your project by using the docker command which looks something like this -> `docker run port_no project_name` then only `CMD` will run i.e. -> taking the above case -> `node index.js` will run 
+
+> :pushpin: **All the things which are above `CMD` run when you are <span style="color:orange">**building the image**</span> and `CMD` things run when you are <span style="color:orange">**Running the image**</span>**
+
+### **Passing in `env` variables**
+----------
+
+You should ideally dont put any `env` variables inside any files **rather pass it at the time of running the docker container**
+
+and to do the above task ->
+
+```java
+docker run -p 3000:3000 -e DATABASE_URL=mongodb@localhost hello-world
+```
+
+using `-e` followed by the **environment variable name with value** will make that variable with value **being pushed inside the environment variable**
+
+
+
+
+Now lets delve deep into `docker build` command 
+
+### **docker build in deep**
+----------
+
+
+Once you have made your project (or image), its time to build it so syntax for it is 
+
+```java
+docker build -t name_of_your_image location_of_dockerfile_youare_trying_to_build
+```
+
+Example -> `docker build -t hello-world .`
+
+**`-t` ->** means **TAG of the project**
+**`.` ->** means it is present inside the root folder only or the directory in which the terminal current path is being shown **current folder or root folder**
+
+and after this command gets executed, now if you run `docker images`, then you will be able to **see your image which you just built** still this has not yet been visible to everyone on the world, it is private to yourself
+
+Now you can also run your project(`hello-world`) by just running one command `docker run -p 3000:3000 hello-world` 
+
+### **How to push your made image to dockerhub ??**
+
+-> to make sure that everyone in the world is able to use your image, you have to deploy it to the `dockerhub` and **the steps are very simple with that you used to do to deploy your project on github**
+
+
+Go to [Dockerhub create repository](https://hub.docker.com/repository/create/) and then you can create your repository for yourself but before that make sure to `singin` or `signup` to dockerhub
+
+**Its very similar to github and even the process is also very similar as that you do to deploy to github**
+
+and now inside you terminal just **login using `docker login`** and then provide your credentials(to be done only for the first time) and then just run the command `docker push` and that's it you will be able to see your image on the dockerhub and **now everyone can use this to run your image and can download**
+
+
+
+
+
+ 
+
+
 
