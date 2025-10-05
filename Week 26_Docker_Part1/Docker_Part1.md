@@ -595,5 +595,60 @@ Lets answer the above question ->
 
 so the idea of achieving the above thing is by changing something inside the `Dockerfile` so that `node_modules` remains intact even though sourcecode changes.
 
+One thing which must be coming in your mind is move the `RUN npm install` layer above `COPY ..` but then **empty directory me thode npm install hota h**
 
+
+```javascript
+FROM node:22-alpine
+
+WORKDIR /app
+
+RUN npm install
+
+COPY . .
+
+
+EXPOSE 3000 
+
+CMD ["node", "index.js"]
+```
+
+so the **final answer to optimise the above `Dockerfile` is very similar to what you have done above but some more addition**
+
+```javascript
+FROM node:22-alpine // 1
+
+WORKDIR /app
+
+COPY ./package.json ./package.json
+COPY ./package-lock.json ./package-lock.json
+RUN npm install // as npm install empty directory me hoga nhi so first COPY all the dependency and as your project dependency depends on 2 files package.json and package-lock.json hence first you COPY these before running npm install // 2
+
+COPY . .
+
+EXPOSE 3000 
+
+CMD ["node", "index.js"]
+```
+If you will change the `Dockerfile` according to the above code, then all the **lines of code from `// 1` to `// 2` will not get COPIED as they are above the `COPY..` command which says that copy everything (files and folders) which are present in the current directory**
+
+This will also make sure that **`npm` remains cached unless and until `package` or `package-lock` file changes and if these changes then only it `npm` will again install**
+
+<img src = "image-18.png" width=500 height=250>
+
+Notice in the above picture, `npm install` has `CACHED` in front of it.
+
+so using the above concept and then documenting it below from the notes 
+
+**Optimising dockerfile**
+
+Changing the `Dockerfile` little bit like the below ->
+
+<img src = "image-19.png" width=400 height=250>
+
+l. We first copy over only the things that `npm install` and `npx prisma generate` need
+
+2. Then we run these scripts
+  
+3. Then we copy over the rest of the source code
 
