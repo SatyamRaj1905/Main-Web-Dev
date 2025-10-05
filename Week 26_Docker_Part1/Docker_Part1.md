@@ -469,7 +469,7 @@ You should ideally dont put any `env` variables inside any files **rather pass i
 and to do the above task ->
 
 ```java
-docker run -p 3000:3000 -e DATABASE_URL=mongodb@localhost hello-world
+docker run -p 3000:3000 -e DATABASE_URL=mongodb@localhost -e USERNAME=harkirat hello-world
 ```
 
 using `-e` followed by the **environment variable name with value** will make that variable with value **being pushed inside the environment variable**
@@ -503,17 +503,16 @@ Now you can also run your project(`hello-world`) by just running one command `do
 -> to make sure that everyone in the world is able to use your image, you have to deploy it to the `dockerhub` and **the steps are very simple with that you used to do to deploy your project on github**
 
 
-Go to [Dockerhub create repository](https://hub.docker.com/repository/create/) and then you can create your repository for yourself but before that make sure to `singin` or `signup` to dockerhub
+Go to [Dockerhub create repository](https://hub.docker.com/repository/create/) and then you can create your repository for yourself but before that make sure to `signin` or `signup` to dockerhub
 
 **Its very similar to github and even the process is also very similar as that you do to deploy to github**
 
-and now inside you terminal just **login using `docker login`** and then provide your credentials(to be done only for the first time) and then just run the command `docker push` and that's it you will be able to see your image on the dockerhub and **now everyone can use this to run your image and can download**
+and now inside you terminal just **login using `docker login`** and then provide your credentials(to be done only for the first time) and then just run the command __`docker push your_dockerusername/your_reponame:tagname`__ and that's it you will be able to see your image on the dockerhub and **now everyone can use this to run your image and can download**
 
+## **Layers in docker**
+----------
 
-
-
-
- 
+In Docker, layers are a __fundamental part of the image architecture that allows Docker to be efficient, fast, and portable.__ __A Docker image is essentially built up from a series of layers, each representing a set of differences from the previous layer.__
 
 
 
