@@ -514,5 +514,86 @@ and now inside you terminal just **login using `docker login`** and then provide
 
 In Docker, layers are a __fundamental part of the image architecture that allows Docker to be efficient, fast, and portable.__ __A Docker image is essentially built up from a series of layers, each representing a set of differences from the previous layer.__
 
+> :pushpin: <span style="color:orange">**The most important reason to use Layes is CACHING**</span>
+
+**How Layers are made ->** [<span style="color:orange">**Very important with respect the interview**</span>]
+
+1. __Base Layer :-__ The starting point of an image, typically an operating system (OS) like ``Ubuntu`, `Alpine`, or any other base image specified in a Dockerfile.
+  
+2. __Instruction Layers :-__ Each command in a Dockerfile creates a new layer in the image. These include instructions like `RUN` , `COPY` , which __modify the filesystem by installing packages, copying files from the host to the container, or making other changes. Each of these modifications creates a new layer on top of the base layer.__
+
+3. __Reusable & Shareable :-__ __Layers are cached and reusable across different images,__ which makes building and sharing images more efficient. __If multiple images are built from the same base image or share common instructions, they can reuse the same layers, reducing storage space and speeding up image downloads and builds.__
+
+4. __Immutable :-__ __Once a layer is created, it cannot be changed.__ If a change is
+made, Docker creates a new layer that captures the difference. This immutability is key to Docker's reliability and performance, as unchanged layers can be shared across images and containers.
+
+> :pushpin:<span style="color:orange">**Please read the above points with very detailed focus as it consists of many points which you need to remember and should be knowing about it while dealing with docker**</span>
+>
+> > Basically `Dockerfile` code is only written in such a way that layers is made from this file only so just see the `Dockerfile` for understanding layers
+
+<img src = "image-14.png" width=600 height=170>
+
+Can you see the `CACHED with some number` basically that only shows the number of **cached things**. basically for the project shown in the above picture, **docker is making 4 layers of caching**
+
+### **Layers practically**
+----------
+
+you can also see the distribution of layer in the Dockerfile as shown below ->
+
+<img src = "image-15.png" width=400 height=200>
+
+you can also see the corresponding **logs in the terminal**
+
+<img src = "image-16.png" width=400 height=100>
+
+### **Why Layers ??**
+----------
+
+If you change your Dockerfile, layers can get re-used based on where the change was made
+
+> :pushpin: __If a layer changes, all subsequent layers also change__
+>
+> > **If a layer is written CACHED, then all the above layers present above will also be CACHED**
+> >
+> > Same as ONION Layers
+
+
+### **Optimising Dockerfile** [<span style="color:orange">**Important w.r.t interview**</span>]
+----------
+
+There is one thing which is wrong in the below `Dockerfile`
+
+```javascript
+FROM node:22-alpine
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install
+
+EXPOSE 3000 
+
+CMD ["node", "index.js"]
+```
+
+The problem here is that **`npm install` is a very heavy operation and even needs a good internet connection to proceed**
+
+but even if you change a **small thing in your codebase and then BUILD it again, then `node modules` folder is not cached i.e. `npm install` runs again** as `npm install` is a very heavy operation and that too is not being cached by the docker, hence it will **take a lot of time and not efficient**
+
+<img src = "image-17.png" width=500 height=250>
+
+see the above pic, although you have just made a small change (that background code file (`das as a dalffl`) line added) still you can clearly see in the terminal `npm install` is again getting installed (**as `CACHED` is not written in front of this command so it again installing basically**)
+
+Now maybe this small project wont take too long but this becomes issue **when you have many dependency as `npm` will then install all those dependency every time you make some change in any of the file and folder and `BUILD` again**
+
+So :bulb:**How to optimise the `DOCKERFILE` ??**
+
+-> why i am not using **CACHED version of `node_modules` so that even if i change the sourcecode, this folder remain intact**
+
+Lets answer the above question -> 
+
+so the idea of achieving the above thing is by changing something inside the `Dockerfile` so that `node_modules` remains intact even though sourcecode changes.
+
 
 
