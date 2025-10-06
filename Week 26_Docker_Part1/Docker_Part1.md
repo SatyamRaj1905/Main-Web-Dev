@@ -651,4 +651,78 @@ l. We first copy over only the things that `npm install` and `npx prisma generat
 2. Then we run these scripts
   
 3. Then we copy over the rest of the source code
+  
+## **Networks and Volumes**
+----------
+
+Networks and volumes are concepts that become important when you __have multiple containers running__ in which you
+
+1. Need to __persist data__ across docker restarts
+
+2. Need to __allow containers to talk to each other__
+
+simply saying **Whenever you stop a docker container its file system is lost(ex -> if you have stored some data in the `mongoDb` and then stops the container, you data will get lost) so to solve this problem, VOLUMES are used**
+
+AND 
+
+**If you want to allow containers to talk to each other, NETWORKS is used**
+
+:bulb:**Why do you want the two containers to talk to each other ??**
+
+-> We will see it later
+
+<img src = "image-20.png" width=400 height=250>
+
+> :pushpin: **we dont need NETWORKs until now because when we started the `mongo` container, it was being accessed by a `Node.js` process running directly on the machine**
+
+<img src = "image-21.png" width=400 height=250>
+
+### **Volumes**
+----------
+
+If you restart a `mongo` docker container, you will notice that your data goes away. Basically someday, your docker container stopped due to some reason, be it stopping by yourself, or some error. Now you definitely can start the same `mongo` container but the data which you stored earlier **will not get deleted or lost**.
+
+<img src = "image-22.png" width=400 height=250>
+
+can you see where the data is being stored inside the `mongo` container, it is inside the `/data/db` so we actually want to **secure this folder or make it persist whenever the docker container restarts so that the data inside this folder does not gets lost [basically this whole folder contents get DUPLICATED somewhere so that it does not get lost]**
+
+and the answer to the above question is **yes and that's exactly why VOLUMES are used for**
+
+<img src = "image-23.png" width=400 height=280>
+
+basically you mount the folder `/data/db`  to the **Volume** folder so that data does not gets lost and when the container is again restarted, the this folder agains mounts with the `Volume` and **retrieves the data**
+
+> :pushpin: **Whenever you want to put some data of the container outside the container so that even if the container dies the data lives or not get lost then you USE VOLUMES**
+
+
+
+This is because docker containers are `transitory` (__they don't retain data across restarts__)
+
+**Without volumes**
+
+1. Start a mongo container locally
+
+```javascript
+docker run -p 27017:27017 -d mongo 
+```
+
+2. Open it in MongoDB compass and put some data in it
+
+
+
+
+
+#### **Creating Volumes and applying it**
+
+1. **Create a volume**
+   
+```javascript
+docker volume create name_of_volume
+```
+
+
+
+
+
+
 
