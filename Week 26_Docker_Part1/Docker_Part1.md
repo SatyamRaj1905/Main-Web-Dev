@@ -833,11 +833,82 @@ You can clearly see the number of commands and the amount of mess going by this 
 
 <img src = "image-27.png" width=400 height=300>
 
+Now explaining the above `docker-compose.yml` file the **whole mongo service represents the below command mainly**
+
+```javascript
+docker run mongo --name mongodb -p 27017:27017 -v mongodb_data:/data/db
+```
+
+similarly, same for `backend22` image which is already build and present on the dockerhub.
+
+**whole volumes to create is same as running the below command**
+
+```java
+docker volume create mongodb_data
+```
+
+
+:bulb:**Benefit of using docker-compose file ->**
+
+-> **You could have run the above command manually or you could have created a DOCKERFILE and then you have to run a single command(`docker-compose up`) which will run the above command also as well as some other commands written below in the docker-compose file** [basically will run all the commands to run this project]
+
+> :pushpin:**Rather than running ten different `docker run` commands you have all the required `run` command in one file and then run this file to run entire project**
+
 
 > :round_pushpin: **If you are facing difficulty in reading the above `.yml` file convert it to `.json` file(you can google)**
 
+> :pushpin: **The biggest benefit of using `docker-compose` file is it automatically creates NETWORKs for your project and hence you do not need to define the Networks by yourself as you have done above. basically all of the containers are already connected via the Network**. How do they connect to each other you have seen this also in the above lecture 
+>
+> although it can be seen in the `docker-compose` file also name of `mongodb` service container name (`mongodb`) has been used in the `backend22` service container name `MONGO_URL` value (instead of `localhost` it is written `mongodb` in the URL **as you are trying to connect to `mongodb` not the `localhost`**)
 
+below is the example of a conversion
 
+<img src = "image-28.png" width=600 height=250>
+
+Lets try to understand a `.yml` file of `docker-compose` and **deduce what is written inside it**
+
+Lets try to understand the above file as it is a real **open-source project called as p5 web js editor's `docker-compose` file**
+
+```java
+services: // tells about the number of services present in this project
+  mongo: // this service is for the database part present in the project
+    image: mongo:5.0  // basically means this is using mongo image version 5.0 from the dockerhub, this is same as running docker run mongo:5.0
+    volumes: // same concept what you studied earlier, you always need volume when are using database container
+      - dbdata:/data/db  // whatever data present in the /data/db mount it on the "dbdata" named volume
+  app: // this service is for project part and as this is written by the developer and he wants to run it via his machine not something on the dockerhub so you have to "build" this project
+    build: // for the acutal source code, build the image using the below commands
+      context: ./  // means build it in this folder
+      dockerfile: Dockerfile // dockerfile is called as Dockerfile which is present in root file (if somewhere else then specify the path of it)
+      target: development 
+    environment: // given the environment variables 
+      - MONGO_URL=mongodb://mongo:27017/p5js-web-editor // you know why "mongo" is there instead of "localhost" in the link (if not then see above notes, its related to NETWORKs topic)
+    volumes: // explicitly defined the volumes (this is for HOT RELOADING present in Next.js, will study later) 
+      - .:/usr/src/app  // known as BIND MOUNTS
+      - /usr/src/app/node_modules
+    ports:  // the ports these projects are using
+      - '8000:8000' // probably for the frontend
+      - '8002:8002' // probably for the backend
+    depends_on:  // simply means that the entire "app" service is dependent on the 
+      - mongo // "mongo" service so dont build this service until "mongo" service has build, if mongo service has not started, you should not start app sevices
+
+volumes: // defines all the volumes that is needed for this project
+  dbdata: // as in this project only 1 volume is being used which is "dbdata" defined above so added this
+```
+
+### **Creating `docker compose` file for a simple project**
+----------
+
+so making an empty `node` project by running the below command simultaneously ->
+
+```javascript
+mkdir week-27-docker-compose
+npm init -y 
+
+npm install typescript // as we are going to use typescript
+npx tsc --init
+```
+
+Now inside the `tsconfig.json` file and making changes required 
 
 
 
