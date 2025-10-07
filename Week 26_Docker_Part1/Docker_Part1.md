@@ -149,6 +149,9 @@ docker run -p 27017:27017 mongo
 You can and **should delete any service after using it as the services still takes the space in your pc** so to do that 
 
 ```javascript
+dcoker rmi name_of_service --force  
+
+// for example as we are here using mongo so we will use the below command
 docker rmi mongo --force
 ```
 above we have removed mongo but you can remove any service from docker which you installed previously by running `docker run -p port_no. service_name` by using similar command 
@@ -698,19 +701,6 @@ basically you mount the folder `/data/db`  to the **Volume** folder so that data
 
 This is because docker containers are `transitory` (__they don't retain data across restarts__)
 
-**Without volumes**
-
-1. Start a mongo container locally
-
-```javascript
-docker run -p 27017:27017 -d mongo 
-```
-
-2. Open it in MongoDB compass and put some data in it
-
-
-
-
 
 #### **Creating Volumes and applying it**
 
@@ -719,6 +709,136 @@ docker run -p 27017:27017 -d mongo
 ```javascript
 docker volume create name_of_volume
 ```
+
+Now if you would have to start the `mongo` locally, then you would have run the below command 
+
+```javascript
+docker run -p 27017:27017 mongo 
+```
+
+but as now we want that the folder `/data/db` to be mounted with the volume so now we **add volume mount**
+
+```javascript
+docker run -p 27017:27017 -v volume_name:/data/db mongo  // so ":" indicates that the volume is connected to /data/db folder and hence this folder is mounted to the volume ("-v" stands for "volume") and the folder contents are now kept at the volume made
+```
+
+Now if you will run the command 
+
+```javascript
+docker volume ls
+```
+
+you will be able to see all the **volumes with the data inside them** even though you stop the `mongo` container.
+
+
+### **Network**
+----------
+
+In Docker, a network is a powerful feature that allows containers to communicate with each other and with the outside world.
+
+Docker containers can't talk to each other by default.
+
+__`localhost` on a docker container means `it's own network` and not the network of the host machine__
+
+<img src = "image-24.png" width=400 height=200>
+
+The above picture with its solution is shown in the below picture ->
+
+<img src = "image-25.png" width=600 height=230>
+
+basically you are not able to connect to the other container as it's localhost is now not that of your mac machine, its that of the container and hence it is not able to resolve where that port is and hence `Network` is used to achieve this to interact with the other containers
+
+Now to **make one container interact with the other, you have to give NAME to the container**
+
+
+:bulb:**How to make containers talk to each other ??**
+
+**Attach them to the same network**
+
+**Step 1 ->** Build the image
+
+```javascript
+docker build -t image_tag
+```
+
+**Step 2 ->** Create a network
+
+```javascript
+docker network create my_custom_network
+```
+
+**First made the Network so tha**
+
+**Step 3 ->** Start the `backend process` with the `network` attached to it  
+
+```javascript
+docker run -d -p 3000:3000 --name backend --network my_custom_network
+```
+
+**Step 4 ->** Start mongo on the same network
+
+```javascript
+docker run -d -v volume_database:/data/db --name mongo --network my_custom_network
+```
+
+**Basically you have made both the container connected to the same network**
+
+**Step 5 ->** Check the logs to ensure the db connection is successful
+
+```javascript
+docker logs<container_id>
+```
+
+**Extra points**
+
+1. Try to visit an endpoint and ensure you are able to talk to the database
+2. If you want, you can remove the port mapping for mongo since you dont necessarily need it exposed on your machine
+
+
+**To see the available Network which has been created**
+
+run this command
+
+```java
+docker network ls
+```
+
+<img src = "image-26.png" width=500 height=250>
+
+## **docker compose**
+
+----------
+
+Docker Compose is a tool __designed to help you define and run multi-container Docker applications__ With Compose, you use a `YAML` file to configure your application's services, networks, and volumes. __Then with a single command, you can create and start all the services from your configuration.__
+
+Whenever you are working with monorepo and even generally also if you are working with a project, you have atleast 2 folders -> `frontend` and `backend` and even a folder for the `database` so will there be these many commands to run this project if going to run the project :-
+
+```javascript
+docker build -t frontend
+docker build -t backend
+docker run mongo
+docker run frontend 
+docker run backend
+```
+*Above commands are just to get the idea of the problem, they are not fully accurate
+
+You can clearly see the number of commands and the amount of mess going by this method is creating also if there is problem in particular container, then you have to restart all the container again (of course you have to also stop it) **Very ugly way**
+
+**So to solve the above problem (i.e -> running multiple containers together) `docker compose` is used**
+
+> :pushpin:**These things are meant for LOCAL developement as in PRODUCTION you are not going to <span style="color:orange">**start the `mongoDB` using docker (not the best idea in the world) as your database is always kept and maintained at other places**</span>** 
+>
+> so keep in mind that it is mainly for running project at local environment
+
+
+<img src = "image-27.png" width=400 height=300>
+
+
+> :round_pushpin: **If you are facing difficulty in reading the above `.yml` file convert it to `.json` file(you can google)**
+
+
+
+
 
 
 
