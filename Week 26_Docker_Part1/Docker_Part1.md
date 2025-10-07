@@ -910,8 +910,185 @@ npx tsc --init
 
 Now inside the `tsconfig.json` file and making changes required 
 
+```javascript
+"rootDir": "./src"
+"outDir": "./dist"
+```
+
+now creaing a seperate folder `src` and then inside it `index.ts` file
+
+**Now lets say this is a simple `express` project that connects to `postgres` via `prisma`**
+
+so running the below command 
+
+```javascript
+npm install prisma express @types/express
+```
+
+Now inside the `index.ts` file writing the code
+
+```javascript
+import express from "express"
+
+const app = express()
+
+app.get("/", (req, res) => {
+  res.json({
+    "message": "Get endpoint"
+  })
+})
+
+app.post("/", (req, res) => {
+  res.json({
+    "message": "Post endpoint"
+  })
+})
+
+app.listen(3000)
+```
+
+Now to use `prisma` running the below command 
+
+```javascript
+npx prisma init // will generate "schema.prisma" file inside the prisma folder generated using this command
+```
+
+Now defining the `schema.prisma` file 
+
+```javascript
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+// From here the real logic starts
+model User {
+  id       String       @id    @default(uuid())
+  username String 
+  password String
+}
+```
+lets say for now our project has only one table `User` table which will store the `id`, `username` and `password` of the user and will show it when you will hit `get` request on the endpoint (`/`) defined above and will get the above data of the user when you hit `post` request on the endpoint (`/`)
+
+Now to finally use the `prisma` you have to run the below command
+
+```javascript
+npx prisma migrate dev  // to migrate the data to the database
+```
+
+but to migrate data to the database, you have to first connect to the database (`postgres` for this project) and to do that inside the `docker` we will run 
+
+```javascript
+docker run -e POSTGRES_PASSWORD=mysecretpassword -d -p 5432:5432 postgres
+```
+
+you will get the password from the `neon.tech`
+
+**`-e` ->** means **environment variables**
+
+**`-d` ->** simply means **run in the detached mode (i.e -> background)**
+
+*eventually we will write the code to automate this (no need of mannual writing)
+
+and if still this feels complicated just go to the `.env` file present in your project and then inside that paste the **`postgres` url you got from `neon.tech` in the `DATABASE_URL` environment variable**
+
+Now if you run `npx prisma migrate` and then gives the name as per your choice to the migration then you will see a folder named as `some_no.&name_you_gave` inside which `migration.sql` file is present which has code written in `schema.prisma` file changed to the compatible `.sql` langauge.
+
+Now you will run `npx prisma generate` to **generate the client** and then adding the logic to perform **CRUD operation** inside the `index.ts` file
+
+```javascript
+import express from "express"
+import {PrismaClient} from "@prisma/client"
+
+const app = express()
+const prismaClient = new prismaClient()
+
+app.get("/",async (req, res) => {
+    const data =  await prismaClient.user.findMany()
+
+    res.json({
+      data
+    })
+})
+
+app.post("/",async (req, res) => {
+    await prismaClient.user.create{
+      data : {
+        username : Math.random.toString(), // for now used the database with some random username and password
+        password : Math.random.toString()
+      }
+    }
+  res.json({
+    "message": "Post endpoint"
+  })
+})
+
+app.listen(3000)
+```
+atlast, doing the change in the `package.json` file to **run as well as start the project by adding some scripts** 
+
+```javascript
+"scripts":{
+  "build": "tsc -b",
+  "start": "node dist/index.js"
+}
+```
+
+Now either you will give the below instruction to use your above project if someone wants to run your project locally 
+
+<img src = "image-29.png" width=600 height=200>
+
+Can you see how lengthy mannual installation is
+
+so we will use `Docker installation`
+
+now here we have 2 options -> 
+
+1. **either use `docker` commands only**
+2. **or use `docker-compose` file**
 
 
+**using `docker` installation steps, the steps will shrink down to just the below ones**[9 steps reduced to 4 steps now]
+
+<img src = "image-30.png" width=600 height=120>
+
+Making the `Dockerfile` for the above case 
+
+```javascript
+FROM node:20-alpine
+
+WORKDIR /app 
+
+COPY ./package.json ./package.json
+COPY ./package-lock.json ./package-lock.json
+// the above two command can also be combined into one single command -> 
+
+// COPY ["package.json", "package-lock.json", "./"] "./" is basically telling the file path (which is root folder in this case) for the two file present in the square bracker (package.json and package-lock.json) or you can also write like the below 
+
+// COPY package*.json ./  which means package-anything will be included 
+
+RUN npm install
+
+COPY..
+
+ENV DATABASE_URL = the_value_you_have_given_in_the_environment_file
+
+RUN npx prisma migrate dev
+RUN npx prisma generate
+RUN npm run build
+
+CMD ["npm ", "start"]
+```
+
+and finally we will use `docker-compose` for this project**because we have two services we want to start(backend and postgres which might increase in the future)** and reduce the above [4 steps to even 1 single step or command]
+
+<img src = "image-31.png" width=600 height=100>
+
+You can clearly see the difference in reduction of steps -> [9 steps -> 4 steps -> 1 step]
 
 
 
