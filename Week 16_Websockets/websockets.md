@@ -1,5 +1,16 @@
 # **Websockets**
 
+
+- [**Websockets**](#websockets)
+  - [**Use case for Websockets**](#use-case-for-websockets)
+  - [**Websockets in `Node.js`**](#websockets-in-nodejs)
+  - [**Ws in Node.js (Code)**](#ws-in-nodejs-code)
+  - [**about `socket.send()`**](#about-socketsend)
+    - [**Connecting via `Postman`**](#connecting-via-postman)
+    - [**about `socket.on()`**](#about-socketon)
+  - [**Client side code**](#client-side-code)
+    - [**about `socket.send()`**](#about-socketsend-1)
+
 Websockets provide a way to establish a persistent, full duplex communication channel over a TCP connection between the client (typically a web browser) and the server
 
 + **Persistent ->** client (a term for what we know as jis jagah se **request bheji jati h to any server** usko client kehte h Ex-> postman, website, app, etc..) now the **persistent means once the connection has been made, it stays there** (You can keep sending multiple request on the same network from the client and you may or may not get back the `response` but client can send it multiple times)
