@@ -1227,5 +1227,11 @@ Now running the `docker-compose up` command will **give error** and reason for t
 
 So in the `docker-compose` file above, though you do have written `depends_on -> postgres` service but still as the `docker-compose` builds first so it will still build the `user_app` first and then **run the `postgres` service and then it will finally run itself** (as `depends_on` will ensure that it does not start before `postgres` start but there is no restriction on `build`, it can `build` before `postgres` starts) but here comes the problem **BUILD OF `user_app` SERVICE HAPPENED BEFORE THE DATABASE(`postgres` container) STARTED RUNNING** (thats the reason for getting an error)
 
+Now **what we want that -> First `postgres` service STARTS, then `user_app` BUILDS and finally `user_app` STARTS**
+
+and to achieve this we made the changes in the `scripts` section only in the `package.json` .which said that as soon as the **container starts running, it should migrate to database at the same time thus ahieving our target to  RUN `postgres` service at start only**
+
+so the above changes ensured that **as inside the `docker-compose` file we have written that the `user_app` `depends_on` `postgres` so when the `user_app` will start we can 100% say that `postgres` is surely running and hence you can migrate to the database**
+
 
 
