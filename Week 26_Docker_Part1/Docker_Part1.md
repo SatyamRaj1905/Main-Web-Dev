@@ -1054,14 +1054,42 @@ now here we have 2 options ->
 
 **using `docker` installation steps, the steps will shrink down to just the below ones**[9 steps reduced to 4 steps now]
 
-<img src = "image-30.png" width=600 height=120>
+<img src = "image-32.png" width=600 height=150>
+
+Install docker command means basically run the command -> `docker build --network=host -t user_project` **this is for building your project**
+
+After this all the command is for **running the project** 
+
+> :pushpin: **we have to add a network as we are starting the `postgres` and image seperately**
+>
+> See the Networks class **if you are starting a backend container seperately and the database container seperately(which we are doing here) they need to be connected via `Network` seperately hence we have to create a network and make both of them connect to the Network**
+
+
+**Explanation of some of the commands**
+
+-> `docker build --network=host -t user_project` **why you changed the usual `build` command ??**
+
+**without using `--network=host` (left image) and with using `--network=host` (right image) explanation**
+
+<img src = "image-33.png" width=320 height=200> <img src = "image-34.png" width=320 height=200>
+
+in the left image, already the `postgres` container was runnning now when you were building the project `docker build`, this container was also running at the same time **where it was trying to access `localhost:5432`, now as there is nothing running on this on the new container which is made by the `docker build` as the NETWORK IT HAS ACCESS TO IS NOT THE `host` NETWORK BUT THE `bridge` NETWORK**
+
+<span style="color:orange">**Basically `docker build` is also running inside a seperate container and there `localhost` means NOTHING (it means `docker build` container not the mac machine)**</span>
+
+BUT when you add  `--network=host` flag in the command (**see the right pic**)
+
+then what happens is that -> <span style="color:orange">**basically now when you are building, you are using the NETWORK of the host machine so now `localhost` means `MAC` machine and `5432` means it now points to `postgres` container**</span>
+
+> :pushpin: **To access something on the `host` machine you have to use `--network=host`**
+
 
 Making the `Dockerfile` for the above case 
 
 ```javascript
 FROM node:20-alpine
 
-WORKDIR /app 
+WORKDIR /app
 
 COPY ./package.json ./package.json
 COPY ./package-lock.json ./package-lock.json
@@ -1073,24 +1101,131 @@ COPY ./package-lock.json ./package-lock.json
 
 RUN npm install
 
-COPY..
+COPY.. // as user is already copying the prisma.schema file so you dont have to do RUN npx prisma init  
 
-ENV DATABASE_URL = the_value_you_have_given_in_the_environment_file
+ENV DATABASE_URL=the_value_you_have_given_in_the_environment_file // as you are running it locally so its okay for you to give the real environment variable value but if you will upload to github then you should be urging the user to put here their environment variable so that SECRECY reamins
 
-RUN npx prisma migrate dev
+RUN DATABASE_URL=$DATABASE_URL npx prisma migrate dev // REMEMBER -> as we are using PRISMA which requires connecting to the database during the build step that is what causing it hard to write or you are seeing for the first time in this docker notes [during this build step we are setting the network to host as you can see in the above command]
 RUN npx prisma generate
 RUN npm run build
 
+EXPOSE 3000 // although in newer verion of docker without this it will also work but this is actually for documentation purpose
+
 CMD ["npm ", "start"]
+```
+
+<span style="color:orange">**VERY VERY IMPORTANT POINT to note here is that ->**</span>
+
+:pushpin:**You have made the above task or project run but its complexity increased REASON -> WHEN A CONTAINER IS BUILT IF YOU WANT ANY ALREADY RUNNING CONTAINER TO TALK TO IT is VERY COMPLEX TASK so to avoid this complexity -> REMOVE THE `// 1` and `// 2` line of code** [so that connecting to database logic gets wiped out of the `Dockerfile`] and **whenever the container will start at that time only it will migrate the database**
+
+so inside the `package.json`, `scripts` section instead of 
+
+```javascript
+"scripts": {
+  "build": "tsc -b",
+  "start": "node dist/index.js" // instead of this line "start", we will use the // 2 line
+  "dev:docker": "npx prisma migrate dev && node dist/index.js"  // 2 this will make the database migrate at that time only when the container really starts
+}
+```
+
+**Its benefit can be seen in the `Dockerfile` but the  main advantage is when you are writing the `docker-compose` file (see below in that section)**
+
+```javascript
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY ./package.json ./package.json
+COPY ./package-lock.json ./package-lock.json
+
+RUN npm install
+
+COPY.. 
+
+// ENV DATABASE_URL=the_value_you_have_given_in_the_environment_file // 1
+
+// RUN DATABASE_URL=$DATABASE_URL npx prisma migrate dev // 2
+
+RUN npx prisma generate
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm ", "run", "dev:docker"] // as "scripts" now has "dev:docker" so used this command
+```
+
+
+**If you were using `mongoDB` you wouldn't have too much complexities**
+
+**To explore your `postgres` database** run the below command  
+
+```javascript
+docker exec -it postgres_container_id sh // will give you shell access of the database
+
+psql -U postgres  // will give you command access to your postgres databse and now you can run commands to interact with the database
+
+// For example ->
+
+\dt; // to see all the table you have inside the database
+SELECT * FROM "User";  // to see all the data inside the User table 
+
+exit // to go out of the database
 ```
 
 and finally we will use `docker-compose` for this project**because we have two services we want to start(backend and postgres which might increase in the future)** and reduce the above [4 steps to even 1 single step or command]
 
 <img src = "image-31.png" width=600 height=100>
 
-You can clearly see the difference in reduction of steps -> [9 steps -> 4 steps -> 1 step]
+You can clearly see the difference in reduction of steps -> [9 steps -> 4 steps -> 1 steps]
 
+Creating now the `docker-compose` file 
 
+```javascript
+version: '3.8' // version of docker compose (you can google for the latest version)
+services: // as there are two services we have to run -> postgres and user_app
+  postgres: 
+    image:postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=password_of_the_postgres
+
+  user_app: // as we are building locally this file so you will not use image istead build it locally 
+    build:
+      network: host
+      context: ./ // where you want to build it
+      dockerfile: Dockerfile
+
+    environment:
+      - DATABASE_URL=same_value_as_that_in_dockerfile
+
+    ports:
+      - 3000:3000
+
+    depends_on:
+      - postgres
+```
+**`-` simply means it is LIST/ARRAY in the `.yml` file**, so as **`ports`, `environment` variables, `depends_on` present in multiple numbers so you keep it inside array while writing them inside the `docker-compose` file**
+
+**The best part of this is now we dont need to explicitly make a network which we have to in the above case and the level of complexity it holds was also high so here NO need to go to that complexity of making the network and then linking both the service to this network, `docker-compose` file will automatically handle it**
+
+Now the magic of `docker-compose` file will be seen ->
+
+**You just have to run the below command to run the entire project NOTHING OTHER THAN THIS in the root folder**
+
+```javascript
+docker-compose up
+```
+
+**Now here we will see the BENEFIT of making change in the "scripts" in `package.json` which i have told you to dicuss later below**
+
+Now running the `docker-compose up` command will **give error** and reason for this is ->
+
+> :pushpin: <span style="color:orange">**Remember ->**</span> **`docker-compose` firsts BUILDs and then STARTs the services**
+
+**VERY VERY IMPORTANT POINT**
+
+So in the `docker-compose` file above, though you do have written `depends_on -> postgres` service but still as the `docker-compose` builds first so it will still build the `user_app` first and then **run the `postgres` service and then it will finally run itself** (as `depends_on` will ensure that it does not start before `postgres` start but there is no restriction on `build`, it can `build` before `postgres` starts) but here comes the problem **BUILD OF `user_app` SERVICE HAPPENED BEFORE THE DATABASE(`postgres` container) STARTED RUNNING** (thats the reason for getting an error)
 
 
 
