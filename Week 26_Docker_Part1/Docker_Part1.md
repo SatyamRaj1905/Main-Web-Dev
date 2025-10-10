@@ -1,5 +1,41 @@
 # **Starting Docker**
 
+- [**Starting Docker**](#starting-docker)
+  - [**Why Docker ??**](#why-docker-)
+  - [**Containerization**](#containerization)
+    - [**Benefit of using container**](#benefit-of-using-container)
+  - [**History of docker**](#history-of-docker)
+  - [**Installing docker**](#installing-docker)
+  - [**Docker architecture**](#docker-architecture)
+  - [**Understanding the component**](#understanding-the-component)
+  - [**Images V/S Containers**](#images-vs-containers)
+    - [**Docker image**](#docker-image)
+    - [**Docker container**](#docker-container)
+    - [**Port mapping**](#port-mapping)
+    - [**Common docker commands**](#common-docker-commands)
+      - [**docker images**](#docker-images)
+      - [**docker ps**](#docker-ps)
+      - [**docker run**](#docker-run)
+      - [**docker kill**](#docker-kill)
+      - [**docker build**](#docker-build)
+      - [**docker push**](#docker-push)
+      - [**docker exec**](#docker-exec)
+  - [**Dockerfile**](#dockerfile)
+    - [**Passing in `env` variables**](#passing-in-env-variables)
+    - [**docker build in deep**](#docker-build-in-deep)
+    - [**How to push your made image to dockerhub ??**](#how-to-push-your-made-image-to-dockerhub)
+  - [**Layers in docker**](#layers-in-docker)
+    - [**Layers practically**](#layers-practically)
+    - [**Why Layers ??**](#why-layers-)
+    - [**Optimising Dockerfile** \[**Important w.r.t interview**\]](#optimising-dockerfile-important-wrt-interview)
+  - [**Networks and Volumes**](#networks-and-volumes)
+    - [**Volumes**](#volumes)
+      - [**Creating Volumes and applying it**](#creating-volumes-and-applying-it)
+    - [**Network**](#network)
+  - [**docker compose**](#docker-compose)
+    - [**Creating `docker compose` file for a simple project**](#creating-docker-compose-file-for-a-simple-project)
+
+
 ## **Why Docker ??**
 ----------
 
@@ -1233,5 +1269,5 @@ and to achieve this we made the changes in the `scripts` section only in the `pa
 
 so the above changes ensured that **as inside the `docker-compose` file we have written that the `user_app` `depends_on` `postgres` so when the `user_app` will start we can 100% say that `postgres` is surely running and hence you can migrate to the database**
 
-
+Finally if you run the `docker-compose up` then you will be able to see the project running
 
